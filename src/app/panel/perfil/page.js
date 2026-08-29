@@ -62,7 +62,7 @@ export default function PerfilPage() {
   if (loading) {
     return (
       <main className="flex-1">
-        <Hero eyebrow="Panel hotelero" title="Perfil" />
+        <Hero backHref="/panel" backLabel="Panel" eyebrow="Panel hotelero" title="Perfil" />
         <section className="mx-auto max-w-2xl px-6 py-10">
           <p className="text-ink/60">Cargando…</p>
         </section>
@@ -72,7 +72,13 @@ export default function PerfilPage() {
 
   return (
     <main className="flex-1">
-      <Hero eyebrow="Panel hotelero" title="Perfil" subtitle="Tu logo aparece en la página de check-in de tus huéspedes." />
+      <Hero
+        backHref="/panel"
+        backLabel="Panel"
+        eyebrow="Panel hotelero"
+        title="Perfil"
+        subtitle="Tu logo aparece en la página de check-in de tus huéspedes."
+      />
       <section className="mx-auto max-w-2xl px-6 py-10">
         <div className="rounded border border-sand-dim bg-sand-card p-5">
           <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Logo</span>

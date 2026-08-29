@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 
-export default function LogoutButton() {
+export default function LogoutButton({ className }) {
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -13,7 +13,10 @@ export default function LogoutButton() {
     <button
       type="button"
       onClick={handleLogout}
-      className="text-xs font-bold uppercase tracking-wider text-ink/60 hover:text-terracotta-deep"
+      className={
+        className ??
+        "text-xs font-bold uppercase tracking-wider text-ink/60 hover:text-terracotta-deep"
+      }
     >
       Cerrar sesión
     </button>

@@ -66,14 +66,30 @@ export default function AlojamientoDetallePage({ params }) {
         photo={property.photos?.[0] ?? null}
       />
       <section className="mx-auto max-w-2xl px-6 py-10">
-        <div className="rounded border border-sand-dim bg-sand-card p-5">
+        {property.photos?.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {property.photos.map((url) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={url}
+                src={url}
+                alt=""
+                className="h-20 w-28 shrink-0 rounded object-cover border border-sand-dim"
+              />
+            ))}
+          </div>
+        )}
+
+        <div className="mt-4 rounded border border-sand-dim bg-sand-card p-5">
           <p className="text-ink">Dirección: {property.address}</p>
           <p className="mt-1 text-ink">Código de acceso: {property.access_code}</p>
           <p className="mt-3 text-ink">
             Plan:{" "}
             {active ? (
               <span className="font-bold text-sage">
-                {property.plan} · {property.subscription_status}
+                {property.plan}
+                {property.billing_cycle ? ` · ${property.billing_cycle}` : ""} ·{" "}
+                {property.subscription_status}
               </span>
             ) : (
               <span className="font-bold text-terracotta-deep">sin suscripción</span>
@@ -82,6 +98,12 @@ export default function AlojamientoDetallePage({ params }) {
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href={`/panel/alojamientos/${id}/editar`}
+            className="inline-block rounded border border-aqua-deep px-5 py-3 font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
+          >
+            Editar →
+          </Link>
           {!active && (
             <Link
               href={`/panel/alojamientos/${id}/suscribirse`}
@@ -96,6 +118,14 @@ export default function AlojamientoDetallePage({ params }) {
               className="inline-block rounded bg-terracotta px-5 py-3 font-bold text-ink transition-colors hover:bg-terracotta-deep"
             >
               Reservas y check-in →
+            </Link>
+          )}
+          {active && (
+            <Link
+              href={`/panel/alojamientos/${id}/cancelar`}
+              className="inline-block rounded border border-sand-dim px-5 py-3 font-bold text-ink/60 transition-colors hover:border-terracotta-deep hover:text-terracotta-deep"
+            >
+              Solicitar cancelación
             </Link>
           )}
           <button

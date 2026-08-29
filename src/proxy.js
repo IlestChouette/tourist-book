@@ -42,6 +42,21 @@ export async function proxy(request) {
     return response;
   }
 
+  // Zone admin ("/admin") : page cachée, non indexée, réservée à un compte
+  // admin distinct des hôteliers. L'autorisation (is_admin) est vérifiée
+  // dans la page elle-même ; ici on ne fait que s'assurer qu'il y a une
+  // session avant d'y accéder.
+  if (pathname.startsWith("/admin")) {
+    const isAuthPage = pathname === "/admin/login";
+    if (!user && !isAuthPage) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin/login";
+      url.search = `?next=${encodeURIComponent(pathname)}`;
+      return NextResponse.redirect(url);
+    }
+    return response;
+  }
+
   // Livret voyageur ("/logement/[slug]") : protégé par code d'accès.
   const match = pathname.match(/^\/logement\/([^/]+)(\/.*)?$/);
   if (match) {

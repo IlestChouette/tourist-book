@@ -1,67 +1,83 @@
 "use client";
 
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { uploadMedia } from "@/lib/uploadMedia";
 import Hero from "@/components/Hero";
 
-function slugify(text) {
-  return text
-    .toString()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function randomCode() {
-  return String(Math.floor(1000 + Math.random() * 9000));
-}
-
 const MAX_PHOTOS = 5;
 const MAX_KEY_PHOTOS = 4;
 
-export default function NuevoAlojamientoPage() {
-  const [form, setForm] = useState({
-    name: "",
-    city: "",
-    address: "",
-    wifi_ssid: "",
-    wifi_password: "",
-    checkin: "",
-    checkout: "",
-    parking: "",
-    contact: "",
-    description: "",
-    key_instructions: "",
-    key_lockbox_code: "",
-  });
-  const [photos, setPhotos] = useState([]);
-  const [keyPhotos, setKeyPhotos] = useState([]);
+export default function EditarAlojamientoPage({ params }) {
+  const { id } = use(params);
+  const [form, setForm] = useState(null);
+  const [existingPhotos, setExistingPhotos] = useState([]);
+  const [newPhotos, setNewPhotos] = useState([]);
+  const [existingKeyPhotos, setExistingKeyPhotos] = useState([]);
+  const [newKeyPhotos, setNewKeyPhotos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient();
+      const { data } = await supabase.from("properties").select("*").eq("id", id).single();
+      if (data) {
+        setForm({
+          name: data.name ?? "",
+          city: data.city ?? "",
+          address: data.address ?? "",
+          wifi_ssid: data.wifi_ssid ?? "",
+          wifi_password: data.wifi_password ?? "",
+          checkin: data.checkin ?? "",
+          checkout: data.checkout ?? "",
+          parking: data.parking ?? "",
+          contact: data.contact ?? "",
+          description: data.description ?? "",
+          key_instructions: data.key_instructions ?? "",
+          key_lockbox_code: data.key_lockbox_code ?? "",
+          slug: data.slug,
+        });
+        setExistingPhotos(data.photos ?? []);
+        setExistingKeyPhotos(data.key_photos ?? []);
+      }
+      setLoading(false);
+    }
+    load();
+  }, [id]);
 
   function update(field) {
     return (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
   }
 
+  const totalPhotos = existingPhotos.length + newPhotos.length;
+  const totalKeyPhotos = existingKeyPhotos.length + newKeyPhotos.length;
+
   function handlePhotos(e) {
-    const files = Array.from(e.target.files ?? []).slice(0, MAX_PHOTOS - photos.length);
-    setPhotos((p) => [...p, ...files].slice(0, MAX_PHOTOS));
+    const files = Array.from(e.target.files ?? []).slice(0, MAX_PHOTOS - totalPhotos);
+    setNewPhotos((p) => [...p, ...files].slice(0, MAX_PHOTOS - existingPhotos.length));
   }
 
-  function removePhoto(index) {
-    setPhotos((p) => p.filter((_, i) => i !== index));
+  function removeExistingPhoto(index) {
+    setExistingPhotos((p) => p.filter((_, i) => i !== index));
+  }
+
+  function removeNewPhoto(index) {
+    setNewPhotos((p) => p.filter((_, i) => i !== index));
   }
 
   function handleKeyPhotos(e) {
-    const files = Array.from(e.target.files ?? []).slice(0, MAX_KEY_PHOTOS - keyPhotos.length);
-    setKeyPhotos((p) => [...p, ...files].slice(0, MAX_KEY_PHOTOS));
+    const files = Array.from(e.target.files ?? []).slice(0, MAX_KEY_PHOTOS - totalKeyPhotos);
+    setNewKeyPhotos((p) => [...p, ...files].slice(0, MAX_KEY_PHOTOS - existingKeyPhotos.length));
   }
 
-  function removeKeyPhoto(index) {
-    setKeyPhotos((p) => p.filter((_, i) => i !== index));
+  function removeExistingKeyPhoto(index) {
+    setExistingKeyPhotos((p) => p.filter((_, i) => i !== index));
+  }
+
+  function removeNewKeyPhoto(index) {
+    setNewKeyPhotos((p) => p.filter((_, i) => i !== index));
   }
 
   async function handleSubmit(e) {
@@ -74,30 +90,26 @@ export default function NuevoAlojamientoPage() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    const slug = `${slugify(form.name)}-${Math.random().toString(36).slice(2, 6)}`;
-
     try {
-      const photoUrls = [];
-      for (let i = 0; i < photos.length; i++) {
-        const file = photos[i];
+      const uploadedUrls = [];
+      for (let i = 0; i < newPhotos.length; i++) {
+        const file = newPhotos[i];
         const ext = file.name.split(".").pop();
-        const url = await uploadMedia(`${user.id}/${slug}/${i + 1}.${ext}`, file);
-        photoUrls.push(url);
+        const url = await uploadMedia(`${user.id}/${form.slug}/${Date.now()}-${i + 1}.${ext}`, file);
+        uploadedUrls.push(url);
       }
 
-      const keyPhotoUrls = [];
-      for (let i = 0; i < keyPhotos.length; i++) {
-        const file = keyPhotos[i];
+      const uploadedKeyUrls = [];
+      for (let i = 0; i < newKeyPhotos.length; i++) {
+        const file = newKeyPhotos[i];
         const ext = file.name.split(".").pop();
-        const url = await uploadMedia(`${user.id}/${slug}/llaves-${i + 1}.${ext}`, file);
-        keyPhotoUrls.push(url);
+        const url = await uploadMedia(`${user.id}/${form.slug}/llaves-${Date.now()}-${i + 1}.${ext}`, file);
+        uploadedKeyUrls.push(url);
       }
 
-      const { data: inserted, error: insertError } = await supabase
+      const { error: updateError } = await supabase
         .from("properties")
-        .insert({
-          host_id: user.id,
-          slug,
+        .update({
           name: form.name,
           city: form.city,
           address: form.address,
@@ -110,26 +122,43 @@ export default function NuevoAlojamientoPage() {
           description: form.description,
           key_instructions: form.key_instructions,
           key_lockbox_code: form.key_lockbox_code,
-          key_photos: keyPhotoUrls,
-          access_code: randomCode(),
-          photos: photoUrls,
+          photos: [...existingPhotos, ...uploadedUrls],
+          key_photos: [...existingKeyPhotos, ...uploadedKeyUrls],
         })
-        .select("id")
-        .single();
+        .eq("id", id);
 
-      if (insertError) throw insertError;
-      window.location.href = `/panel/alojamientos/${inserted.id}/suscribirse`;
-      return;
+      if (updateError) throw updateError;
+      window.location.href = `/panel/alojamientos/${id}`;
     } catch (err) {
       setError(err.message);
-    } finally {
       setSaving(false);
     }
   }
 
+  if (loading) {
+    return (
+      <main className="flex-1">
+        <Hero eyebrow="Panel hotelero" title="Cargando…" />
+      </main>
+    );
+  }
+
+  if (!form) {
+    return (
+      <main className="flex-1">
+        <Hero eyebrow="Panel hotelero" title="Alojamiento no encontrado" />
+      </main>
+    );
+  }
+
   return (
     <main className="flex-1">
-      <Hero backHref="/panel/alojamientos" backLabel="Alojamientos" eyebrow="Panel hotelero" title="Nuevo alojamiento" />
+      <Hero
+        backHref={`/panel/alojamientos/${id}`}
+        backLabel={form.name}
+        eyebrow="Panel hotelero"
+        title="Editar alojamiento"
+      />
       <section className="mx-auto max-w-2xl px-6 py-10">
         <form onSubmit={handleSubmit} className="grid gap-4">
           <label className="grid gap-1.5">
@@ -197,7 +226,7 @@ export default function NuevoAlojamientoPage() {
             <textarea
               rows={4}
               placeholder={
-                'Hazlo personal y cálido — es lo primero que lee tu huésped. Por ejemplo: "¡Bienvenido/a! Estamos muy felices de recibirte. Hemos preparado todo con cariño para que te sientas como en casa desde el primer minuto. Cualquier cosa que necesites durante tu estancia, no dudes en escribirnos — ¡esperamos que tengas una estancia inolvidable!" Puedes añadir también tus recomendaciones del barrio.'
+                'Hazlo personal y cálido — es lo primero que lee tu huésped. Por ejemplo: "¡Bienvenido/a! Estamos muy felices de recibirte..."'
               }
               value={form.description}
               onChange={update("description")}
@@ -211,10 +240,23 @@ export default function NuevoAlojamientoPage() {
 
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-              Fotos ({photos.length}/{MAX_PHOTOS})
+              Fotos ({totalPhotos}/{MAX_PHOTOS})
             </span>
             <div className="mt-2 flex flex-wrap gap-3">
-              {photos.map((file, i) => (
+              {existingPhotos.map((url, i) => (
+                <div key={url} className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" className="h-20 w-20 rounded object-cover border border-sand-dim" />
+                  <button
+                    type="button"
+                    onClick={() => removeExistingPhoto(i)}
+                    className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {newPhotos.map((file, i) => (
                 <div key={i} className="relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -224,14 +266,14 @@ export default function NuevoAlojamientoPage() {
                   />
                   <button
                     type="button"
-                    onClick={() => removePhoto(i)}
+                    onClick={() => removeNewPhoto(i)}
                     className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
                   >
                     ×
                   </button>
                 </div>
               ))}
-              {photos.length < MAX_PHOTOS && (
+              {totalPhotos < MAX_PHOTOS && (
                 <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded border border-dashed border-sand-dim text-xs text-ink/50">
                   + Añadir
                   <input type="file" accept="image/*" multiple onChange={handlePhotos} className="hidden" />
@@ -269,10 +311,23 @@ export default function NuevoAlojamientoPage() {
             </label>
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-                Fotos del lugar de las llaves ({keyPhotos.length}/{MAX_KEY_PHOTOS})
+                Fotos del lugar de las llaves ({totalKeyPhotos}/{MAX_KEY_PHOTOS})
               </span>
               <div className="mt-2 flex flex-wrap gap-3">
-                {keyPhotos.map((file, i) => (
+                {existingKeyPhotos.map((url, i) => (
+                  <div key={url} className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt="" className="h-20 w-20 rounded object-cover border border-sand-dim" />
+                    <button
+                      type="button"
+                      onClick={() => removeExistingKeyPhoto(i)}
+                      className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                {newKeyPhotos.map((file, i) => (
                   <div key={i} className="relative">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -282,14 +337,14 @@ export default function NuevoAlojamientoPage() {
                     />
                     <button
                       type="button"
-                      onClick={() => removeKeyPhoto(i)}
+                      onClick={() => removeNewKeyPhoto(i)}
                       className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
                     >
                       ×
                     </button>
                   </div>
                 ))}
-                {keyPhotos.length < MAX_KEY_PHOTOS && (
+                {totalKeyPhotos < MAX_KEY_PHOTOS && (
                   <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded border border-dashed border-sand-dim text-xs text-ink/50">
                     + Añadir
                     <input type="file" accept="image/*" multiple onChange={handleKeyPhotos} className="hidden" />
@@ -304,7 +359,7 @@ export default function NuevoAlojamientoPage() {
             disabled={saving}
             className="mt-2 rounded bg-terracotta px-5 py-3 font-bold text-ink transition-colors hover:bg-terracotta-deep disabled:opacity-60"
           >
-            {saving ? "Guardando…" : "Crear alojamiento →"}
+            {saving ? "Guardando…" : "Guardar cambios →"}
           </button>
           {error && <p className="text-sm text-terracotta-deep">{error}</p>}
         </form>

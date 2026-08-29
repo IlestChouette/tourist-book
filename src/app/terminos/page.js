@@ -25,16 +25,32 @@ export default function TerminosPage() {
 
           <div>
             <h2 className="font-display italic text-2xl text-ink">2. Planes y precios</h2>
-            <ul className="mt-2 grid gap-1">
-              <li>• Plan Básico — 29,99 €/mes: livret digital (wifi, información práctica, carnet de
-                visita, carta local, asistente).</li>
-              <li>• Plan Premium — 49,99 €/mes: todo lo anterior + check-in electrónico por reserva.</li>
-            </ul>
             <p className="mt-2">
-              Ambos planes incluyen 30 días de prueba gratuita. Facturación mensual recurrente gestionada
-              por Stripe. Puedes cancelar en cualquier momento desde tu panel; la cancelación surte
-              efecto al final del periodo ya facturado.
+              Cada alojamiento se suscribe a un plan de contenido (Básico o Premium) y a un ciclo de
+              facturación (Anual o Por temporada), de forma independiente del resto de tus
+              alojamientos.
             </p>
+            <ul className="mt-2 grid gap-1">
+              <li>• Plan Básico: livret digital (wifi, información práctica, carnet de visita, carta
+                local, asistente).</li>
+              <li>• Plan Premium: todo lo anterior + check-in electrónico por reserva.</li>
+            </ul>
+            <p className="mt-3 font-bold text-ink">Ciclo Anual</p>
+            <p className="mt-1">
+              39,99 €/año (Básico) o 59,99 €/año (Premium). Incluye 30 días de prueba gratuita{" "}
+              <strong>una única vez por cuenta</strong>, con independencia del número de alojamientos
+              que gestiones o de si te vuelves a suscribir tras una cancelación. La suscripción se
+              renueva automáticamente cada año; la cancelación solo puede solicitarse una vez
+              transcurrido el año en curso, y surte efecto al final de ese año (no se realizan
+              reembolsos parciales).
+            </p>
+            <p className="mt-3 font-bold text-ink">Ciclo Por temporada</p>
+            <p className="mt-1">
+              7 €/mes (Básico) o 10 €/mes (Premium). Sin periodo de prueba. Facturación mensual
+              recurrente; puedes cancelar en cualquier momento, y la cancelación surte efecto al final
+              del mes ya facturado.
+            </p>
+            <p className="mt-3">Facturación gestionada por Stripe en todos los casos.</p>
           </div>
 
           <div>

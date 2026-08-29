@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import TransfertForm from "./TransfertForm";
+import CarnetPanel from "./CarnetPanel";
+import CarteInteractive from "./CarteInteractive";
+import { recommendationsForCity } from "@/data/recommendations";
 
 const iconProps = {
   viewBox: "0 0 24 24",
@@ -98,13 +101,14 @@ export default function LivretMenu({ property, slug }) {
   ];
 
   const navItems = [
-    { key: "transfert", label: "Transfert", icon: <CarIcon />, href: `/logement/${slug}/transfert` },
-    { key: "tours", label: "Tours", icon: <CompassIcon />, href: `/logement/${slug}/tours` },
-    { key: "carte", label: "Carte locale", icon: <PinIcon />, href: `/logement/${slug}/carte` },
-    { key: "carnet", label: "Carnet", icon: <BookIcon />, href: `/logement/${slug}/carnet` },
+    { key: "transfert", label: "Transfert", icon: <CarIcon /> },
+    { key: "tours", label: "Tours", icon: <CompassIcon /> },
+    { key: "carte", label: "Carte locale", icon: <PinIcon /> },
+    { key: "carnet", label: "Carnet", icon: <BookIcon /> },
   ];
 
   const activeInfo = infoItems.find((i) => i.key === active);
+  const activeNav = navItems.find((i) => i.key === active);
 
   return (
     <div>
@@ -130,21 +134,100 @@ export default function LivretMenu({ property, slug }) {
         ))}
 
         {navItems.map((item) => (
-          <Link key={item.key} href={item.href} className="flex flex-col items-center gap-2 text-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-terracotta text-ink">
+          <button
+            key={item.key}
+            type="button"
+            onClick={() => setActive(active === item.key ? null : item.key)}
+            className="flex flex-col items-center gap-2 text-center"
+          >
+            <span
+              className={`flex h-16 w-16 items-center justify-center rounded-full transition-colors ${
+                active === item.key ? "bg-aqua-deep text-sand-card" : "bg-terracotta text-ink"
+              }`}
+            >
               {item.icon}
             </span>
             <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-ink/70">
               {item.label}
             </span>
-          </Link>
+          </button>
         ))}
       </div>
 
       {activeInfo && (
         <div className="mt-6 rounded border border-sand-dim bg-sand-card p-4">
-          <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{activeInfo.label}</span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{activeInfo.label}</span>
+            <button
+              type="button"
+              onClick={() => setActive(null)}
+              className="text-xs font-bold uppercase tracking-wider text-ink/40 hover:text-ink"
+            >
+              Fermer ✕
+            </button>
+          </div>
           <p className="mt-1 text-ink">{activeInfo.detail}</p>
+
+          {active === "horaires" &&
+            (property.key_instructions || property.key_lockbox_code || property.key_photos?.length > 0) && (
+              <div className="mt-4 border-t border-sand-dim pt-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                  Récupération des clés
+                </span>
+                {property.key_instructions && (
+                  <p className="mt-2 text-ink">{property.key_instructions}</p>
+                )}
+                {property.key_lockbox_code && (
+                  <p className="mt-2 text-ink">
+                    Code du cadenas :{" "}
+                    <span className="font-bold tracking-widest">{property.key_lockbox_code}</span>
+                  </p>
+                )}
+                {property.key_photos?.length > 0 && (
+                  <div className="mt-3 flex gap-2 overflow-x-auto">
+                    {property.key_photos.map((url) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={url}
+                        src={url}
+                        alt=""
+                        className="h-24 w-24 shrink-0 rounded object-cover border border-sand-dim"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+        </div>
+      )}
+
+      {activeNav && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{activeNav.label}</span>
+            <button
+              type="button"
+              onClick={() => setActive(null)}
+              className="text-xs font-bold uppercase tracking-wider text-ink/40 hover:text-ink"
+            >
+              Fermer ✕
+            </button>
+          </div>
+          <div className="mt-3">
+            {active === "transfert" && <TransfertForm slug={slug} propertyName={property.name} />}
+            {active === "tours" && (
+              <div className="rounded border border-sand-dim bg-sand-card p-5">
+                <p className="text-ink">
+                  La réservation de tours et d&apos;activités arrive bientôt — le partenaire est en cours de
+                  configuration.
+                </p>
+              </div>
+            )}
+            {active === "carte" && (
+              <CarteInteractive property={property} items={recommendationsForCity(property.city)} />
+            )}
+            {active === "carnet" && <CarnetPanel slug={slug} />}
+          </div>
         </div>
       )}
     </div>

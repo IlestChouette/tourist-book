@@ -79,7 +79,7 @@ export default function RegistroPage() {
 
   return (
     <main className="flex-1">
-      <Hero eyebrow="Tourist Book" title="Crear cuenta de hotelero" />
+      <Hero backHref="/" backLabel="Inicio" eyebrow="Tourist Book" title="Crear cuenta de hotelero" />
       <section className="mx-auto max-w-sm px-6 py-10">
         <form onSubmit={handleSubmit} className="grid gap-4">
           <label className="grid gap-1.5">

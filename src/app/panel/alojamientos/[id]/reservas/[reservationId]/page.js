@@ -1,10 +1,12 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Hero from "@/components/Hero";
 
 export default function ReservaDetallePage({ params }) {
   const { id, reservationId } = use(params);
+  const router = useRouter();
   const [reservation, setReservation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -27,8 +29,7 @@ export default function ReservaDetallePage({ params }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ verificationStatus: status }),
     });
-    await load();
-    setUpdating(false);
+    router.push(`/panel/alojamientos/${id}/reservas`);
   }
 
   if (loading) {

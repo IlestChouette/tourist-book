@@ -19,13 +19,22 @@ export async function POST(request) {
       const session = event.data.object;
       const propertyId = session.metadata?.property_id;
       const plan = session.metadata?.plan;
+      const cycle = session.metadata?.cycle;
       if (propertyId) {
+        // Le statut réel (trialing vs active) dépend de si un essai a été
+        // accordé (seulement pour le cycle annuel) — on va le chercher plutôt
+        // que de le supposer.
+        const subscription = await stripe.subscriptions.retrieve(session.subscription);
         await admin
           .from("properties")
           .update({
             plan,
-            subscription_status: "trialing",
+            billing_cycle: cycle,
+            subscription_status: subscription.status,
             stripe_subscription_id: session.subscription,
+            trial_ends_at: subscription.trial_end
+              ? new Date(subscription.trial_end * 1000).toISOString()
+              : null,
           })
           .eq("id", propertyId);
       }

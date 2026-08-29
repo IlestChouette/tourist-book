@@ -74,9 +74,32 @@ export default function CarteInteractive({ property, items }) {
     mapsQuery: property.address,
   });
   const [activeCategory, setActiveCategory] = useState(null);
+  const [search, setSearch] = useState("");
+  const [searchResult, setSearchResult] = useState(null);
+
+  const query = search.trim().toLowerCase();
+  const searchedItems = query
+    ? items.filter(
+        (i) => i.name.toLowerCase().includes(query) || i.note.toLowerCase().includes(query)
+      )
+    : items;
 
   const availableCategories = categories.filter((c) => items.some((i) => i.category === c));
-  const visibleCategories = activeCategory ? [activeCategory] : availableCategories;
+  const visibleCategories = query
+    ? categories.filter((c) => searchedItems.some((i) => i.category === c))
+    : activeCategory
+      ? [activeCategory]
+      : availableCategories;
+
+  function handleSearchSubmit(e) {
+    e.preventDefault();
+    if (!query) return;
+    setActiveCategory(null);
+    const name = search.trim();
+    const mapsQuery = `${name}, ${property.city}`;
+    setSelected({ name, mapsQuery });
+    setSearchResult({ name, mapsQuery });
+  }
 
   return (
     <div>
@@ -92,6 +115,50 @@ export default function CarteInteractive({ property, items }) {
       <p className="mt-2 text-sm text-ink/60">
         Sur la carte : <span className="font-bold text-ink">{selected.name}</span>
       </p>
+
+      <form onSubmit={handleSearchSubmit} className="mt-4 flex gap-2">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => {
+            const v = e.target.value;
+            setSearch(v);
+            if (!v) setSearchResult(null);
+          }}
+          placeholder="Rechercher un lieu (restaurant, plage, musée…)"
+          className="input flex-1"
+        />
+        <button
+          type="submit"
+          className="shrink-0 rounded bg-terracotta px-5 py-2.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
+        >
+          Rechercher
+        </button>
+      </form>
+      <p className="mt-1.5 text-xs text-ink/50">
+        Tape un lieu et appuie sur « Rechercher » pour le voir sur la carte et dans la liste —
+        les recommandations de l&apos;hôte se filtrent aussi automatiquement pendant que tu tapes.
+      </p>
+
+      {searchResult && (
+        <div className="mt-6">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-terracotta">
+            Résultat de recherche
+          </h2>
+          <div className="mt-3 rounded border border-terracotta bg-sand-card p-4">
+            <span className="block font-bold text-ink">{searchResult.name}</span>
+            <span className="block text-sm text-ink/70">Recherché près de {property.city}</span>
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(searchResult.mapsQuery)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-block text-xs font-bold uppercase tracking-wider text-aqua-deep"
+            >
+              Itinéraire →
+            </a>
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 flex flex-wrap gap-4">
         <button
@@ -142,7 +209,7 @@ export default function CarteInteractive({ property, items }) {
       </div>
 
       {visibleCategories.map((category) => {
-        const categoryItems = items.filter((i) => i.category === category);
+        const categoryItems = searchedItems.filter((i) => i.category === category);
         if (categoryItems.length === 0) return null;
         return (
           <div key={category} className="mt-8">
@@ -185,6 +252,9 @@ export default function CarteInteractive({ property, items }) {
 
       {items.length === 0 && (
         <p className="mt-8 text-ink/70">Pas encore de recommandations pour {property.city}.</p>
+      )}
+      {items.length > 0 && searchedItems.length === 0 && (
+        <p className="mt-8 text-ink/70">Aucun résultat pour « {search} ».</p>
       )}
     </div>
   );
