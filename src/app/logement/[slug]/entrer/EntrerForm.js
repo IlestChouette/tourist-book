@@ -1,0 +1,79 @@
+"use client";
+
+import { use, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+
+export default function EntrerForm({ params }) {
+  const { slug } = use(params);
+  const [property, setProperty] = useState(null);
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || `/logement/${slug}`;
+
+  const [code, setCode] = useState("");
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/properties/${slug}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then(setProperty)
+      .catch(() => setProperty(null));
+  }, [slug]);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+    setError(false);
+
+    const res = await fetch("/api/access", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug, code }),
+    });
+
+    if (res.ok) {
+      // Navigation complète (pas router.push) : évite que le cache client de Next.js
+      // serve une redirection périmée datant d'avant la pose du cookie d'accès.
+      window.location.href = next;
+    } else {
+      setLoading(false);
+      setError(true);
+    }
+  }
+
+  return (
+    <main className="flex flex-1 items-center justify-center bg-aqua px-6 py-14">
+      <div className="w-full max-w-sm rounded border border-sand-dim bg-sand-card p-6 text-center">
+        <span className="text-xs font-bold uppercase tracking-widest text-ink/60">
+          Livret d&apos;accueil
+        </span>
+        <h1 className="mt-2 font-display italic text-3xl text-ink">
+          {property ? property.name : "Accès au livret"}
+        </h1>
+        <p className="mt-2 text-sm text-ink/70">
+          Entre le code d&apos;accès transmis par ton hôte pour consulter le livret.
+        </p>
+
+        <form onSubmit={handleSubmit} className="mt-5 grid gap-3">
+          <input
+            required
+            autoFocus
+            inputMode="numeric"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            className="input text-center text-lg tracking-[0.3em]"
+            placeholder="••••"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="rounded bg-terracotta px-5 py-3 font-bold text-ink transition-colors hover:bg-terracotta-deep disabled:opacity-60"
+          >
+            {loading ? "Vérification…" : "Accéder au livret →"}
+          </button>
+          {error && <p className="text-sm text-terracotta-deep">Code incorrect, réessaie.</p>}
+        </form>
+      </div>
+    </main>
+  );
+}
