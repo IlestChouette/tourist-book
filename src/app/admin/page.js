@@ -43,6 +43,8 @@ const content = {
     name: "Nom",
     email: "Email",
     joined: "Inscription",
+    analytics: "Analytics →",
+    searchConsole: "Search Console →",
   },
   en: {
     summary: "Summary",
@@ -64,6 +66,8 @@ const content = {
     name: "Name",
     email: "Email",
     joined: "Joined",
+    analytics: "Analytics →",
+    searchConsole: "Search Console →",
   },
   es: {
     summary: "Resumen",
@@ -85,6 +89,8 @@ const content = {
     name: "Nombre",
     email: "Email",
     joined: "Alta",
+    analytics: "Analytics →",
+    searchConsole: "Search Console →",
   },
 };
 
@@ -136,7 +142,25 @@ export default async function AdminPage() {
           />
           <span className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70">Admin</span>
         </div>
-        <LogoutButton className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]" />
+        <div className="flex items-center gap-5">
+          <a
+            href="https://analytics.google.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+          >
+            {t.analytics}
+          </a>
+          <a
+            href="https://search.google.com/search-console?resource_id=sc-domain:tourist-book.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+          >
+            {t.searchConsole}
+          </a>
+          <LogoutButton className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]" />
+        </div>
       </div>
 
       <section className="mx-auto max-w-5xl px-6 py-10">
