@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import Hero from "@/components/Hero";
 import { getLocale } from "@/lib/i18n/locale";
 
+export const metadata = { robots: { index: false, follow: false } };
+
 const content = {
   fr: {
     eyebrow: "Panel hôtelier",
