@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { getPropertyBySlug } from "@/lib/properties";
 import { recommendationsForCity } from "@/data/recommendations";
 
@@ -45,6 +46,12 @@ function simulateReply(question, property) {
 
 export async function POST(request) {
   const { slug, messages } = await request.json();
+
+  const cookieStore = await cookies();
+  if (cookieStore.get(`access_${slug}`)?.value !== "1") {
+    return Response.json({ error: "Non autorisé" }, { status: 401 });
+  }
+
   const property = await getPropertyBySlug(slug);
 
   if (!property) {

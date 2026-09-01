@@ -28,12 +28,14 @@ export async function POST(request) {
   const response = NextResponse.json({ ok: true });
   response.cookies.set(`access_${slug}`, "1", {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   });
   response.cookies.set(`guest_${slug}`, account.reservation_id, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 30,

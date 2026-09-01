@@ -111,6 +111,7 @@ export async function POST(request, { params }) {
   // Donne un accès immédiat au livret pendant que l'hôte vérifie les documents.
   response.cookies.set(`access_${reservation.properties?.slug}`, "1", {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
@@ -118,6 +119,7 @@ export async function POST(request, { params }) {
   // Identifie ce voyageur pour lui afficher l'état de son check-in sur le livret.
   response.cookies.set(`guest_${reservation.properties?.slug}`, reservation.id, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
