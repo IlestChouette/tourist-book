@@ -351,7 +351,9 @@ export default function LivretMenu({ property, slug }) {
 
               {isNav && (
                 <>
-                  {active === "transfert" && <TransfertForm slug={slug} propertyName={property.name} />}
+                  {active === "transfert" && (
+                    <TransfertForm slug={slug} propertyName={property.name} propertyAddress={property.address} />
+                  )}
                   {active === "tours" && (
                     <div className="rounded border border-sand-dim bg-sand p-5">
                       <p className="text-ink">

@@ -67,7 +67,7 @@ export default function TransfertsPage({ params }) {
   useEffect(() => {
     async function load() {
       const supabase = createClient();
-      const { data: prop } = await supabase.from("properties").select("name").eq("id", id).single();
+      const { data: prop } = await supabase.from("properties").select("name, address").eq("id", id).single();
       setProperty(prop);
 
       const res = await fetch(`/api/requests?propertyId=${id}`);

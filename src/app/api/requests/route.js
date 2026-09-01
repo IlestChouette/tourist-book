@@ -52,7 +52,7 @@ export async function POST(request) {
   const admin = createAdminClient();
   const { data: property } = await admin
     .from("properties")
-    .select("id, name, hosts(email)")
+    .select("id, name, address, hosts(email)")
     .eq("slug", slug)
     .single();
   if (!property) {
@@ -92,6 +92,7 @@ export async function POST(request) {
       await sendTransferRequestNotification({
         hostEmail: property.hosts?.email,
         propertyName: property.name,
+        propertyAddress: property.address,
         request: inserted,
       });
     } catch (err) {

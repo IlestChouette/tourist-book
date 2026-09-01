@@ -6,7 +6,7 @@ import { formatTransferWhatsAppMessage } from "./transferMessage";
 // rien — la demande reste enregistrée normalement, seul l'email est
 // désactivé. Sans domaine vérifié sur Resend, l'email ne peut être livré
 // qu'à l'adresse du compte Resend lui-même (limite du mode sandbox).
-export async function sendTransferRequestNotification({ hostEmail, propertyName, request }) {
+export async function sendTransferRequestNotification({ hostEmail, propertyName, propertyAddress, request }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey || !hostEmail) return { sent: false, reason: "not_configured" };
 
@@ -15,6 +15,7 @@ export async function sendTransferRequestNotification({ hostEmail, propertyName,
 
   const lines = [
     `Nouvelle demande de transfert pour ${propertyName}`,
+    propertyAddress ? `Adresse : ${propertyAddress}` : null,
     "",
     `Voyageur : ${request.nom}`,
     `Téléphone : ${request.telephone || "-"}`,
@@ -30,17 +31,25 @@ export async function sendTransferRequestNotification({ hostEmail, propertyName,
 
   const whatsappMessage = formatTransferWhatsAppMessage({
     propertyName,
+    propertyAddress,
     nom: request.nom,
     telephone: request.telephone,
     details: d,
   });
 
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: "Tourist Book <onboarding@resend.dev>",
     to: hostEmail,
     subject: `Nouvelle demande de transfert — ${propertyName}`,
     text: `${lines.join("\n")}\n\n— Message prêt à copier pour WhatsApp —\n\n${whatsappMessage}`,
   });
+
+  // resend.emails.send() ne lève pas d'exception en cas d'erreur API — elle
+  // renvoie { data: null, error } que le SDK laisserait passer silencieusement
+  // si on ne le vérifie pas explicitement ici.
+  if (error) {
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
 
   return { sent: true };
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function TransfertForm({ slug, propertyName }) {
+export default function TransfertForm({ slug, propertyName, propertyAddress }) {
   const [form, setForm] = useState({
     nom: "",
     telephone: "",
@@ -26,7 +26,7 @@ export default function TransfertForm({ slug, propertyName }) {
     e.preventDefault();
     setSending(true);
 
-    const entry = { slug, type: "transfert", property: propertyName, ...form };
+    const entry = { slug, type: "transfert", property: propertyName, destination: propertyAddress, ...form };
     try {
       await fetch("/api/requests", {
         method: "POST",
@@ -54,6 +54,13 @@ export default function TransfertForm({ slug, propertyName }) {
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
+      {propertyAddress && (
+        <div className="rounded border border-sand-dim bg-sand p-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Destination</span>
+          <p className="mt-0.5 text-ink">{propertyName}, {propertyAddress}</p>
+        </div>
+      )}
+
       <Field label="Nom du voyageur">
         <input required value={form.nom} onChange={update("nom")} className="input" />
       </Field>
@@ -80,7 +87,7 @@ export default function TransfertForm({ slug, propertyName }) {
 
       <Field label="Lieu de prise en charge">
         <select value={form.lieu} onChange={update("lieu")} className="input">
-          <option>Aéroport Nice Côte d'Azur</option>
+          <option>Aéroport Nice Côte d&apos;Azur</option>
           <option>Gare de Nice-Ville</option>
           <option>Autre</option>
         </select>
