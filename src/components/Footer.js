@@ -4,8 +4,8 @@ export default function Footer() {
   return (
     <footer className="relative border-t border-sand-dim bg-sand">
       <div className="mx-auto max-w-5xl px-6 py-14">
-        <div className="grid gap-10 sm:grid-cols-4">
-          <div>
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4">
+          <div className="col-span-2 sm:col-span-1">
             <span className="font-display italic text-lg text-ink">Tourist Book</span>
             <p className="mt-2 text-sm text-ink/60">
               Livret de acogida digital y check-in electrónico para alojamientos de la Côte d&apos;Azur.
