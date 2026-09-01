@@ -139,10 +139,10 @@ export default function LivretMenu({ property, slug }) {
   ];
 
   const navItems = [
-    { key: "transfert", label: "Transfert", icon: <CarIcon /> },
+    { key: "transfert", label: "Réserver un transfert", icon: <CarIcon /> },
     { key: "tours", label: "Tours", icon: <CompassIcon /> },
     { key: "carte", label: "Carte locale", icon: <PinIcon /> },
-    { key: "carnet", label: "Carnet", icon: <BookIcon /> },
+    { key: "carnet", label: "Livre d'or", icon: <BookIcon /> },
   ];
 
   const activeInfo = infoItems.find((i) => i.key === active);
@@ -172,6 +172,7 @@ export default function LivretMenu({ property, slug }) {
             </button>
           );
         })}
+        {tiles.length % 2 !== 0 && <div aria-hidden="true" className="aspect-square sm:hidden" />}
       </div>
 
       {activeInfo && (
