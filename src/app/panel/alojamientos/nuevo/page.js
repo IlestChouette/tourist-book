@@ -34,10 +34,14 @@ export default function NuevoAlojamientoPage() {
     parking: "",
     contact: "",
     description: "",
+    house_rules: "",
+    waste_instructions: "",
+    general_info: "",
     key_instructions: "",
     key_lockbox_code: "",
   });
   const [photos, setPhotos] = useState([]);
+  const [wastePhoto, setWastePhoto] = useState(null);
   const [keyPhotos, setKeyPhotos] = useState([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -53,6 +57,10 @@ export default function NuevoAlojamientoPage() {
 
   function removePhoto(index) {
     setPhotos((p) => p.filter((_, i) => i !== index));
+  }
+
+  function handleWastePhoto(e) {
+    setWastePhoto(e.target.files?.[0] ?? null);
   }
 
   function handleKeyPhotos(e) {
@@ -85,6 +93,12 @@ export default function NuevoAlojamientoPage() {
         photoUrls.push(url);
       }
 
+      let wastePhotoUrl = null;
+      if (wastePhoto) {
+        const ext = wastePhoto.name.split(".").pop();
+        wastePhotoUrl = await uploadMedia(`${user.id}/${slug}/basuras.${ext}`, wastePhoto);
+      }
+
       const keyPhotoUrls = [];
       for (let i = 0; i < keyPhotos.length; i++) {
         const file = keyPhotos[i];
@@ -108,6 +122,10 @@ export default function NuevoAlojamientoPage() {
           parking: form.parking,
           contact: form.contact,
           description: form.description,
+          house_rules: form.house_rules,
+          waste_instructions: form.waste_instructions,
+          waste_photo: wastePhotoUrl,
+          general_info: form.general_info,
           key_instructions: form.key_instructions,
           key_lockbox_code: form.key_lockbox_code,
           key_photos: keyPhotoUrls,
@@ -239,6 +257,78 @@ export default function NuevoAlojamientoPage() {
               )}
             </div>
           </div>
+
+          <label className="grid gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
+              Reglas del lugar (opcional)
+            </span>
+            <textarea
+              rows={3}
+              placeholder="Ej: no se permiten fiestas, prohibido fumar dentro, horario de silencio a partir de las 22h..."
+              value={form.house_rules}
+              onChange={update("house_rules")}
+              className="input"
+            />
+          </label>
+
+          <div className="mt-2 grid gap-4 rounded border border-sand-dim bg-sand-card p-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
+              Manejo de basuras
+            </span>
+            <label className="grid gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                Indicaciones (opcional)
+              </span>
+              <textarea
+                rows={3}
+                placeholder="Ej: la basura se saca los martes y viernes, los contenedores están al final de la calle..."
+                value={form.waste_instructions}
+                onChange={update("waste_instructions")}
+                className="input"
+              />
+            </label>
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Foto (opcional)</span>
+              <div className="mt-2 flex flex-wrap gap-3">
+                {wastePhoto && (
+                  <div className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={URL.createObjectURL(wastePhoto)}
+                      alt=""
+                      className="h-20 w-20 rounded object-cover border border-sand-dim"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setWastePhoto(null)}
+                      className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+                {!wastePhoto && (
+                  <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded border border-dashed border-sand-dim text-xs text-ink/50">
+                    + Añadir
+                    <input type="file" accept="image/*" onChange={handleWastePhoto} className="hidden" />
+                  </label>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <label className="grid gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
+              Información general (opcional)
+            </span>
+            <textarea
+              rows={3}
+              placeholder="Ej: instrucciones del aire acondicionado, dónde están las toallas extra, cómo funciona la cafetera..."
+              value={form.general_info}
+              onChange={update("general_info")}
+              className="input"
+            />
+          </label>
 
           <div className="mt-2 grid gap-4 rounded border border-sand-dim bg-sand-card p-4">
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">

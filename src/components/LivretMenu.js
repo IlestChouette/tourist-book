@@ -76,6 +76,35 @@ function PinIcon() {
   );
 }
 
+function RulesIcon() {
+  return (
+    <svg {...iconProps} width="24" height="24">
+      <path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5v15a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19.5v-15z" />
+      <path d="M9 8h6M9 12h6M9 16h3" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg {...iconProps} width="24" height="24">
+      <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+      <path d="M6 7l1 13a1.5 1.5 0 0 0 1.5 1.4h7a1.5 1.5 0 0 0 1.5-1.4L18 7" />
+      <path d="M10 11v6M14 11v6" />
+    </svg>
+  );
+}
+
+function InfoIcon() {
+  return (
+    <svg {...iconProps} width="24" height="24">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 11v5.5" />
+      <circle cx="12" cy="7.8" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 function BookIcon() {
   return (
     <svg {...iconProps} width="24" height="24">
@@ -98,6 +127,15 @@ export default function LivretMenu({ property, slug }) {
     },
     { key: "parking", label: "Stationnement", icon: <ParkingIcon />, detail: property.parking },
     { key: "contact", label: "Contact", icon: <PhoneIcon />, detail: property.contact },
+    ...(property.house_rules
+      ? [{ key: "rules", label: "Règles", icon: <RulesIcon />, detail: property.house_rules }]
+      : []),
+    ...(property.waste_instructions || property.waste_photo
+      ? [{ key: "basuras", label: "Poubelles", icon: <TrashIcon />, detail: property.waste_instructions }]
+      : []),
+    ...(property.general_info
+      ? [{ key: "info", label: "Informations", icon: <InfoIcon />, detail: property.general_info }]
+      : []),
   ];
 
   const navItems = [
@@ -166,7 +204,18 @@ export default function LivretMenu({ property, slug }) {
               Fermer ✕
             </button>
           </div>
-          <p className="mt-1 text-ink">{activeInfo.detail}</p>
+          {activeInfo.detail && <p className="mt-1 text-ink">{activeInfo.detail}</p>}
+
+          {active === "basuras" && property.waste_photo && (
+            <div className="mt-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={property.waste_photo}
+                alt=""
+                className="h-40 w-full rounded object-cover border border-sand-dim"
+              />
+            </div>
+          )}
 
           {active === "horaires" &&
             (property.key_instructions || property.key_lockbox_code || property.key_photos?.length > 0) && (
