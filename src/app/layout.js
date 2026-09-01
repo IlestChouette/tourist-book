@@ -1,5 +1,6 @@
 import { Bodoni_Moda, Archivo } from "next/font/google";
 import Footer from "@/components/Footer";
+import CookieConsent from "@/components/CookieConsent";
 import { getLocale } from "@/lib/i18n/locale";
 import "./globals.css";
 
@@ -15,8 +16,24 @@ const archivo = Archivo({
 });
 
 export const metadata = {
+  metadataBase: new URL("https://tourist-book.com"),
   title: "Tourist Book",
   description: "Livret d'accueil numérique — Côte d'Azur",
+  openGraph: {
+    title: "Tourist Book",
+    description: "Livret d'accueil numérique et check-in électronique pour les hébergements de la Côte d'Azur.",
+    url: "https://tourist-book.com",
+    siteName: "Tourist Book",
+    images: ["/tourist book long.png"],
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Tourist Book",
+    description: "Livret d'accueil numérique et check-in électronique pour les hébergements de la Côte d'Azur.",
+    images: ["/tourist book long.png"],
+  },
 };
 
 export default async function RootLayout({ children }) {
@@ -29,6 +46,7 @@ export default async function RootLayout({ children }) {
       <body className="min-h-full flex flex-col bg-sand text-ink font-body">
         {children}
         <Footer />
+        <CookieConsent locale={locale} />
       </body>
     </html>
   );

@@ -280,8 +280,33 @@ export default async function Home() {
   const locale = await getLocale();
   const t = content[locale];
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Tourist Book",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    description: t.metaDescription,
+    url: "https://tourist-book.com",
+    offers: [
+      { "@type": "Offer", price: "39.99", priceCurrency: "EUR", name: "Essentiel — annuel" },
+      { "@type": "Offer", price: "59.99", priceCurrency: "EUR", name: "Premium — annuel" },
+      { "@type": "Offer", price: "7", priceCurrency: "EUR", name: "Essentiel — saisonnier" },
+      { "@type": "Offer", price: "10", priceCurrency: "EUR", name: "Premium — saisonnier" },
+    ],
+    provider: {
+      "@type": "Organization",
+      name: "Il est chouette",
+      url: "https://tourist-book.com/aviso-legal",
+    },
+  };
+
   return (
     <main className="flex-1">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <header className="bg-[#2f7d76]">
         <div className="flex items-center justify-between px-6 py-6">
           <Link href="/" className="inline-flex items-center">

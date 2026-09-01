@@ -63,7 +63,7 @@ const content = {
       "Si vous êtes un hôte et souhaitez exercer ces droits sur vos données de check-in, vous pouvez vous adresser directement à l'hôtelier du logement (responsable de votre réservation) ou à nous, et nous transmettrons la demande.",
     s8Title: "8. Cookies",
     s8Body:
-      "Nous utilisons uniquement des cookies techniques, strictement nécessaires au fonctionnement du service : maintenir la session de l'hôtelier connectée, mémoriser l'accès d'un hôte à son livret pendant le séjour, et retenir la langue choisie. Nous n'utilisons aucun cookie publicitaire ni de suivi tiers, ils ne nécessitent donc pas votre consentement préalable au regard de la réglementation sur les cookies (ePrivacy).",
+      "Nous utilisons des cookies techniques, strictement nécessaires au fonctionnement du service (maintenir la session de l'hôtelier connectée, mémoriser l'accès d'un hôte à son livret pendant le séjour, retenir la langue et le choix de cookies) : ceux-ci ne nécessitent pas votre consentement au regard de la réglementation (ePrivacy). Avec votre accord, nous utilisons aussi Google Analytics pour mesurer la fréquentation du site (pages consultées, provenance du trafic) — ces cookies ne sont déposés qu'après que vous ayez cliqué sur « Accepter » dans le bandeau affiché en bas de page, et vous pouvez changer d'avis à tout moment en effaçant les cookies de votre navigateur pour ce site.",
     s9Title: "9. Mineurs",
     s9Body:
       "La plateforme ne s'adresse pas aux mineurs. La création d'un compte hôtelier requiert d'être majeur et d'avoir la capacité juridique de contracter.",
@@ -133,7 +133,7 @@ const content = {
       "If you are a guest and want to exercise these rights over your check-in data, you can contact the host of the property (responsible for your booking) directly, or contact us and we will forward the request.",
     s8Title: "8. Cookies",
     s8Body:
-      "We only use technical cookies, strictly necessary for the service to work: keeping the host's session logged in, remembering a guest's access to their welcome book during their stay, and remembering the chosen language. We do not use any advertising or third-party tracking cookies, so they do not require your prior consent under cookie regulation (ePrivacy).",
+      "We use technical cookies, strictly necessary for the service to work (keeping the host's session logged in, remembering a guest's access to their welcome book during their stay, remembering the chosen language and cookie choice): these do not require your consent under cookie regulation (ePrivacy). With your consent, we also use Google Analytics to measure site traffic (pages viewed, traffic source) — these cookies are only set after you click \"Accept\" on the banner shown at the bottom of the page, and you can change your mind at any time by clearing this site's cookies in your browser.",
     s9Title: "9. Minors",
     s9Body:
       "The platform is not aimed at minors. Creating a host account requires being of legal age and having the legal capacity to contract.",
@@ -203,7 +203,7 @@ const content = {
       "Si eres huésped y quieres ejercer estos derechos sobre tus datos de check-in, puedes dirigirte directamente al hotelero de la propiedad (responsable de tu reserva) o a nosotros, y trasladaremos la solicitud.",
     s8Title: "8. Cookies",
     s8Body:
-      "Usamos únicamente cookies técnicas, estrictamente necesarias para el funcionamiento del servicio: mantener la sesión del hotelero iniciada, recordar el acceso de un huésped a su livret durante la estancia, y recordar el idioma elegido. No usamos cookies de publicidad ni de seguimiento de terceros, por lo que no requieren tu consentimiento previo conforme a la normativa de cookies (ePrivacy).",
+      "Usamos cookies técnicas, estrictamente necesarias para el funcionamiento del servicio (mantener la sesión del hotelero iniciada, recordar el acceso de un huésped a su livret durante la estancia, recordar el idioma y la elección de cookies): estas no requieren tu consentimiento conforme a la normativa (ePrivacy). Con tu consentimiento, también usamos Google Analytics para medir la audiencia del sitio (páginas visitadas, origen del tráfico) — estas cookies solo se activan si hacés clic en \"Aceptar\" en el aviso que aparece al pie de la página, y podés cambiar de opinión en cualquier momento borrando las cookies de este sitio en tu navegador.",
     s9Title: "9. Menores de edad",
     s9Body:
       "La plataforma no está dirigida a menores de edad. La creación de una cuenta de hotelero requiere ser mayor de edad y tener capacidad legal para contratar.",
