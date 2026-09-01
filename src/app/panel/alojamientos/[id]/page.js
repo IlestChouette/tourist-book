@@ -20,6 +20,7 @@ const content = {
     edit: "Modifier →",
     activate: "Activer l'abonnement →",
     reservations: "Réservations et check-in →",
+    transferts: "Demandes de transfert →",
     requestCancel: "Demander la résiliation",
     deleting: "Suppression…",
     delete: "Supprimer le logement",
@@ -40,6 +41,7 @@ const content = {
     edit: "Edit →",
     activate: "Activate subscription →",
     reservations: "Bookings and check-in →",
+    transferts: "Transfer requests →",
     requestCancel: "Request cancellation",
     deleting: "Deleting…",
     delete: "Delete property",
@@ -60,6 +62,7 @@ const content = {
     edit: "Editar →",
     activate: "Activar suscripción →",
     reservations: "Reservas y check-in →",
+    transferts: "Solicitudes de transfer →",
     requestCancel: "Solicitar cancelación",
     deleting: "Eliminando…",
     delete: "Eliminar alojamiento",
@@ -202,6 +205,14 @@ export default function AlojamientoDetallePage({ params }) {
               className="inline-block rounded bg-terracotta px-5 py-3 font-bold text-ink transition-colors hover:bg-terracotta-deep"
             >
               {t.reservations}
+            </Link>
+          )}
+          {active && (
+            <Link
+              href={`/panel/alojamientos/${id}/transferts`}
+              className="inline-block rounded border border-aqua-deep px-5 py-3 font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
+            >
+              {t.transferts}
             </Link>
           )}
           {active && (
