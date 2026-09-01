@@ -17,7 +17,7 @@ const iconProps = {
 
 function WifiIcon() {
   return (
-    <svg {...iconProps} width="24" height="24">
+    <svg {...iconProps} className="h-full w-full">
       <path d="M3 8.5a14 14 0 0 1 18 0" />
       <path d="M6.5 12a9 9 0 0 1 11 0" />
       <path d="M9.5 15.5a4.5 4.5 0 0 1 5 0" />
@@ -28,7 +28,7 @@ function WifiIcon() {
 
 function ClockIcon() {
   return (
-    <svg {...iconProps} width="24" height="24">
+    <svg {...iconProps} className="h-full w-full">
       <circle cx="12" cy="12" r="8.5" />
       <path d="M12 7.5V12l3 2" />
     </svg>
@@ -37,19 +37,19 @@ function ClockIcon() {
 
 function PhoneIcon() {
   return (
-    <svg {...iconProps} width="24" height="24">
+    <svg {...iconProps} className="h-full w-full">
       <path d="M5 4c-1 0-1.6.8-1.4 1.8C4.5 10.5 9.5 15.5 14.2 16.4c1 .2 1.8-.4 1.8-1.4v-2c0-.5-.4-1-.9-1.1l-2.6-.6c-.4-.1-.9 0-1.1.4l-.8 1.2A11 11 0 0 1 6.9 9.4l1.2-.8c.4-.3.5-.7.4-1.1L8 4.9C7.9 4.4 7.4 4 6.9 4H5z" />
     </svg>
   );
 }
 
 function ParkingIcon() {
-  return <span className="text-lg font-bold leading-none">P</span>;
+  return <span className="text-2xl font-bold leading-none md:text-base">P</span>;
 }
 
 function CarIcon() {
   return (
-    <svg {...iconProps} width="24" height="24">
+    <svg {...iconProps} className="h-full w-full">
       <path d="M4 16V11l2-4h12l2 4v5" />
       <path d="M4 16h16" />
       <circle cx="7.5" cy="16.5" r="1.4" fill="currentColor" stroke="none" />
@@ -60,7 +60,7 @@ function CarIcon() {
 
 function CompassIcon() {
   return (
-    <svg {...iconProps} width="24" height="24">
+    <svg {...iconProps} className="h-full w-full">
       <circle cx="12" cy="12" r="8.5" />
       <path d="M15 9l-2 6-6 2 2-6 6-2z" />
     </svg>
@@ -69,7 +69,7 @@ function CompassIcon() {
 
 function PinIcon() {
   return (
-    <svg {...iconProps} width="24" height="24">
+    <svg {...iconProps} className="h-full w-full">
       <path d="M12 21s-6.5-6-6.5-11A6.5 6.5 0 0 1 18.5 10c0 5-6.5 11-6.5 11z" />
       <circle cx="12" cy="10" r="2.2" />
     </svg>
@@ -78,7 +78,7 @@ function PinIcon() {
 
 function RulesIcon() {
   return (
-    <svg {...iconProps} width="24" height="24">
+    <svg {...iconProps} className="h-full w-full">
       <path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5v15a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19.5v-15z" />
       <path d="M9 8h6M9 12h6M9 16h3" />
     </svg>
@@ -87,7 +87,7 @@ function RulesIcon() {
 
 function TrashIcon() {
   return (
-    <svg {...iconProps} width="24" height="24">
+    <svg {...iconProps} className="h-full w-full">
       <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
       <path d="M6 7l1 13a1.5 1.5 0 0 0 1.5 1.4h7a1.5 1.5 0 0 0 1.5-1.4L18 7" />
       <path d="M10 11v6M14 11v6" />
@@ -97,7 +97,7 @@ function TrashIcon() {
 
 function InfoIcon() {
   return (
-    <svg {...iconProps} width="24" height="24">
+    <svg {...iconProps} className="h-full w-full">
       <circle cx="12" cy="12" r="8.5" />
       <path d="M12 11v5.5" />
       <circle cx="12" cy="7.8" r="0.9" fill="currentColor" stroke="none" />
@@ -107,7 +107,7 @@ function InfoIcon() {
 
 function BookIcon() {
   return (
-    <svg {...iconProps} width="24" height="24">
+    <svg {...iconProps} className="h-full w-full">
       <path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5v-13z" />
       <path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5c.8 0 1.5-.7 1.5-1.5v-13z" />
     </svg>
@@ -147,49 +147,31 @@ export default function LivretMenu({ property, slug }) {
 
   const activeInfo = infoItems.find((i) => i.key === active);
   const activeNav = navItems.find((i) => i.key === active);
+  const tiles = [...infoItems, ...navItems];
 
   return (
     <div>
-      <div className="grid grid-cols-4 gap-x-3 gap-y-6">
-        {infoItems.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => setActive(active === item.key ? null : item.key)}
-            className="flex flex-col items-center gap-2 text-center"
-          >
-            <span
-              className={`flex h-16 w-16 items-center justify-center rounded-full transition-colors ${
-                active === item.key ? "bg-terracotta" : "bg-aqua-deep"
-              } text-sand-card`}
-            >
-              {item.icon}
-            </span>
-            <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-ink/70">
-              {item.label}
-            </span>
-          </button>
-        ))}
-
-        {navItems.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => setActive(active === item.key ? null : item.key)}
-            className="flex flex-col items-center gap-2 text-center"
-          >
-            <span
-              className={`flex h-16 w-16 items-center justify-center rounded-full transition-colors ${
-                active === item.key ? "bg-aqua-deep text-sand-card" : "bg-terracotta text-ink"
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-3 lg:grid-cols-6">
+        {tiles.map((item) => {
+          const isActive = active === item.key;
+          return (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setActive(isActive ? null : item.key)}
+              className={`flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl text-center transition-colors md:gap-1.5 md:rounded-xl md:border md:shadow-sm ${
+                isActive
+                  ? "bg-terracotta-deep text-sand-card md:border-terracotta md:bg-terracotta/10 md:text-ink"
+                  : "bg-terracotta text-sand-card md:border-sand-dim md:bg-sand-card md:text-ink md:hover:border-terracotta/60"
               }`}
             >
-              {item.icon}
-            </span>
-            <span className="text-[11px] font-bold uppercase leading-tight tracking-wide text-ink/70">
-              {item.label}
-            </span>
-          </button>
-        ))}
+              <span className="h-9 w-9 md:h-6 md:w-6">{item.icon}</span>
+              <span className="text-sm font-bold uppercase leading-tight tracking-wide md:text-[11px]">
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {activeInfo && (

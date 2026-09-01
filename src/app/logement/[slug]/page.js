@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getPropertyBySlug } from "@/lib/properties";
-import Hero from "@/components/Hero";
+import LivretHero from "@/components/LivretHero";
 import LivretMenu from "@/components/LivretMenu";
 
 export default async function LivretPage({ params }) {
@@ -13,25 +13,13 @@ export default async function LivretPage({ params }) {
 
   return (
     <main className="flex-1">
-      <Hero
-        eyebrow="Livret d'accueil"
-        title={property.name}
-        subtitle={property.address}
-        stamps={["FR", "EN", "ES"]}
-        photo={photos[0] ?? null}
-      />
+      <LivretHero title={property.name} subtitle={property.address} photo={photos[0] ?? null} />
 
-      {photos.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto px-6 py-4">
-          {photos.slice(1).map((url) => (
-            <div key={url} className="relative h-20 w-28 shrink-0 overflow-hidden rounded border border-sand-dim">
-              <Image src={url} alt="" fill sizes="112px" className="object-cover" />
-            </div>
-          ))}
-        </div>
-      )}
+      <section id="menu" className="mx-auto max-w-2xl px-6 py-8 md:max-w-5xl md:py-10">
+        <LivretMenu property={property} slug={slug} />
+      </section>
 
-      <section className="mx-auto max-w-2xl px-6 py-10">
+      <section className="mx-auto max-w-2xl px-6 pb-10 md:max-w-5xl">
         {property.description ? (
           <p className="whitespace-pre-line text-ink/80">{property.description}</p>
         ) : (
@@ -41,11 +29,17 @@ export default async function LivretPage({ params }) {
             transfert — directement depuis ton téléphone, sans rien installer.
           </p>
         )}
-
-        <div className="mt-8">
-          <LivretMenu property={property} slug={slug} />
-        </div>
       </section>
+
+      {photos.length > 1 && (
+        <div className="mx-auto flex max-w-2xl gap-2 overflow-x-auto px-6 pb-10 md:max-w-5xl">
+          {photos.slice(1).map((url) => (
+            <div key={url} className="relative h-20 w-28 shrink-0 overflow-hidden rounded border border-sand-dim">
+              <Image src={url} alt="" fill sizes="112px" className="object-cover" />
+            </div>
+          ))}
+        </div>
+      )}
     </main>
   );
 }
