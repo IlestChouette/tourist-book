@@ -4,12 +4,24 @@ import { use, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { uploadMedia } from "@/lib/uploadMedia";
 import Hero from "@/components/Hero";
+import { getClientLocale } from "@/lib/i18n/clientLocale";
+import fieldsDict from "@/lib/i18n/dictionaries/propertyForm";
 
 const MAX_PHOTOS = 5;
 const MAX_KEY_PHOTOS = 4;
 
+const pageContent = {
+  fr: { eyebrow: "Panel hôtelier", loading: "Chargement…", notFound: "Logement introuvable", title: "Modifier le logement", saving: "Enregistrement…", submit: "Enregistrer →" },
+  en: { eyebrow: "Host panel", loading: "Loading…", notFound: "Property not found", title: "Edit property", saving: "Saving…", submit: "Save →" },
+  es: { eyebrow: "Panel hotelero", loading: "Cargando…", notFound: "Alojamiento no encontrado", title: "Editar alojamiento", saving: "Guardando…", submit: "Guardar cambios →" },
+};
+
 export default function EditarAlojamientoPage({ params }) {
   const { id } = use(params);
+  const [locale] = useState(getClientLocale);
+  const t = fieldsDict[locale];
+  const p = pageContent[locale];
+
   const [form, setForm] = useState(null);
   const [existingPhotos, setExistingPhotos] = useState([]);
   const [newPhotos, setNewPhotos] = useState([]);
@@ -158,7 +170,7 @@ export default function EditarAlojamientoPage({ params }) {
   if (loading) {
     return (
       <main className="flex-1">
-        <Hero eyebrow="Panel hotelero" title="Cargando…" />
+        <Hero eyebrow={p.eyebrow} title={p.loading} />
       </main>
     );
   }
@@ -166,7 +178,7 @@ export default function EditarAlojamientoPage({ params }) {
   if (!form) {
     return (
       <main className="flex-1">
-        <Hero eyebrow="Panel hotelero" title="Alojamiento no encontrado" />
+        <Hero eyebrow={p.eyebrow} title={p.notFound} />
       </main>
     );
   }
@@ -176,52 +188,52 @@ export default function EditarAlojamientoPage({ params }) {
       <Hero
         backHref={`/panel/alojamientos/${id}`}
         backLabel={form.name}
-        eyebrow="Panel hotelero"
-        title="Editar alojamiento"
+        eyebrow={p.eyebrow}
+        title={p.title}
       />
       <section className="mx-auto max-w-2xl px-6 py-10">
         <form onSubmit={handleSubmit} className="grid gap-4">
           <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Nombre</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.name}</span>
             <input required value={form.name} onChange={update("name")} className="input" />
           </label>
 
           <div className="grid grid-cols-2 gap-4">
             <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Ciudad</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.city}</span>
               <input required value={form.city} onChange={update("city")} className="input" />
             </label>
             <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Dirección</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.address}</span>
               <input required value={form.address} onChange={update("address")} className="input" />
             </label>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Wifi (red)</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wifiNetwork}</span>
               <input value={form.wifi_ssid} onChange={update("wifi_ssid")} className="input" />
             </label>
             <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Wifi (contraseña)</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wifiPassword}</span>
               <input value={form.wifi_password} onChange={update("wifi_password")} className="input" />
             </label>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Llegada</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.arrival}</span>
               <input
-                placeholder="A partir de 15h00"
+                placeholder={t.arrivalPlaceholder}
                 value={form.checkin}
                 onChange={update("checkin")}
                 className="input"
               />
             </label>
             <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Salida</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.departure}</span>
               <input
-                placeholder="Antes de 11h00"
+                placeholder={t.departurePlaceholder}
                 value={form.checkout}
                 onChange={update("checkout")}
                 className="input"
@@ -230,37 +242,30 @@ export default function EditarAlojamientoPage({ params }) {
           </div>
 
           <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Aparcamiento</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.parking}</span>
             <input value={form.parking} onChange={update("parking")} className="input" />
           </label>
 
           <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Contacto</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.contact}</span>
             <input value={form.contact} onChange={update("contact")} className="input" />
           </label>
 
           <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-              Mensaje de bienvenida (opcional, pero recomendado)
-            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.welcomeMessage}</span>
             <textarea
               rows={4}
-              placeholder={
-                'Hazlo personal y cálido — es lo primero que lee tu huésped. Por ejemplo: "¡Bienvenido/a! Estamos muy felices de recibirte..."'
-              }
+              placeholder={t.welcomeMessagePlaceholder}
               value={form.description}
               onChange={update("description")}
               className="input"
             />
-            <span className="text-xs text-ink/50">
-              Este texto aparece en la primera página del livret — es la primera impresión de tu
-              huésped. Un mensaje cálido y personal vale más que uno genérico.
-            </span>
+            <span className="text-xs text-ink/50">{t.welcomeMessageHint}</span>
           </label>
 
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-              Fotos ({totalPhotos}/{MAX_PHOTOS})
+              {t.photos(totalPhotos, MAX_PHOTOS)}
             </span>
             <div className="mt-2 flex flex-wrap gap-3">
               {existingPhotos.map((url, i) => (
@@ -295,7 +300,7 @@ export default function EditarAlojamientoPage({ params }) {
               ))}
               {totalPhotos < MAX_PHOTOS && (
                 <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded border border-dashed border-sand-dim text-xs text-ink/50">
-                  + Añadir
+                  {t.addPhoto}
                   <input type="file" accept="image/*" multiple onChange={handlePhotos} className="hidden" />
                 </label>
               )}
@@ -303,12 +308,10 @@ export default function EditarAlojamientoPage({ params }) {
           </div>
 
           <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-              Reglas del lugar (opcional)
-            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.houseRules}</span>
             <textarea
               rows={3}
-              placeholder="Ej: no se permiten fiestas, prohibido fumar dentro, horario de silencio a partir de las 22h..."
+              placeholder={t.houseRulesPlaceholder}
               value={form.house_rules}
               onChange={update("house_rules")}
               className="input"
@@ -316,23 +319,19 @@ export default function EditarAlojamientoPage({ params }) {
           </label>
 
           <div className="mt-2 grid gap-4 rounded border border-sand-dim bg-sand-card p-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-              Manejo de basuras
-            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wasteManagement}</span>
             <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-                Indicaciones (opcional)
-              </span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wasteInstructions}</span>
               <textarea
                 rows={3}
-                placeholder="Ej: la basura se saca los martes y viernes, los contenedores están al final de la calle..."
+                placeholder={t.wasteInstructionsPlaceholder}
                 value={form.waste_instructions}
                 onChange={update("waste_instructions")}
                 className="input"
               />
             </label>
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Foto (opcional)</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.photoOptional}</span>
               <div className="mt-2 flex flex-wrap gap-3">
                 {newWastePhoto ? (
                   <div className="relative">
@@ -368,7 +367,7 @@ export default function EditarAlojamientoPage({ params }) {
                   </div>
                 ) : (
                   <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded border border-dashed border-sand-dim text-xs text-ink/50">
-                    + Añadir
+                    {t.addPhoto}
                     <input type="file" accept="image/*" onChange={handleWastePhoto} className="hidden" />
                   </label>
                 )}
@@ -377,12 +376,10 @@ export default function EditarAlojamientoPage({ params }) {
           </div>
 
           <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-              Información general (opcional)
-            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.generalInfo}</span>
             <textarea
               rows={3}
-              placeholder="Ej: instrucciones del aire acondicionado, dónde están las toallas extra, cómo funciona la cafetera..."
+              placeholder={t.generalInfoPlaceholder}
               value={form.general_info}
               onChange={update("general_info")}
               className="input"
@@ -390,27 +387,21 @@ export default function EditarAlojamientoPage({ params }) {
           </label>
 
           <div className="mt-2 grid gap-4 rounded border border-sand-dim bg-sand-card p-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-              Recogida de llaves
-            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.keyPickup}</span>
             <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-                Indicaciones (opcional)
-              </span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.keyInstructions}</span>
               <textarea
                 rows={3}
-                placeholder="Ej: la llave está en la caja de seguridad junto a la puerta principal, a la izquierda del timbre."
+                placeholder={t.keyInstructionsPlaceholder}
                 value={form.key_instructions}
                 onChange={update("key_instructions")}
                 className="input"
               />
             </label>
             <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-                Código del candado (si aplica)
-              </span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.lockboxCode}</span>
               <input
-                placeholder="Ej: 4821"
+                placeholder={t.lockboxCodePlaceholder}
                 value={form.key_lockbox_code}
                 onChange={update("key_lockbox_code")}
                 className="input"
@@ -418,7 +409,7 @@ export default function EditarAlojamientoPage({ params }) {
             </label>
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-                Fotos del lugar de las llaves ({totalKeyPhotos}/{MAX_KEY_PHOTOS})
+                {t.keyPhotos(totalKeyPhotos, MAX_KEY_PHOTOS)}
               </span>
               <div className="mt-2 flex flex-wrap gap-3">
                 {existingKeyPhotos.map((url, i) => (
@@ -453,7 +444,7 @@ export default function EditarAlojamientoPage({ params }) {
                 ))}
                 {totalKeyPhotos < MAX_KEY_PHOTOS && (
                   <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded border border-dashed border-sand-dim text-xs text-ink/50">
-                    + Añadir
+                    {t.addPhoto}
                     <input type="file" accept="image/*" multiple onChange={handleKeyPhotos} className="hidden" />
                   </label>
                 )}
@@ -466,7 +457,7 @@ export default function EditarAlojamientoPage({ params }) {
             disabled={saving}
             className="mt-2 rounded bg-terracotta px-5 py-3 font-bold text-ink transition-colors hover:bg-terracotta-deep disabled:opacity-60"
           >
-            {saving ? "Guardando…" : "Guardar cambios →"}
+            {saving ? p.saving : p.submit}
           </button>
           {error && <p className="text-sm text-terracotta-deep">{error}</p>}
         </form>
