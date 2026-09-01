@@ -1,5 +1,6 @@
 import { Bodoni_Moda, Archivo } from "next/font/google";
 import Footer from "@/components/Footer";
+import { getLocale } from "@/lib/i18n/locale";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -18,10 +19,11 @@ export const metadata = {
   description: "Livret d'accueil numérique — Côte d'Azur",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const locale = await getLocale();
   return (
     <html
-      lang="fr"
+      lang={locale}
       className={`${bodoniModa.variable} ${archivo.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-sand text-ink font-body">
