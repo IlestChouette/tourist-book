@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 const MAX_DESCRIPTION_LENGTH = 220;
@@ -9,17 +12,38 @@ function truncate(text, max) {
   return `${clean.slice(0, max).trimEnd()}…`;
 }
 
-// Header du livret d'accueil, spécifique à cette page : la photo est un
-// fond fixe plein écran (comme styQR) — elle reste visible derrière le
-// titre ET la grille de tuiles, pas seulement dans un bandeau du haut.
-export default function LivretHero({ title, subtitle, description, photo }) {
+// Header du livret d'accueil, spécifique à cette page : le fond est un
+// carrousel plein écran et fixe (comme styQR) qui défile tout seul entre
+// les photos du logement — il reste visible derrière le titre ET la grille
+// de tuiles, pas seulement dans un bandeau du haut.
+export default function LivretHero({ title, subtitle, description, photos = [] }) {
+  const [index, setIndex] = useState(0);
   const shortDescription = truncate(description, MAX_DESCRIPTION_LENGTH);
+  const mainPhoto = photos[0] ?? null;
+
+  useEffect(() => {
+    if (photos.length <= 1) return;
+    const id = setInterval(() => setIndex((i) => (i + 1) % photos.length), 5000);
+    return () => clearInterval(id);
+  }, [photos.length]);
 
   return (
     <>
-      {photo && (
+      {photos.length > 0 && (
         <div className="fixed inset-0 -z-10 bg-aqua-deep">
-          <Image src={photo} alt="" fill priority sizes="100vw" className="object-cover" />
+          {photos.map((url, i) => (
+            <Image
+              key={url}
+              src={url}
+              alt=""
+              fill
+              priority={i === 0}
+              sizes="100vw"
+              className={`object-cover transition-opacity duration-1000 ${
+                i === index ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          ))}
           <div className="absolute inset-0 bg-gradient-to-b from-[#12202a]/45 via-[#12202a]/25 to-[#12202a]/75" />
         </div>
       )}
@@ -35,9 +59,9 @@ export default function LivretHero({ title, subtitle, description, photo }) {
           </svg>
         </a>
 
-        {photo && (
+        {mainPhoto && (
           <div className="mb-5 h-28 w-28 shrink-0 overflow-hidden rounded-full border-4 border-[#f7f1e4] shadow-lg md:h-32 md:w-32">
-            <Image src={photo} alt="" width={128} height={128} className="h-full w-full object-cover" />
+            <Image src={mainPhoto} alt="" width={128} height={128} className="h-full w-full object-cover" />
           </div>
         )}
         <h1 className="font-display italic text-4xl text-[#f7f1e4] [text-shadow:0_2px_12px_rgba(0,0,0,0.55)] md:text-5xl">

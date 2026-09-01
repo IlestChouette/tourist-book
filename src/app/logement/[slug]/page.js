@@ -4,7 +4,6 @@ import { getPropertyBySlug } from "@/lib/properties";
 import { createAdminClient } from "@/lib/supabase/admin";
 import LivretHero from "@/components/LivretHero";
 import LivretMenu from "@/components/LivretMenu";
-import PhotoCarousel from "@/components/PhotoCarousel";
 
 const CHECKIN_STATUS_BANNER = {
   pendiente: {
@@ -50,7 +49,7 @@ export default async function LivretPage({ params }) {
         title={property.name}
         subtitle={property.address}
         description={description}
-        photo={photos[0] ?? null}
+        photos={photos}
       />
 
       <section id="menu" className="mx-auto max-w-2xl px-6 py-8 md:max-w-5xl md:py-10">
@@ -59,12 +58,6 @@ export default async function LivretPage({ params }) {
         )}
         <LivretMenu property={property} slug={slug} />
       </section>
-
-      {photos.length > 1 && (
-        <div className="relative bg-sand px-6 pb-10 pt-2">
-          <PhotoCarousel photos={photos.slice(1)} />
-        </div>
-      )}
     </main>
   );
 }
