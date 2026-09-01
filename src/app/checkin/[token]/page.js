@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import Hero from "@/components/Hero";
+import { resizeImage } from "@/lib/uploadMedia";
 
 export default function CheckinPage({ params }) {
   const { token } = use(params);
@@ -38,22 +39,41 @@ export default function CheckinPage({ params }) {
     setSending(true);
     setError("");
 
-    const formData = new FormData();
-    formData.append("phone", form.phone);
-    formData.append("email", form.email);
-    formData.append("documentNumber", form.documentNumber);
-    formData.append("nationality", form.nationality);
-    formData.append("idDocument", idDocument);
-    formData.append("selfie", selfie);
+    let data;
+    try {
+      const [resizedDocument, resizedSelfie] = await Promise.all([
+        resizeImage(idDocument),
+        resizeImage(selfie),
+      ]);
 
-    const res = await fetch(`/api/checkin/${token}`, { method: "POST", body: formData });
-    const data = await res.json();
-    setSending(false);
+      const formData = new FormData();
+      formData.append("phone", form.phone);
+      formData.append("email", form.email);
+      formData.append("documentNumber", form.documentNumber);
+      formData.append("nationality", form.nationality);
+      formData.append("idDocument", resizedDocument);
+      formData.append("selfie", resizedSelfie);
 
-    if (!res.ok) {
-      setError(data.error || "No se pudo completar el check-in.");
+      const res = await fetch(`/api/checkin/${token}`, { method: "POST", body: formData });
+
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(
+          "No se pudo enviar el check-in (las fotos pueden ser demasiado grandes). Prueba con otras fotos."
+        );
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || "No se pudo completar el check-in.");
+      }
+    } catch (err) {
+      setSending(false);
+      setError(err.message);
       return;
     }
+
+    setSending(false);
     setResult(data);
   }
 
