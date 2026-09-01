@@ -4,10 +4,19 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { getClientLocale } from "@/lib/i18n/clientLocale";
+
+const content = {
+  fr: { email: "Email", password: "Mot de passe", submitting: "Connexion…", submit: "Entrer →", error: "Email ou mot de passe incorrect." },
+  en: { email: "Email", password: "Password", submitting: "Logging in…", submit: "Log in →", error: "Incorrect email or password." },
+  es: { email: "Email", password: "Contraseña", submitting: "Entrando…", submit: "Entrar →", error: "Email o contraseña incorrectos." },
+};
 
 export default function AdminLoginForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/admin";
+  const [locale] = useState(getClientLocale);
+  const t = content[locale];
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [sending, setSending] = useState(false);
@@ -30,7 +39,7 @@ export default function AdminLoginForm() {
 
     if (signInError) {
       setSending(false);
-      setError("Email o contraseña incorrectos.");
+      setError(t.error);
       return;
     }
 
@@ -50,11 +59,11 @@ export default function AdminLoginForm() {
         <h1 className="font-display italic text-2xl text-ink">Admin</h1>
         <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
           <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Email</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.email}</span>
             <input required type="email" value={form.email} onChange={update("email")} className="input" />
           </label>
           <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Contraseña</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.password}</span>
             <input
               required
               type="password"
@@ -68,7 +77,7 @@ export default function AdminLoginForm() {
             disabled={sending}
             className="mt-2 rounded bg-terracotta px-5 py-3 font-bold text-ink transition-colors hover:bg-terracotta-deep disabled:opacity-60"
           >
-            {sending ? "Entrando…" : "Entrar →"}
+            {sending ? t.submitting : t.submit}
           </button>
           {error && <p className="text-sm text-terracotta-deep">{error}</p>}
         </form>

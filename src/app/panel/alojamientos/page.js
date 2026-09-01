@@ -4,8 +4,41 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import Hero from "@/components/Hero";
+import { getClientLocale } from "@/lib/i18n/clientLocale";
+
+const content = {
+  fr: {
+    eyebrow: "Panel hôtelier",
+    title: "Vos logements",
+    newProperty: "+ Nouveau logement",
+    loading: "Chargement…",
+    empty: "Vous n'avez pas encore ajouté de logement.",
+    noSubscription: "sans abonnement",
+    plan: { basico: "Essentiel", premium: "Premium" },
+  },
+  en: {
+    eyebrow: "Host panel",
+    title: "Your properties",
+    newProperty: "+ New property",
+    loading: "Loading…",
+    empty: "You haven't added any property yet.",
+    noSubscription: "no subscription",
+    plan: { basico: "Essential", premium: "Premium" },
+  },
+  es: {
+    eyebrow: "Panel hotelero",
+    title: "Tus alojamientos",
+    newProperty: "+ Nuevo alojamiento",
+    loading: "Cargando…",
+    empty: "Todavía no has añadido ningún alojamiento.",
+    noSubscription: "sin suscripción",
+    plan: { basico: "Básico", premium: "Premium" },
+  },
+};
 
 export default function AlojamientosPage() {
+  const [locale] = useState(getClientLocale);
+  const t = content[locale];
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,18 +61,18 @@ export default function AlojamientosPage() {
 
   return (
     <main className="flex-1">
-      <Hero eyebrow="Panel hotelero" title="Tus alojamientos" />
+      <Hero eyebrow={t.eyebrow} title={t.title} />
       <section className="mx-auto max-w-2xl px-6 py-10">
         <Link
           href="/panel/alojamientos/nuevo"
           className="inline-block rounded bg-terracotta px-5 py-2.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
         >
-          + Nuevo alojamiento
+          {t.newProperty}
         </Link>
 
-        {loading && <p className="mt-6 text-ink/60">Cargando…</p>}
+        {loading && <p className="mt-6 text-ink/60">{t.loading}</p>}
         {!loading && properties.length === 0 && (
-          <p className="mt-6 text-ink/60">Todavía no has añadido ningún alojamiento.</p>
+          <p className="mt-6 text-ink/60">{t.empty}</p>
         )}
 
         <div className="mt-6 grid gap-3">
@@ -66,7 +99,7 @@ export default function AlojamientosPage() {
                     active ? "bg-sage text-ink" : "bg-terracotta text-ink"
                   }`}
                 >
-                  {active ? p.plan : "sin suscripción"}
+                  {active ? (t.plan[p.plan] ?? p.plan) : t.noSubscription}
                 </span>
               </Link>
             );

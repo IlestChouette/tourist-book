@@ -71,6 +71,35 @@
   border-color: rgba(247, 241, 228, 0.5);
 }
 
+.sheet-backdrop {
+  transition: opacity 0.25s ease-out;
+}
+
+@starting-style {
+  .sheet-backdrop {
+    opacity: 0;
+  }
+}
+
+.sheet-panel {
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.28s ease-out;
+}
+
+@starting-style {
+  .sheet-panel {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@media (min-width: 640px) {
+  @starting-style {
+    .sheet-panel {
+      transform: translateY(12px) scale(0.98);
+    }
+  }
+}
+
 .stripe-band {
   position: absolute;
   left: 0;

@@ -114,6 +114,14 @@ function BookIcon() {
   );
 }
 
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" className="h-4 w-4">
+      <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  );
+}
+
 export default function LivretMenu({ property, slug }) {
   const [active, setActive] = useState(null);
 
@@ -145,9 +153,13 @@ export default function LivretMenu({ property, slug }) {
     { key: "carnet", label: "Livre d'or", icon: <BookIcon /> },
   ];
 
-  const activeInfo = infoItems.find((i) => i.key === active);
-  const activeNav = navItems.find((i) => i.key === active);
   const tiles = [...infoItems, ...navItems];
+  const activeItem = tiles.find((i) => i.key === active);
+  const isNav = navItems.some((i) => i.key === active);
+
+  function close() {
+    setActive(null);
+  }
 
   return (
     <div>
@@ -158,7 +170,7 @@ export default function LivretMenu({ property, slug }) {
             <button
               key={item.key}
               type="button"
-              onClick={() => setActive(isActive ? null : item.key)}
+              onClick={() => setActive(item.key)}
               className={`flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl text-center transition-colors md:gap-1.5 md:rounded-xl md:border md:shadow-sm ${
                 isActive
                   ? "bg-terracotta-deep text-sand-card md:border-terracotta md:bg-terracotta/10 md:text-ink"
@@ -175,90 +187,97 @@ export default function LivretMenu({ property, slug }) {
         {tiles.length % 2 !== 0 && <div aria-hidden="true" className="aspect-square sm:hidden" />}
       </div>
 
-      {activeInfo && (
-        <div className="mt-6 rounded border border-sand-dim bg-sand-card p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{activeInfo.label}</span>
-            <button
-              type="button"
-              onClick={() => setActive(null)}
-              className="text-xs font-bold uppercase tracking-wider text-ink/40 hover:text-ink"
-            >
-              Fermer ✕
-            </button>
-          </div>
-          {activeInfo.detail && <p className="mt-1 text-ink">{activeInfo.detail}</p>}
-
-          {active === "basuras" && property.waste_photo && (
-            <div className="mt-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={property.waste_photo}
-                alt=""
-                className="h-40 w-full rounded object-cover border border-sand-dim"
-              />
-            </div>
-          )}
-
-          {active === "horaires" &&
-            (property.key_instructions || property.key_lockbox_code || property.key_photos?.length > 0) && (
-              <div className="mt-4 border-t border-sand-dim pt-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-                  Récupération des clés
+      {activeItem && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center sm:items-center sm:p-6">
+          <div
+            className="sheet-backdrop absolute inset-0 bg-[#12202a]/60 backdrop-blur-sm"
+            onClick={close}
+          />
+          <div className="sheet-panel relative z-10 max-h-[85vh] w-full overflow-y-auto rounded-t-3xl bg-sand-card p-6 shadow-2xl sm:max-w-md sm:rounded-3xl">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-terracotta text-sand-card">
+                  <span className="h-5 w-5">{activeItem.icon}</span>
                 </span>
-                {property.key_instructions && (
-                  <p className="mt-2 text-ink">{property.key_instructions}</p>
-                )}
-                {property.key_lockbox_code && (
-                  <p className="mt-2 text-ink">
-                    Code du cadenas :{" "}
-                    <span className="font-bold tracking-widest">{property.key_lockbox_code}</span>
-                  </p>
-                )}
-                {property.key_photos?.length > 0 && (
-                  <div className="mt-3 flex gap-2 overflow-x-auto">
-                    {property.key_photos.map((url) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        key={url}
-                        src={url}
-                        alt=""
-                        className="h-24 w-24 shrink-0 rounded object-cover border border-sand-dim"
-                      />
-                    ))}
-                  </div>
-                )}
+                <span className="font-display italic text-xl text-ink">{activeItem.label}</span>
               </div>
-            )}
-        </div>
-      )}
+              <button
+                type="button"
+                onClick={close}
+                aria-label="Fermer"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink/40 transition-colors hover:bg-sand hover:text-ink"
+              >
+                <CloseIcon />
+              </button>
+            </div>
 
-      {activeNav && (
-        <div className="mt-6">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{activeNav.label}</span>
-            <button
-              type="button"
-              onClick={() => setActive(null)}
-              className="text-xs font-bold uppercase tracking-wider text-ink/40 hover:text-ink"
-            >
-              Fermer ✕
-            </button>
-          </div>
-          <div className="mt-3">
-            {active === "transfert" && <TransfertForm slug={slug} propertyName={property.name} />}
-            {active === "tours" && (
-              <div className="rounded border border-sand-dim bg-sand-card p-5">
-                <p className="text-ink">
-                  La réservation de tours et d&apos;activités arrive bientôt — le partenaire est en cours de
-                  configuration.
-                </p>
-              </div>
-            )}
-            {active === "carte" && (
-              <CarteInteractive property={property} items={recommendationsForCity(property.city)} />
-            )}
-            {active === "carnet" && <CarnetPanel slug={slug} />}
+            <div className="mt-4">
+              {!isNav && (
+                <>
+                  {activeItem.detail && <p className="text-ink">{activeItem.detail}</p>}
+
+                  {active === "basuras" && property.waste_photo && (
+                    <div className="mt-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={property.waste_photo}
+                        alt=""
+                        className="h-40 w-full rounded object-cover border border-sand-dim"
+                      />
+                    </div>
+                  )}
+
+                  {active === "horaires" &&
+                    (property.key_instructions || property.key_lockbox_code || property.key_photos?.length > 0) && (
+                      <div className="mt-4 border-t border-sand-dim pt-4">
+                        <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                          Récupération des clés
+                        </span>
+                        {property.key_instructions && (
+                          <p className="mt-2 text-ink">{property.key_instructions}</p>
+                        )}
+                        {property.key_lockbox_code && (
+                          <p className="mt-2 text-ink">
+                            Code du cadenas :{" "}
+                            <span className="font-bold tracking-widest">{property.key_lockbox_code}</span>
+                          </p>
+                        )}
+                        {property.key_photos?.length > 0 && (
+                          <div className="mt-3 flex gap-2 overflow-x-auto">
+                            {property.key_photos.map((url) => (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                key={url}
+                                src={url}
+                                alt=""
+                                className="h-24 w-24 shrink-0 rounded object-cover border border-sand-dim"
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                </>
+              )}
+
+              {isNav && (
+                <>
+                  {active === "transfert" && <TransfertForm slug={slug} propertyName={property.name} />}
+                  {active === "tours" && (
+                    <div className="rounded border border-sand-dim bg-sand p-5">
+                      <p className="text-ink">
+                        La réservation de tours et d&apos;activités arrive bientôt — le partenaire est en cours de
+                        configuration.
+                      </p>
+                    </div>
+                  )}
+                  {active === "carte" && (
+                    <CarteInteractive property={property} items={recommendationsForCity(property.city)} />
+                  )}
+                  {active === "carnet" && <CarnetPanel slug={slug} />}
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

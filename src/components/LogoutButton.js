@@ -1,8 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getClientLocale } from "@/lib/i18n/clientLocale";
+import navDict from "@/lib/i18n/dictionaries/nav";
 
 export default function LogoutButton({ className }) {
+  const [locale] = useState(getClientLocale);
+
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -18,7 +23,7 @@ export default function LogoutButton({ className }) {
         "text-xs font-bold uppercase tracking-wider text-ink/60 hover:text-terracotta-deep"
       }
     >
-      Cerrar sesión
+      {navDict[locale].logout}
     </button>
   );
 }
