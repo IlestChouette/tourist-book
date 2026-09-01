@@ -23,6 +23,7 @@ export default function LivretHero({ title, subtitle, description, photos = [] }
 
   useEffect(() => {
     if (photos.length <= 1) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const id = setInterval(() => setIndex((i) => (i + 1) % photos.length), 5000);
     return () => clearInterval(id);
   }, [photos.length]);

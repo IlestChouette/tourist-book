@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TransfertForm from "./TransfertForm";
 import CarnetPanel from "./CarnetPanel";
 import CarteInteractive from "./CarteInteractive";
@@ -165,6 +165,7 @@ function whatsappHref(phone) {
 export default function LivretMenu({ property, slug }) {
   const [active, setActive] = useState(null);
   const [copied, setCopied] = useState(false);
+  const closeButtonRef = useRef(null);
 
   const infoItems = [
     { key: "wifi", label: "Wifi", icon: <WifiIcon />, detail: `${property.wifi_ssid} · ${property.wifi_password}` },
@@ -211,6 +212,17 @@ export default function LivretMenu({ property, slug }) {
     setCopied(false);
   }
 
+  useEffect(() => {
+    if (!active) return;
+    closeButtonRef.current?.focus();
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") close();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [active]);
+
   async function copyWifiPassword() {
     try {
       await navigator.clipboard.writeText(property.wifi_password || "");
@@ -226,6 +238,7 @@ export default function LivretMenu({ property, slug }) {
       <div
         className="grid grid-cols-2 gap-4 sm:gap-3 tile-grid-wide"
         style={{ "--tile-cols": cols }}
+        inert={!!activeItem}
       >
         {tiles.map((item) => {
           const isActive = active === item.key;
@@ -236,8 +249,8 @@ export default function LivretMenu({ property, slug }) {
               onClick={() => setActive(item.key)}
               className={`flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl text-center transition-colors md:gap-1.5 md:rounded-xl md:border md:shadow-sm ${
                 isActive
-                  ? "bg-terracotta-deep text-sand-card md:border-terracotta md:bg-terracotta/10 md:text-ink"
-                  : "bg-terracotta text-sand-card md:border-sand-dim md:bg-sand-card md:text-ink md:hover:border-terracotta/60"
+                  ? "bg-terracotta text-ink ring-2 ring-inset ring-ink/60 md:border-terracotta md:bg-terracotta/10 md:text-ink md:ring-0"
+                  : "bg-terracotta text-ink md:border-sand-dim md:bg-sand-card md:text-ink md:hover:border-terracotta/60"
               }`}
             >
               <span className="h-9 w-9 md:h-6 md:w-6">{item.icon}</span>
@@ -259,15 +272,23 @@ export default function LivretMenu({ property, slug }) {
             className="sheet-backdrop absolute inset-0 bg-[#12202a]/60 backdrop-blur-sm"
             onClick={close}
           />
-          <div className="sheet-panel relative z-10 max-h-[85vh] w-full overflow-y-auto rounded-t-3xl bg-sand-card p-6 shadow-2xl sm:max-w-md sm:rounded-3xl">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="livret-sheet-title"
+            className="sheet-panel relative z-10 max-h-[85vh] w-full overflow-y-auto rounded-t-3xl bg-sand-card p-6 shadow-2xl sm:max-w-md sm:rounded-3xl"
+          >
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-terracotta text-sand-card">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-terracotta text-ink">
                   <span className="h-5 w-5">{activeItem.icon}</span>
                 </span>
-                <span className="font-display italic text-xl text-ink">{activeItem.label}</span>
+                <span id="livret-sheet-title" className="font-display italic text-xl text-ink">
+                  {activeItem.label}
+                </span>
               </div>
               <button
+                ref={closeButtonRef}
                 type="button"
                 onClick={close}
                 aria-label="Fermer"
@@ -310,7 +331,7 @@ export default function LivretMenu({ property, slug }) {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={property.waste_photo}
-                        alt=""
+                        alt="Emplacement des poubelles"
                         className="h-40 w-full rounded object-cover border border-sand-dim"
                       />
                     </div>
@@ -338,7 +359,7 @@ export default function LivretMenu({ property, slug }) {
                               <img
                                 key={url}
                                 src={url}
-                                alt=""
+                                alt="Photo d'aide pour la récupération des clés"
                                 className="h-24 w-24 shrink-0 rounded object-cover border border-sand-dim"
                               />
                             ))}
