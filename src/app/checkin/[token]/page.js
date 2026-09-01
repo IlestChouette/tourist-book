@@ -103,12 +103,19 @@ export default function CheckinPage({ params }) {
               Ton check-in a bien été enregistré. L&apos;hôtelier va vérifier tes documents, mais tu peux déjà
               accéder au livret de ton logement.
             </p>
-            <p className="mt-4 text-sm text-ink/70">Garde ces identifiants au cas où tu doives te reconnecter :</p>
+            <p className="mt-4 text-sm text-ink/70">
+              Note bien ces identifiants — ils te permettront de retrouver le livret depuis un autre
+              appareil, ou si tu reviens plus tard sur ce lien :
+            </p>
             <p className="mt-1 text-ink">
               Identifiant : <span className="font-bold">{result.username}</span>
             </p>
             <p className="text-ink">
               Mot de passe : <span className="font-bold">{result.password}</span>
+            </p>
+            <p className="mt-3 text-xs text-ink/60">
+              Pour te reconnecter plus tard, ouvre le lien de ton livret et choisis « Déjà fait ton
+              check-in ? »
             </p>
           </div>
           <a

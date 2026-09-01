@@ -16,6 +16,7 @@ const content = {
     accessCode: "Code d'accès :",
     plan: "Offre :",
     noSubscription: "sans abonnement",
+    viewLivret: "Voir le livret →",
     edit: "Modifier →",
     activate: "Activer l'abonnement →",
     reservations: "Réservations et check-in →",
@@ -35,6 +36,7 @@ const content = {
     accessCode: "Access code:",
     plan: "Plan:",
     noSubscription: "no subscription",
+    viewLivret: "View livret →",
     edit: "Edit →",
     activate: "Activate subscription →",
     reservations: "Bookings and check-in →",
@@ -54,6 +56,7 @@ const content = {
     accessCode: "Código de acceso:",
     plan: "Plan:",
     noSubscription: "sin suscripción",
+    viewLivret: "Ver livret →",
     edit: "Editar →",
     activate: "Activar suscripción →",
     reservations: "Reservas y check-in →",
@@ -83,6 +86,19 @@ export default function AlojamientoDetallePage({ params }) {
     }
     load();
   }, [id]);
+
+  async function handleViewLivret() {
+    try {
+      await fetch("/api/access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: property.slug, code: property.access_code }),
+      });
+    } catch {
+      // Si ça échoue, l'onglet ouvre quand même — au pire il faudra entrer le code manuellement.
+    }
+    window.open(`/logement/${property.slug}`, "_blank");
+  }
 
   async function handleDelete() {
     const confirmed = window.confirm(t.confirmDelete(property.name));
@@ -159,6 +175,13 @@ export default function AlojamientoDetallePage({ params }) {
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={handleViewLivret}
+            className="inline-block rounded bg-aqua-deep px-5 py-3 font-bold text-sand-card transition-colors hover:bg-aqua-deep/90"
+          >
+            {t.viewLivret}
+          </button>
           <Link
             href={`/panel/alojamientos/${id}/editar`}
             className="inline-block rounded border border-aqua-deep px-5 py-3 font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
