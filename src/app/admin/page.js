@@ -3,8 +3,30 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { monthlyRevenue } from "@/lib/pricing";
+import { stripe } from "@/lib/stripe";
 import LogoutButton from "@/components/LogoutButton";
 import { getLocale } from "@/lib/i18n/locale";
+
+// Vrai MRR calculé depuis Stripe plutôt que depuis le prix de liste local —
+// reflète les coupons/réductions réellement appliqués sur chaque abonnement.
+// Si Stripe échoue pour un abonnement (ou qu'il n'a pas encore d'ID Stripe,
+// ex. données de test créées à la main), on retombe sur l'estimation locale
+// pour cette ligne uniquement, plutôt que de compter 0€.
+async function realMonthlyRevenue(property) {
+  if (!property.stripe_subscription_id) {
+    return monthlyRevenue(property.plan, property.billing_cycle);
+  }
+  try {
+    const invoice = await stripe.invoices.createPreview({ subscription: property.stripe_subscription_id });
+    const amount = invoice.total / 100;
+    // L'aperçu Stripe donne le montant de la prochaine échéance — pour un
+    // cycle annuel, c'est le prix de l'année entière, à ramener au mois.
+    return property.billing_cycle === "anual" ? amount / 12 : amount;
+  } catch (err) {
+    console.error(`Stripe invoice preview failed for subscription ${property.stripe_subscription_id}:`, err);
+    return monthlyRevenue(property.plan, property.billing_cycle);
+  }
+}
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -162,7 +184,9 @@ export default async function AdminPage() {
     admin.from("hosts").select("id, name, email, created_at").eq("is_admin", false).order("created_at", { ascending: false }),
     admin
       .from("properties")
-      .select("id, name, city, host_id, plan, billing_cycle, subscription_status, created_at, hosts(name, email)")
+      .select(
+        "id, name, city, host_id, plan, billing_cycle, subscription_status, stripe_subscription_id, created_at, hosts(name, email)"
+      )
       .order("created_at", { ascending: false }),
     admin
       .from("cancellation_requests")
@@ -173,12 +197,14 @@ export default async function AdminPage() {
   const activeProperties = (properties ?? []).filter(
     (p) => p.plan && p.subscription_status && p.subscription_status !== "canceled"
   );
-  const mrr = activeProperties.reduce((sum, p) => sum + monthlyRevenue(p.plan, p.billing_cycle), 0);
+  // "trialing" ne rapporte encore rien : seul "active" compte pour le chiffre réel.
+  const payingProperties = activeProperties.filter((p) => p.subscription_status === "active");
+  const mrr = (await Promise.all(payingProperties.map(realMonthlyRevenue))).reduce((sum, v) => sum + v, 0);
   const pendingRequests = (requests ?? []).filter((r) => r.status === "pendiente");
 
   const goalPercent = Math.min((mrr / MONTHLY_GOAL) * 100, 100);
   const goalRemaining = Math.max(MONTHLY_GOAL - mrr, 0);
-  const avgRevenuePerClient = activeProperties.length > 0 ? mrr / activeProperties.length : null;
+  const avgRevenuePerClient = payingProperties.length > 0 ? mrr / payingProperties.length : null;
   const clientsNeeded =
     avgRevenuePerClient && goalRemaining > 0 ? Math.ceil(goalRemaining / avgRevenuePerClient) : null;
 
