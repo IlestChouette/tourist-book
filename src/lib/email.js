@@ -4,8 +4,7 @@ import { formatTransferWhatsAppMessage } from "./transferMessage";
 // Notifie l'hôtelier par email dès qu'une demande de transfert arrive.
 // Tant que RESEND_API_KEY n'est pas configurée, cette fonction ne fait
 // rien — la demande reste enregistrée normalement, seul l'email est
-// désactivé. Sans domaine vérifié sur Resend, l'email ne peut être livré
-// qu'à l'adresse du compte Resend lui-même (limite du mode sandbox).
+// désactivé.
 export async function sendTransferRequestNotification({ hostEmail, propertyName, propertyAddress, request }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey || !hostEmail) return { sent: false, reason: "not_configured" };
@@ -38,7 +37,7 @@ export async function sendTransferRequestNotification({ hostEmail, propertyName,
   });
 
   const { error } = await resend.emails.send({
-    from: "Tourist Book <onboarding@resend.dev>",
+    from: "Tourist Book <notifications@tourist-book.com>",
     to: hostEmail,
     subject: `Nouvelle demande de transfert — ${propertyName}`,
     text: `${lines.join("\n")}\n\n— Message prêt à copier pour WhatsApp —\n\n${whatsappMessage}`,
