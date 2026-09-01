@@ -9,6 +9,44 @@ import { getLocale } from "@/lib/i18n/locale";
 export const metadata = { robots: { index: false, follow: false } };
 
 const dateLocale = { fr: "fr-FR", en: "en-GB", es: "es-ES" };
+const MONTHLY_GOAL = 5000;
+
+const motivationTiers = {
+  fr: [
+    "Chaque client compte — le premier est toujours le plus important 🚀",
+    "C'est parti ! Continue comme ça 💪",
+    "Un quart du chemin parcouru — le rythme est bon 🔥",
+    "Plus de la moitié ! Tu es en bonne voie 🎯",
+    "Presque là — l'objectif est à portée de main ✨",
+    "🎉 Objectif atteint ! Beau travail.",
+  ],
+  en: [
+    "Every client counts — the first one is always the hardest 🚀",
+    "You're off and running — keep going 💪",
+    "A quarter of the way there — good pace 🔥",
+    "Over halfway! You're on track 🎯",
+    "Almost there — the goal is within reach ✨",
+    "🎉 Goal reached! Great work.",
+  ],
+  es: [
+    "Cada cliente cuenta — el primero siempre es el más difícil 🚀",
+    "¡Ya arrancaste! Sigue así 💪",
+    "Un cuarto del camino recorrido — buen ritmo 🔥",
+    "¡Más de la mitad! Vas por buen camino 🎯",
+    "Casi lo logras — el objetivo está a la vuelta de la esquina ✨",
+    "🎉 ¡Objetivo alcanzado! Gran trabajo.",
+  ],
+};
+
+function motivationMessage(percent, locale) {
+  const tiers = motivationTiers[locale];
+  if (percent >= 100) return tiers[5];
+  if (percent >= 75) return tiers[4];
+  if (percent >= 50) return tiers[3];
+  if (percent >= 25) return tiers[2];
+  if (percent > 0) return tiers[1];
+  return tiers[0];
+}
 
 const subscriptionStatusLabel = {
   fr: { trialing: "En essai", active: "Actif", canceled: "Résilié", past_due: "Paiement en retard" },
@@ -45,6 +83,9 @@ const content = {
     joined: "Inscription",
     analytics: "Analytics →",
     searchConsole: "Search Console →",
+    goalLabel: "Objectif mensuel",
+    remaining: (amount) => `Il reste ${amount.toFixed(0)} € pour atteindre l'objectif`,
+    clientsNeeded: (n) => `≈ ${n} client${n > 1 ? "s" : ""} de plus au rythme actuel`,
   },
   en: {
     summary: "Summary",
@@ -68,6 +109,9 @@ const content = {
     joined: "Joined",
     analytics: "Analytics →",
     searchConsole: "Search Console →",
+    goalLabel: "Monthly goal",
+    remaining: (amount) => `${amount.toFixed(0)} € left to reach the goal`,
+    clientsNeeded: (n) => `≈ ${n} more client${n > 1 ? "s" : ""} at the current rate`,
   },
   es: {
     summary: "Resumen",
@@ -91,6 +135,9 @@ const content = {
     joined: "Alta",
     analytics: "Analytics →",
     searchConsole: "Search Console →",
+    goalLabel: "Objetivo mensual",
+    remaining: (amount) => `Faltan ${amount.toFixed(0)} € para llegar al objetivo`,
+    clientsNeeded: (n) => `≈ ${n} cliente${n > 1 ? "s" : ""} más al ritmo actual`,
   },
 };
 
@@ -128,6 +175,12 @@ export default async function AdminPage() {
   );
   const mrr = activeProperties.reduce((sum, p) => sum + monthlyRevenue(p.plan, p.billing_cycle), 0);
   const pendingRequests = (requests ?? []).filter((r) => r.status === "pendiente");
+
+  const goalPercent = Math.min((mrr / MONTHLY_GOAL) * 100, 100);
+  const goalRemaining = Math.max(MONTHLY_GOAL - mrr, 0);
+  const avgRevenuePerClient = activeProperties.length > 0 ? mrr / activeProperties.length : null;
+  const clientsNeeded =
+    avgRevenuePerClient && goalRemaining > 0 ? Math.ceil(goalRemaining / avgRevenuePerClient) : null;
 
   return (
     <main className="flex-1 bg-sand">
@@ -170,6 +223,33 @@ export default async function AdminPage() {
           <Stat label={t.activeProperties} value={activeProperties.length} />
           <Stat label={t.mrr} value={`${mrr.toFixed(2)} €`} />
           <Stat label={t.arr} value={`${(mrr * 12).toFixed(0)} €`} />
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-sand-dim bg-gradient-to-br from-sand-card to-sand p-6 shadow-sm">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.goalLabel}</span>
+              <p className="mt-1 font-display italic text-3xl text-ink">
+                {mrr.toFixed(0)} € <span className="text-lg not-italic text-ink/40">/ {MONTHLY_GOAL} €</span>
+              </p>
+            </div>
+            <span className="font-display text-4xl font-bold text-aqua-deep">{goalPercent.toFixed(0)}%</span>
+          </div>
+
+          <div className="mt-4 h-4 w-full overflow-hidden rounded-full bg-sand-dim">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-terracotta to-terracotta-deep transition-all duration-700"
+              style={{ width: `${goalPercent}%` }}
+            />
+          </div>
+
+          <p className="mt-4 text-sm font-bold text-ink">{motivationMessage(goalPercent, locale)}</p>
+          {goalRemaining > 0 && (
+            <p className="mt-1 text-xs text-ink/60">
+              {t.remaining(goalRemaining)}
+              {clientsNeeded && ` — ${t.clientsNeeded(clientsNeeded)}`}
+            </p>
+          )}
         </div>
 
         <h2 className="mt-12 font-display italic text-2xl text-ink">
