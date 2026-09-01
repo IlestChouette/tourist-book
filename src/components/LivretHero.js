@@ -3,7 +3,7 @@ import Image from "next/image";
 // Header du livret d'accueil, spécifique à cette page : la photo est un
 // fond fixe plein écran (comme styQR) — elle reste visible derrière le
 // titre ET la grille de tuiles, pas seulement dans un bandeau du haut.
-export default function LivretHero({ title, subtitle, photo }) {
+export default function LivretHero({ title, subtitle, description, photo }) {
   return (
     <>
       {photo && (
@@ -35,6 +35,11 @@ export default function LivretHero({ title, subtitle, photo }) {
         {subtitle && (
           <p className="mt-3 max-w-xs text-[#f7f1e4]/95 [text-shadow:0_1px_6px_rgba(0,0,0,0.55)] md:max-w-md">
             {subtitle}
+          </p>
+        )}
+        {description && (
+          <p className="mt-5 max-w-sm whitespace-pre-line text-[#f7f1e4]/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.55)] md:max-w-lg">
+            {description}
           </p>
         )}
       </header>
