@@ -4,7 +4,6 @@ import { useState } from "react";
 import TransfertForm from "./TransfertForm";
 import CarnetPanel from "./CarnetPanel";
 import CarteInteractive from "./CarteInteractive";
-import { recommendationsForCity } from "@/data/recommendations";
 
 const iconProps = {
   viewBox: "0 0 24 24",
@@ -362,7 +361,7 @@ export default function LivretMenu({ property, slug }) {
                     </div>
                   )}
                   {active === "carte" && (
-                    <CarteInteractive property={property} items={recommendationsForCity(property.city)} />
+                    <CarteInteractive property={property} />
                   )}
                   {active === "carnet" && <CarnetPanel slug={slug} />}
                 </>

@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 
-const categories = ["Zone à visiter", "Restaurant", "Shopping", "Mobilité", "Toilettes publiques"];
+const categories = [
+  { key: "visiter", label: "Zone à visiter", query: "lieux touristiques" },
+  { key: "restaurant", label: "Restaurant", query: "restaurants" },
+  { key: "shopping", label: "Shopping", query: "shopping" },
+  { key: "mobilite", label: "Mobilité", query: "transports en commun" },
+  { key: "toilettes", label: "Toilettes publiques", query: "toilettes publiques" },
+];
 
 const iconProps = {
   viewBox: "0 0 24 24",
@@ -13,8 +19,8 @@ const iconProps = {
   strokeLinejoin: "round",
 };
 
-function CategoryIcon({ category }) {
-  switch (category) {
+function CategoryIcon({ label }) {
+  switch (label) {
     case "Zone à visiter":
       return (
         <svg {...iconProps} width="22" height="22">
@@ -68,37 +74,32 @@ function CategoryIcon({ category }) {
   }
 }
 
-export default function CarteInteractive({ property, items }) {
-  const [selected, setSelected] = useState({
-    name: property.name,
-    mapsQuery: property.address,
-  });
+export default function CarteInteractive({ property }) {
+  const [selected, setSelected] = useState({ name: property.name, mapsQuery: property.address });
   const [activeCategory, setActiveCategory] = useState(null);
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState(null);
 
-  const query = search.trim().toLowerCase();
-  const searchedItems = query
-    ? items.filter(
-        (i) => i.name.toLowerCase().includes(query) || i.note.toLowerCase().includes(query)
-      )
-    : items;
+  function resetToProperty() {
+    setActiveCategory(null);
+    setSearchResult(null);
+    setSelected({ name: property.name, mapsQuery: property.address });
+  }
 
-  const availableCategories = categories.filter((c) => items.some((i) => i.category === c));
-  const visibleCategories = query
-    ? categories.filter((c) => searchedItems.some((i) => i.category === c))
-    : activeCategory
-      ? [activeCategory]
-      : availableCategories;
+  function selectCategory(cat) {
+    setActiveCategory(cat.key);
+    setSearchResult(null);
+    setSelected({ name: cat.label, mapsQuery: `${cat.query} près de ${property.address}` });
+  }
 
   function handleSearchSubmit(e) {
     e.preventDefault();
+    const query = search.trim();
     if (!query) return;
     setActiveCategory(null);
-    const name = search.trim();
-    const mapsQuery = `${name}, ${property.city}`;
-    setSelected({ name, mapsQuery });
-    setSearchResult({ name, mapsQuery });
+    const mapsQuery = `${query} près de ${property.address}`;
+    setSelected({ name: query, mapsQuery });
+    setSearchResult({ name: query, mapsQuery });
   }
 
   return (
@@ -108,7 +109,7 @@ export default function CarteInteractive({ property, items }) {
           key={selected.mapsQuery}
           title={`Carte — ${selected.name}`}
           src={`https://www.google.com/maps?q=${encodeURIComponent(selected.mapsQuery)}&output=embed`}
-          className="h-64 w-full"
+          className="h-72 w-full sm:h-96"
           loading="lazy"
         />
       </div>
@@ -136,8 +137,8 @@ export default function CarteInteractive({ property, items }) {
         </button>
       </form>
       <p className="mt-1.5 text-xs text-ink/50">
-        Tape un lieu et appuie sur « Rechercher » pour le voir sur la carte et dans la liste —
-        les recommandations de l&apos;hôte se filtrent aussi automatiquement pendant que tu tapes.
+        Tape un lieu et appuie sur « Rechercher », ou choisis une catégorie ci-dessous — la carte
+        cherche toujours à proximité immédiate du logement.
       </p>
 
       {searchResult && (
@@ -147,7 +148,7 @@ export default function CarteInteractive({ property, items }) {
           </h2>
           <div className="mt-3 rounded border border-terracotta bg-sand-card p-4">
             <span className="block font-bold text-ink">{searchResult.name}</span>
-            <span className="block text-sm text-ink/70">Recherché près de {property.city}</span>
+            <span className="block text-sm text-ink/70">Recherché près du logement</span>
             <a
               href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(searchResult.mapsQuery)}`}
               target="_blank"
@@ -161,14 +162,7 @@ export default function CarteInteractive({ property, items }) {
       )}
 
       <div className="mt-6 flex flex-wrap gap-4">
-        <button
-          type="button"
-          onClick={() => {
-            setActiveCategory(null);
-            setSelected({ name: property.name, mapsQuery: property.address });
-          }}
-          className="flex w-16 flex-col items-center gap-1.5 text-center"
-        >
+        <button type="button" onClick={resetToProperty} className="flex w-16 flex-col items-center gap-1.5 text-center">
           <span
             className={`flex h-14 w-14 items-center justify-center rounded-full border-2 transition-colors ${
               activeCategory === null
@@ -176,85 +170,43 @@ export default function CarteInteractive({ property, items }) {
                 : "border-sand-dim bg-sand-card text-ink/70"
             }`}
           >
-            <CategoryIcon category="Tout" />
+            <CategoryIcon label="Tout" />
           </span>
-          <span className="text-[11px] font-bold uppercase tracking-wide text-ink/70">Tout</span>
+          <span className="text-[11px] font-bold uppercase tracking-wide text-ink/70">Logement</span>
         </button>
 
-        {availableCategories.map((category) => (
+        {categories.map((cat) => (
           <button
-            key={category}
+            key={cat.key}
             type="button"
-            onClick={() => {
-              setActiveCategory(category);
-              const first = items.find((i) => i.category === category);
-              if (first) setSelected({ name: first.name, mapsQuery: first.mapsQuery });
-            }}
+            onClick={() => selectCategory(cat)}
             className="flex w-16 flex-col items-center gap-1.5 text-center"
           >
             <span
               className={`flex h-14 w-14 items-center justify-center rounded-full border-2 transition-colors ${
-                activeCategory === category
+                activeCategory === cat.key
                   ? "border-terracotta bg-terracotta text-ink"
                   : "border-sand-dim bg-sand-card text-ink/70"
               }`}
             >
-              <CategoryIcon category={category} />
+              <CategoryIcon label={cat.label} />
             </span>
             <span className="text-[11px] font-bold uppercase tracking-wide text-ink/70">
-              {category}
+              {cat.label}
             </span>
           </button>
         ))}
       </div>
 
-      {visibleCategories.map((category) => {
-        const categoryItems = searchedItems.filter((i) => i.category === category);
-        if (categoryItems.length === 0) return null;
-        return (
-          <div key={category} className="mt-8">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-terracotta">
-              {category}
-            </h2>
-            <div className="mt-3 grid gap-3">
-              {categoryItems.map((item) => {
-                const active = selected.mapsQuery === item.mapsQuery;
-                return (
-                  <div
-                    key={item.id}
-                    className={`rounded border bg-sand-card p-4 transition-colors ${
-                      active ? "border-terracotta" : "border-sand-dim"
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setSelected({ name: item.name, mapsQuery: item.mapsQuery })}
-                      className="block w-full text-left"
-                    >
-                      <span className="block font-bold text-ink">{item.name}</span>
-                      <span className="block text-sm text-ink/70">{item.note}</span>
-                    </button>
-                    <a
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.mapsQuery)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 inline-block text-xs font-bold uppercase tracking-wider text-aqua-deep"
-                    >
-                      Itinéraire →
-                    </a>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
-
-      {items.length === 0 && (
-        <p className="mt-8 text-ink/70">Pas encore de recommandations pour {property.city}.</p>
-      )}
-      {items.length > 0 && searchedItems.length === 0 && (
-        <p className="mt-8 text-ink/70">Aucun résultat pour « {search} ».</p>
+      {selected.mapsQuery !== property.address && (
+        <a
+          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(selected.mapsQuery)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-block text-xs font-bold uppercase tracking-wider text-aqua-deep"
+        >
+          Itinéraire →
+        </a>
       )}
     </div>
   );
