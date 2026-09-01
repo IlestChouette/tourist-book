@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
@@ -38,8 +38,21 @@ function readConsent() {
 }
 
 export default function CookieConsent({ locale }) {
-  const [consent, setConsent] = useState(readConsent);
+  // Le serveur ne peut pas lire le localStorage : il rend toujours null (bandeau visible).
+  // Si on lisait le localStorage dès l'état initial côté client, un visiteur ayant déjà
+  // répondu obtiendrait un rendu client différent du HTML serveur — un vrai mismatch
+  // d'hydratation, pas juste un avertissement cosmétique : React peut alors laisser le
+  // bandeau du serveur affiché sans y rattacher les gestionnaires de clic, ce qui le
+  // rend visible mais totalement inerte. On démarre donc identique au serveur (null),
+  // puis on relit le localStorage une fois monté, une fois l'hydratation terminée.
+  const [consent, setConsent] = useState(null);
   const t = content[locale];
+
+  useEffect(() => {
+    // Lecture ponctuelle du localStorage après montage, volontaire (cf. commentaire ci-dessus).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setConsent(readConsent());
+  }, []);
 
   function choose(value) {
     try {
