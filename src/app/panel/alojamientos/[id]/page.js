@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import Hero from "@/components/Hero";
+import QrCodeButton from "@/components/QrCodeButton";
 import { getClientLocale } from "@/lib/i18n/clientLocale";
 
 const content = {
@@ -185,6 +186,7 @@ export default function AlojamientoDetallePage({ params }) {
           >
             {t.viewLivret}
           </button>
+          <QrCodeButton slug={property.slug} accessCode={property.access_code} propertyName={property.name} />
           <Link
             href={`/panel/alojamientos/${id}/editar`}
             className="inline-block rounded border border-aqua-deep px-5 py-3 font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"

@@ -10,11 +10,12 @@ export default function EntrerForm({ params }) {
   const next = searchParams.get("next") || `/logement/${slug}`;
   const [mode, setMode] = useState(searchParams.get("mode") === "login" ? "login" : "code");
 
+  const codeFromQr = searchParams.get("code");
   const [code, setCode] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!codeFromQr);
 
   useEffect(() => {
     fetch(`/api/properties/${slug}`)
@@ -23,15 +24,21 @@ export default function EntrerForm({ params }) {
       .catch(() => setProperty(null));
   }, [slug]);
 
-  async function handleCodeSubmit(e) {
-    e.preventDefault();
+  // QR code imprimé : le code est déjà dans le lien, pas besoin de le taper.
+  useEffect(() => {
+    if (!codeFromQr) return;
+    submitCode(codeFromQr);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [codeFromQr]);
+
+  async function submitCode(value) {
     setLoading(true);
     setError(false);
 
     const res = await fetch("/api/access", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug, code }),
+      body: JSON.stringify({ slug, code: value }),
     });
 
     if (res.ok) {
@@ -42,6 +49,11 @@ export default function EntrerForm({ params }) {
       setLoading(false);
       setError(true);
     }
+  }
+
+  function handleCodeSubmit(e) {
+    e.preventDefault();
+    submitCode(code);
   }
 
   async function handleLoginSubmit(e) {
@@ -61,6 +73,14 @@ export default function EntrerForm({ params }) {
       setLoading(false);
       setError(true);
     }
+  }
+
+  if (codeFromQr && loading && !error) {
+    return (
+      <main className="flex flex-1 items-center justify-center bg-aqua px-6 py-14">
+        <p className="text-sand-card">Ouverture du livret…</p>
+      </main>
+    );
   }
 
   return (
