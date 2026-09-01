@@ -89,12 +89,11 @@ export async function POST(request) {
     }
 
     try {
-      const emailResult = await sendTransferRequestNotification({
+      await sendTransferRequestNotification({
         hostEmail: property.hosts?.email,
         propertyName: property.name,
         request: inserted,
       });
-      console.log("sendTransferRequestNotification result:", emailResult, "hostEmail:", property.hosts?.email);
     } catch (err) {
       // Envoi email best-effort : la demande est déjà enregistrée même si ça échoue.
       console.error("sendTransferRequestNotification failed:", err);
