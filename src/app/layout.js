@@ -1,4 +1,5 @@
 import { Bodoni_Moda, Archivo } from "next/font/google";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -25,6 +26,7 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col bg-sand text-ink font-body">
         {children}
+        <Footer />
       </body>
     </html>
   );

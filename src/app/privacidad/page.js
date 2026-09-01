@@ -18,9 +18,10 @@ export default function PrivacidadPage() {
           <div>
             <h2 className="font-display italic text-2xl text-ink">1. Responsable del tratamiento</h2>
             <p className="mt-2">
-              Tourist Book — [razón social a completar], con domicilio en [dirección a completar]. Para
-              cualquier cuestión relativa a tus datos personales puedes escribir a{" "}
-              <span className="font-bold">[email de contacto a completar]</span>.
+              Tourist Book es un servicio operado por <span className="font-bold">Il est chouette</span>,
+              SAS unipersonal con domicilio en 143 Promenade des Anglais, 06200 Niza, Francia (SIREN 942 069
+              949, RCS Nice). Para cualquier cuestión relativa a tus datos personales puedes escribir a{" "}
+              <span className="font-bold">allo@ilestchouette.fr</span>.
             </p>
           </div>
 
@@ -131,7 +132,7 @@ export default function PrivacidadPage() {
             <p className="mt-2">
               Puedes solicitar en cualquier momento el acceso, la rectificación, la supresión, la
               limitación del tratamiento, la portabilidad de tus datos, o oponerte a su tratamiento,
-              escribiendo a <span className="font-bold">[email de contacto a completar]</span>. Responderemos
+              escribiendo a <span className="font-bold">allo@ilestchouette.fr</span>. Responderemos
               en el plazo de un mes desde la solicitud. Si consideras que el tratamiento de tus datos no se
               ajusta a la normativa, tienes derecho a presentar una reclamación ante la autoridad de control
               competente (por ejemplo, la CNIL en Francia — www.cnil.fr — o la autoridad de protección de
@@ -169,7 +170,7 @@ export default function PrivacidadPage() {
               última actualización se indica al pie de esta página; te recomendamos consultarla
               periódicamente.
             </p>
-            <p className="mt-4 text-sm text-ink/60">Última actualización: [fecha a completar].</p>
+            <p className="mt-4 text-sm text-ink/60">Última actualización: 1 de septiembre de 2026.</p>
           </div>
         </div>
       </section>

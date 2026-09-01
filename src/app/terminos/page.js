@@ -85,7 +85,7 @@ export default function TerminosPage() {
 
           <div>
             <h2 className="font-display italic text-2xl text-ink">6. Contacto</h2>
-            <p className="mt-2">Para cualquier duda sobre estas condiciones: [email de contacto a completar].</p>
+            <p className="mt-2">Para cualquier duda sobre estas condiciones: allo@ilestchouette.fr.</p>
           </div>
         </div>
       </section>
