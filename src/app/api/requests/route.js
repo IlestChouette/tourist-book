@@ -83,18 +83,21 @@ export async function POST(request) {
       if (result.sent) {
         await admin.from("requests").update({ whatsapp_sent: true }).eq("id", inserted.id);
       }
-    } catch {
+    } catch (err) {
       // Envoi WhatsApp best-effort : la demande est déjà enregistrée même si ça échoue.
+      console.error("sendTransferRequestWhatsApp failed:", err);
     }
 
     try {
-      await sendTransferRequestNotification({
+      const emailResult = await sendTransferRequestNotification({
         hostEmail: property.hosts?.email,
         propertyName: property.name,
         request: inserted,
       });
-    } catch {
+      console.log("sendTransferRequestNotification result:", emailResult, "hostEmail:", property.hosts?.email);
+    } catch (err) {
       // Envoi email best-effort : la demande est déjà enregistrée même si ça échoue.
+      console.error("sendTransferRequestNotification failed:", err);
     }
   }
 
