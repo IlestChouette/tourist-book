@@ -15,7 +15,7 @@ export async function GET(request, { params }) {
     .single();
 
   if (!reservation) {
-    return NextResponse.json({ error: "Reserva no encontrada" }, { status: 404 });
+    return NextResponse.json({ error: "Réservation introuvable" }, { status: 404 });
   }
 
   return NextResponse.json({
@@ -40,7 +40,7 @@ export async function POST(request, { params }) {
     .single();
 
   if (!reservation) {
-    return NextResponse.json({ error: "Reserva no encontrada" }, { status: 404 });
+    return NextResponse.json({ error: "Réservation introuvable" }, { status: 404 });
   }
 
   const formData = await request.formData();
@@ -52,7 +52,7 @@ export async function POST(request, { params }) {
   const selfie = formData.get("selfie");
 
   if (!phone || !email || !documentNumber || !nationality || !idDocument || !selfie) {
-    return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
+    return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
   }
 
   const idExt = idDocument.name.split(".").pop();

@@ -9,12 +9,12 @@ export async function POST(request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
   const { propertyId, guestName, arrivalDate, departureDate } = await request.json();
   if (!propertyId || !guestName || !arrivalDate || !departureDate) {
-    return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
+    return NextResponse.json({ error: "Données invalides" }, { status: 400 });
   }
 
   const admin = createAdminClient();
@@ -26,11 +26,11 @@ export async function POST(request) {
     .single();
 
   if (!property || property.host_id !== user.id) {
-    return NextResponse.json({ error: "Alojamiento no encontrado" }, { status: 404 });
+    return NextResponse.json({ error: "Logement introuvable" }, { status: 404 });
   }
   if (property.plan !== "premium") {
     return NextResponse.json(
-      { error: "El check-in solo está disponible en el plan Premium." },
+      { error: "Le check-in n'est disponible que dans l'offre Premium." },
       { status: 403 }
     );
   }
@@ -61,7 +61,7 @@ export async function GET(request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
   const { searchParams } = new URL(request.url);
@@ -74,7 +74,7 @@ export async function GET(request) {
     .eq("id", propertyId)
     .single();
   if (!property || property.host_id !== user.id) {
-    return NextResponse.json({ error: "Alojamiento no encontrado" }, { status: 404 });
+    return NextResponse.json({ error: "Logement introuvable" }, { status: 404 });
   }
 
   const { data } = await admin

@@ -9,12 +9,12 @@ export async function POST(request, { params }) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
   const { data: me } = await supabase.from("hosts").select("is_admin").eq("id", user.id).single();
   if (!me?.is_admin) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 
   const admin = createAdminClient();

@@ -22,10 +22,10 @@ export async function GET(request, { params }) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
   const loaded = await loadOwned(id, user.id);
-  if (!loaded) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+  if (!loaded) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
 
   const { reservation, admin } = loaded;
   const guestAccount = reservation.guest_accounts;
@@ -69,19 +69,19 @@ export async function PATCH(request, { params }) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
   const loaded = await loadOwned(id, user.id);
-  if (!loaded) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+  if (!loaded) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
 
   const { verificationStatus } = await request.json();
   if (!["aprobado", "rechazado", "pendiente"].includes(verificationStatus)) {
-    return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
+    return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
   }
 
   const { admin, reservation } = loaded;
   const guestAccount = reservation.guest_accounts;
-  if (!guestAccount) return NextResponse.json({ error: "Sin check-in todavía" }, { status: 400 });
+  if (!guestAccount) return NextResponse.json({ error: "Check-in pas encore effectué" }, { status: 400 });
 
   await admin
     .from("guest_accounts")

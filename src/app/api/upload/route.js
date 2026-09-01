@@ -14,7 +14,7 @@ export async function POST(request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
   const formData = await request.formData();
@@ -22,13 +22,13 @@ export async function POST(request) {
   const path = formData.get("path");
 
   if (!file || !path || typeof path !== "string") {
-    return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
+    return NextResponse.json({ error: "Données invalides" }, { status: 400 });
   }
 
   // El primer segmento del path debe ser el propio usuario (misma regla que
   // la política de Storage que queríamos aplicar).
   if (!path.startsWith(`${user.id}/`)) {
-    return NextResponse.json({ error: "Ruta no permitida" }, { status: 403 });
+    return NextResponse.json({ error: "Chemin non autorisé" }, { status: 403 });
   }
 
   const admin = createAdminClient();

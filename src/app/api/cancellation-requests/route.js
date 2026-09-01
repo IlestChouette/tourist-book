@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export async function POST(request) {
   const { propertyId, reason } = await request.json();
   if (!propertyId || !reason?.trim()) {
-    return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
+    return NextResponse.json({ error: "Données invalides" }, { status: 400 });
   }
 
   const supabase = await createClient();
@@ -13,7 +13,7 @@ export async function POST(request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
   const { data: property } = await supabase
@@ -23,7 +23,7 @@ export async function POST(request) {
     .eq("host_id", user.id)
     .single();
   if (!property) {
-    return NextResponse.json({ error: "Alojamiento no encontrado" }, { status: 404 });
+    return NextResponse.json({ error: "Logement introuvable" }, { status: 404 });
   }
 
   const admin = createAdminClient();

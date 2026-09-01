@@ -29,11 +29,11 @@ export default function CheckinPage({ params }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!idDocument || !selfie) {
-      setError("Sube tu documento de identidad y un selfie para continuar.");
+      setError("Ajoute ta pièce d'identité et un selfie pour continuer.");
       return;
     }
     if (!consent) {
-      setError("Debes autorizar el envío de tus documentos para continuar.");
+      setError("Tu dois autoriser l'envoi de tes documents pour continuer.");
       return;
     }
     setSending(true);
@@ -60,12 +60,12 @@ export default function CheckinPage({ params }) {
         data = await res.json();
       } catch {
         throw new Error(
-          "No se pudo enviar el check-in (las fotos pueden ser demasiado grandes). Prueba con otras fotos."
+          "Impossible d'envoyer le check-in (les photos sont peut-être trop lourdes). Essaie avec d'autres photos."
         );
       }
 
       if (!res.ok) {
-        throw new Error(data.error || "No se pudo completar el check-in.");
+        throw new Error(data.error || "Impossible de terminer le check-in.");
       }
     } catch (err) {
       setSending(false);
@@ -88,7 +88,7 @@ export default function CheckinPage({ params }) {
   if (!reservation) {
     return (
       <main className="mx-auto max-w-2xl px-6 py-14">
-        <p className="text-ink">Enlace de check-in no válido.</p>
+        <p className="text-ink">Lien de check-in invalide.</p>
       </main>
     );
   }
@@ -96,26 +96,26 @@ export default function CheckinPage({ params }) {
   if (result) {
     return (
       <main className="flex-1">
-        <Hero eyebrow="Check-in" title="¡Listo!" />
+        <Hero eyebrow="Check-in" title="C'est fait !" />
         <section className="mx-auto max-w-2xl px-6 py-10">
           <div className="rounded border border-sand-dim bg-sand-card p-5">
             <p className="text-ink">
-              Tu check-in se ha registrado. El hotelero revisará tus documentos, pero ya puedes acceder al
-              livret de tu alojamiento.
+              Ton check-in a bien été enregistré. L&apos;hôtelier va vérifier tes documents, mais tu peux déjà
+              accéder au livret de ton logement.
             </p>
-            <p className="mt-4 text-sm text-ink/70">Guarda estos datos por si necesitas volver a entrar:</p>
+            <p className="mt-4 text-sm text-ink/70">Garde ces identifiants au cas où tu doives te reconnecter :</p>
             <p className="mt-1 text-ink">
-              Usuario: <span className="font-bold">{result.username}</span>
+              Identifiant : <span className="font-bold">{result.username}</span>
             </p>
             <p className="text-ink">
-              Contraseña: <span className="font-bold">{result.password}</span>
+              Mot de passe : <span className="font-bold">{result.password}</span>
             </p>
           </div>
           <a
             href={`/logement/${result.slug}`}
             className="mt-6 inline-block rounded bg-terracotta px-5 py-3 font-bold text-ink transition-colors hover:bg-terracotta-deep"
           >
-            Ir al livret →
+            Aller au livret →
           </a>
         </section>
       </main>

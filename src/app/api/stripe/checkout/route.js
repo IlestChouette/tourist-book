@@ -18,7 +18,7 @@ export async function POST(request) {
   const { plan, cycle, propertyId } = await request.json();
   const priceId = PRICE_BY_PLAN[cycle]?.[plan];
   if (!priceId || !propertyId) {
-    return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
+    return NextResponse.json({ error: "Données invalides" }, { status: 400 });
   }
 
   const supabase = await createClient();
@@ -26,7 +26,7 @@ export async function POST(request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
   // Verifica que el alojamiento sea de este hotelero.
@@ -37,7 +37,7 @@ export async function POST(request) {
     .eq("host_id", user.id)
     .single();
   if (!property) {
-    return NextResponse.json({ error: "Alojamiento no encontrado" }, { status: 404 });
+    return NextResponse.json({ error: "Logement introuvable" }, { status: 404 });
   }
 
   const { data: host } = await supabase.from("hosts").select("*").eq("id", user.id).single();
