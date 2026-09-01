@@ -19,27 +19,29 @@ export default async function LivretPage({ params }) {
         <LivretMenu property={property} slug={slug} />
       </section>
 
-      <section className="mx-auto max-w-2xl px-6 pb-10 md:max-w-5xl">
-        {property.description ? (
-          <p className="whitespace-pre-line text-ink/80">{property.description}</p>
-        ) : (
-          <p className="text-ink/80">
-            Ce livret numérique réunit tout ce qu&apos;il faut pour ton séjour : le wifi, les horaires
-            d&apos;arrivée et de départ, les recommandations de l&apos;hôte, et la réservation de ton
-            transfert — directement depuis ton téléphone, sans rien installer.
-          </p>
-        )}
-      </section>
+      <div className="relative bg-sand pt-2">
+        <section className="mx-auto max-w-2xl px-6 pb-10 md:max-w-5xl">
+          {property.description ? (
+            <p className="whitespace-pre-line text-ink/80">{property.description}</p>
+          ) : (
+            <p className="text-ink/80">
+              Ce livret numérique réunit tout ce qu&apos;il faut pour ton séjour : le wifi, les horaires
+              d&apos;arrivée et de départ, les recommandations de l&apos;hôte, et la réservation de ton
+              transfert — directement depuis ton téléphone, sans rien installer.
+            </p>
+          )}
+        </section>
 
-      {photos.length > 1 && (
-        <div className="mx-auto flex max-w-2xl gap-2 overflow-x-auto px-6 pb-10 md:max-w-5xl">
-          {photos.slice(1).map((url) => (
-            <div key={url} className="relative h-20 w-28 shrink-0 overflow-hidden rounded border border-sand-dim">
-              <Image src={url} alt="" fill sizes="112px" className="object-cover" />
-            </div>
-          ))}
-        </div>
-      )}
+        {photos.length > 1 && (
+          <div className="mx-auto flex max-w-2xl gap-2 overflow-x-auto px-6 pb-10 md:max-w-5xl">
+            {photos.slice(1).map((url) => (
+              <div key={url} className="relative h-20 w-28 shrink-0 overflow-hidden rounded border border-sand-dim">
+                <Image src={url} alt="" fill sizes="112px" className="object-cover" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   );
 }
