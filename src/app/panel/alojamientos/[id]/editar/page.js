@@ -41,7 +41,9 @@ export default function EditarAlojamientoPage({ params }) {
         setForm({
           name: data.name ?? "",
           city: data.city ?? "",
+          postal_code: data.postal_code ?? "",
           address: data.address ?? "",
+          address_details: data.address_details ?? "",
           wifi_ssid: data.wifi_ssid ?? "",
           wifi_password: data.wifi_password ?? "",
           checkin: data.checkin ?? "",
@@ -142,7 +144,9 @@ export default function EditarAlojamientoPage({ params }) {
         .update({
           name: form.name,
           city: form.city,
+          postal_code: form.postal_code,
           address: form.address,
+          address_details: form.address_details,
           wifi_ssid: form.wifi_ssid,
           wifi_password: form.wifi_password,
           checkin: form.checkin,
@@ -208,10 +212,25 @@ export default function EditarAlojamientoPage({ params }) {
               <input required value={form.city} onChange={update("city")} className="input" />
             </label>
             <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.address}</span>
-              <input required value={form.address} onChange={update("address")} className="input" />
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.postalCode}</span>
+              <input required value={form.postal_code} onChange={update("postal_code")} className="input" />
             </label>
           </div>
+
+          <label className="grid gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.address}</span>
+            <input required value={form.address} onChange={update("address")} className="input" />
+          </label>
+
+          <label className="grid gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.addressDetails}</span>
+            <input
+              placeholder={t.addressDetailsPlaceholder}
+              value={form.address_details}
+              onChange={update("address_details")}
+              className="input"
+            />
+          </label>
 
           <div className="grid grid-cols-2 gap-4">
             <label className="grid gap-1.5">

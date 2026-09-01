@@ -2,7 +2,10 @@ const dict = {
   fr: {
     name: "Nom",
     city: "Ville",
+    postalCode: "Code postal",
     address: "Adresse",
+    addressDetails: "Complément d'adresse (facultatif)",
+    addressDetailsPlaceholder: "Ex : Bâtiment B, 3ème étage, porte 12, code portail 4821...",
     wifiNetwork: "Wifi (réseau)",
     wifiPassword: "Wifi (mot de passe)",
     arrival: "Arrivée",
@@ -42,7 +45,10 @@ const dict = {
   en: {
     name: "Name",
     city: "City",
+    postalCode: "Postal code",
     address: "Address",
+    addressDetails: "Additional address info (optional)",
+    addressDetailsPlaceholder: "E.g.: Building B, 3rd floor, door 12, gate code 4821...",
     wifiNetwork: "Wifi (network)",
     wifiPassword: "Wifi (password)",
     arrival: "Check-in",
@@ -82,7 +88,10 @@ const dict = {
   es: {
     name: "Nombre",
     city: "Ciudad",
+    postalCode: "Código postal",
     address: "Dirección",
+    addressDetails: "Información complementaria (opcional)",
+    addressDetailsPlaceholder: "Ej: Edificio B, 3er piso, puerta 12, código del portón 4821...",
     wifiNetwork: "Wifi (red)",
     wifiPassword: "Wifi (contraseña)",
     arrival: "Llegada",
