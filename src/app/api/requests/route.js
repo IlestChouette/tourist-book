@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendTransferRequestWhatsApp } from "@/lib/whatsapp";
+import { sendTransferRequestNotification } from "@/lib/email";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -49,7 +50,11 @@ export async function POST(request) {
   }
 
   const admin = createAdminClient();
-  const { data: property } = await admin.from("properties").select("id, name").eq("slug", slug).single();
+  const { data: property } = await admin
+    .from("properties")
+    .select("id, name, hosts(email)")
+    .eq("slug", slug)
+    .single();
   if (!property) {
     return NextResponse.json({ error: "Logement introuvable" }, { status: 404 });
   }
@@ -80,6 +85,16 @@ export async function POST(request) {
       }
     } catch {
       // Envoi WhatsApp best-effort : la demande est déjà enregistrée même si ça échoue.
+    }
+
+    try {
+      await sendTransferRequestNotification({
+        hostEmail: property.hosts?.email,
+        propertyName: property.name,
+        request: inserted,
+      });
+    } catch {
+      // Envoi email best-effort : la demande est déjà enregistrée même si ça échoue.
     }
   }
 

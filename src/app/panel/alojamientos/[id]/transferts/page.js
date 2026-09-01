@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Hero from "@/components/Hero";
 import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { formatTransferWhatsAppMessage } from "@/lib/transferMessage";
 
 const content = {
   fr: {
@@ -14,10 +15,12 @@ const content = {
     empty: "Aucune demande de transfert pour le moment.",
     passengers: "passager(s)",
     whatsappSent: "Envoyée par WhatsApp ✓",
-    whatsappNotSent: "Non envoyée par WhatsApp",
+    whatsappNotSent: "Non envoyée automatiquement",
     flight: "Vol",
     bags: "Bagages",
     notes: "Remarques",
+    copy: "Copier le message",
+    copied: "Copié !",
   },
   en: {
     eyebrow: "Host panel",
@@ -27,10 +30,12 @@ const content = {
     empty: "No transfer requests yet.",
     passengers: "passenger(s)",
     whatsappSent: "Sent via WhatsApp ✓",
-    whatsappNotSent: "Not sent via WhatsApp",
+    whatsappNotSent: "Not sent automatically",
     flight: "Flight",
     bags: "Bags",
     notes: "Notes",
+    copy: "Copy message",
+    copied: "Copied!",
   },
   es: {
     eyebrow: "Panel hotelero",
@@ -40,10 +45,12 @@ const content = {
     empty: "Todavía no hay solicitudes de transfer.",
     passengers: "pasajero(s)",
     whatsappSent: "Enviada por WhatsApp ✓",
-    whatsappNotSent: "No enviada por WhatsApp",
+    whatsappNotSent: "No enviada automáticamente",
     flight: "Vuelo",
     bags: "Equipaje",
     notes: "Comentarios",
+    copy: "Copiar mensaje",
+    copied: "¡Copiado!",
   },
 };
 
@@ -55,6 +62,7 @@ export default function TransfertsPage({ params }) {
   const [property, setProperty] = useState(null);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [copiedId, setCopiedId] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -68,6 +76,22 @@ export default function TransfertsPage({ params }) {
     }
     load();
   }, [id]);
+
+  async function copyMessage(r) {
+    const message = formatTransferWhatsAppMessage({
+      propertyName: property?.name ?? "",
+      nom: r.nom,
+      telephone: r.telephone,
+      details: r.details,
+    });
+    try {
+      await navigator.clipboard.writeText(message);
+      setCopiedId(r.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      // Presse-papiers indisponible (permissions navigateur) : on ignore silencieusement.
+    }
+  }
 
   if (loading) {
     return (
@@ -117,7 +141,16 @@ export default function TransfertsPage({ params }) {
                     {t.notes}: {d.remarques}
                   </p>
                 )}
-                <p className="mt-2 text-xs text-ink/50">{new Date(r.created_at).toLocaleString(locale)}</p>
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => copyMessage(r)}
+                    className="rounded border border-aqua-deep px-4 py-2 text-xs font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
+                  >
+                    {copiedId === r.id ? t.copied : t.copy}
+                  </button>
+                  <p className="text-xs text-ink/50">{new Date(r.created_at).toLocaleString(locale)}</p>
+                </div>
               </div>
             );
           })}
