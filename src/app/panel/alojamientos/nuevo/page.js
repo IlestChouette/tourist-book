@@ -50,6 +50,7 @@ export default function NuevoAlojamientoPage() {
     house_rules: "",
     waste_instructions: "",
     general_info: "",
+    local_recommendations: "",
     key_instructions: "",
     key_lockbox_code: "",
   });
@@ -140,6 +141,7 @@ export default function NuevoAlojamientoPage() {
           waste_instructions: form.waste_instructions,
           waste_photo: wastePhotoUrl,
           general_info: form.general_info,
+          local_recommendations: form.local_recommendations,
           key_instructions: form.key_instructions,
           key_lockbox_code: form.key_lockbox_code,
           key_photos: keyPhotoUrls,
@@ -338,6 +340,17 @@ export default function NuevoAlojamientoPage() {
               placeholder={t.generalInfoPlaceholder}
               value={form.general_info}
               onChange={update("general_info")}
+              className="input"
+            />
+          </label>
+
+          <label className="grid gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.localRecommendations}</span>
+            <textarea
+              rows={4}
+              placeholder={t.localRecommendationsPlaceholder}
+              value={form.local_recommendations}
+              onChange={update("local_recommendations")}
               className="input"
             />
           </label>

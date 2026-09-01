@@ -127,7 +127,7 @@ export default function AssistantPage({ params }) {
           )}
           {error && (
             <p className="text-sm text-terracotta-deep">
-              Une erreur est survenue. Réessaie, ou contacte directement l&apos;hôte : {property.contact}
+              Une erreur est survenue. Réessaie, ou contacte directement l&apos;hôte depuis le livret.
             </p>
           )}
           <div ref={bottomRef} />

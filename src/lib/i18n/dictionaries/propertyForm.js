@@ -29,6 +29,9 @@ const dict = {
     photoOptional: "Photo (facultatif)",
     generalInfo: "Informations générales (facultatif)",
     generalInfoPlaceholder: "Ex : instructions de la climatisation, où sont les serviettes supplémentaires, comment marche la cafetière...",
+    localRecommendations: "Recommandations locales (facultatif)",
+    localRecommendationsPlaceholder:
+      "Vos vraies adresses : restaurants, plages, visites, toilettes publiques... L'assistant du livret s'en sert pour répondre aux hôtes. Ex : \"Le Bistrot du Port, petit resto de poisson à 5 min à pied, plutôt cher mais excellent. La plage de la Réserve est la plus tranquille du coin.\"",
     keyPickup: "Récupération des clés",
     keyInstructions: "Indications (facultatif)",
     keyInstructionsPlaceholder: "Ex : la clé est dans la boîte à clés près de la porte d'entrée, à gauche de la sonnette.",
@@ -66,6 +69,9 @@ const dict = {
     photoOptional: "Photo (optional)",
     generalInfo: "General information (optional)",
     generalInfoPlaceholder: "E.g.: air conditioning instructions, where the extra towels are, how the coffee maker works...",
+    localRecommendations: "Local recommendations (optional)",
+    localRecommendationsPlaceholder:
+      "Your real picks: restaurants, beaches, sights, public restrooms... The livret's assistant uses this to answer guests. E.g.: \"Le Bistrot du Port, small seafood place 5 min walk, pricier but excellent. La Réserve beach is the quietest around.\"",
     keyPickup: "Key pickup",
     keyInstructions: "Instructions (optional)",
     keyInstructionsPlaceholder: "E.g.: the key is in the lockbox by the front door, to the left of the doorbell.",
@@ -103,6 +109,9 @@ const dict = {
     photoOptional: "Foto (opcional)",
     generalInfo: "Información general (opcional)",
     generalInfoPlaceholder: "Ej: instrucciones del aire acondicionado, dónde están las toallas extra, cómo funciona la cafetera...",
+    localRecommendations: "Recomendaciones locales (opcional)",
+    localRecommendationsPlaceholder:
+      "Tus lugares reales: restaurantes, playas, sitios para visitar, baños públicos... El asistente del livret usa esto para responder a los huéspedes. Ej: \"Le Bistrot du Port, restaurante de pescado a 5 min caminando, algo caro pero excelente. La playa La Réserve es la más tranquila de la zona.\"",
     keyPickup: "Recogida de llaves",
     keyInstructions: "Indicaciones (opcional)",
     keyInstructionsPlaceholder: "Ej: la llave está en la caja de seguridad junto a la puerta principal, a la izquierda del timbre.",

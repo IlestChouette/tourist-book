@@ -1,47 +1,62 @@
 import { cookies } from "next/headers";
+import Anthropic from "@anthropic-ai/sdk";
 import { getPropertyBySlug } from "@/lib/properties";
-import { recommendationsForCity } from "@/data/recommendations";
 
-// SIMULATION : réponses générées par mots-clés, pas de vrai appel IA pour l'instant.
-// Pour brancher un vrai assistant plus tard, il faudra une clé API Anthropic
-// (voir @anthropic-ai/sdk déjà installé) et remplacer le contenu de cette fonction.
+const MODEL = "claude-opus-5";
+
+function contactLine(property) {
+  return [property.contact_name || property.contact, property.contact_phone].filter(Boolean).join(" · ") || "non renseigné";
+}
+
+// Repli si ANTHROPIC_API_KEY n'est pas configurée : réponses par mots-clés,
+// pas de vraie IA — juste pour que le chat reste utilisable sans clé.
 function simulateReply(question, property) {
   const q = question.toLowerCase();
-  const recos = recommendationsForCity(property.city);
 
   if (q.includes("wifi") || q.includes("wi-fi") || q.includes("internet")) {
     return `Le wifi s'appelle "${property.wifi_ssid}", mot de passe : ${property.wifi_password}.`;
   }
   if (q.includes("arriv") || q.includes("check-in") || q.includes("checkin")) {
-    return `L'arrivée est possible ${property.checkin.toLowerCase()}.`;
+    return `L'arrivée est possible ${property.checkin?.toLowerCase() ?? ""}.`;
   }
   if (q.includes("dépar") || q.includes("depart") || q.includes("check-out") || q.includes("checkout")) {
-    return `Le départ se fait ${property.checkout.toLowerCase()}.`;
+    return `Le départ se fait ${property.checkout?.toLowerCase() ?? ""}.`;
   }
   if (q.includes("parking") || q.includes("stationne") || q.includes("garer")) {
-    return property.parking;
-  }
-  if (q.includes("resto") || q.includes("manger") || q.includes("café") || q.includes("boire")) {
-    const r = recos.find((r) => r.category === "Restaurant");
-    return r
-      ? `Je te conseille "${r.name}" — ${r.note}`
-      : `Je n'ai pas encore de recommandation restaurant enregistrée pour ${property.city}, demande à ton hôte : ${property.contact}.`;
-  }
-  if (q.includes("visit") || q.includes("faire") || q.includes("voir") || q.includes("après-midi") || q.includes("apres-midi")) {
-    const r = recos.find((r) => r.category === "Zone à visiter");
-    return r
-      ? `Une idée : "${r.name}" — ${r.note}`
-      : `Je n'ai pas encore d'idée de visite enregistrée pour ${property.city}.`;
-  }
-  if (q.includes("toilette")) {
-    const r = recos.find((r) => r.category === "Toilettes publiques");
-    return r ? `${r.name} — ${r.note}` : "Je n'ai pas encore cette info, désolé.";
+    return property.parking || "Pas d'information de stationnement enregistrée.";
   }
   if (q.includes("contact") || q.includes("hôte") || q.includes("hote") || q.includes("urgence")) {
-    return `Tu peux joindre l'hôte ici : ${property.contact}.`;
+    return `Tu peux joindre l'hôte ici : ${contactLine(property)}.`;
   }
 
-  return "Je suis encore en mode démo et je ne connais que quelques réponses (wifi, arrivée, départ, parking, restos, visites, contact). Pose-moi une question là-dessus !";
+  return property.local_recommendations
+    ? property.local_recommendations
+    : "Je suis encore en mode démo et je ne connais que quelques réponses (wifi, arrivée, départ, parking, contact). Pose-moi une question là-dessus !";
+}
+
+function buildSystemPrompt(property) {
+  const lines = [
+    "Tu es l'assistant virtuel du livret d'accueil numérique d'un logement de courte durée sur la Côte d'Azur.",
+    "Tu réponds aux questions des voyageurs UNIQUEMENT à partir des informations ci-dessous sur ce logement précis.",
+    "Réponds dans la langue du voyageur, de façon brève, chaleureuse et directe — pas de formules creuses.",
+    "Si une information demandée n'est pas dans ce qui suit, dis-le honnêtement et oriente vers le contact de l'hôte plutôt que d'inventer.",
+    "",
+    `Logement : ${property.name} — ${property.city}`,
+    property.address ? `Adresse : ${property.address}` : null,
+    property.wifi_ssid || property.wifi_password
+      ? `Wifi : réseau "${property.wifi_ssid ?? "-"}", mot de passe "${property.wifi_password ?? "-"}"`
+      : null,
+    property.checkin ? `Arrivée : ${property.checkin}` : null,
+    property.checkout ? `Départ : ${property.checkout}` : null,
+    property.parking ? `Stationnement : ${property.parking}` : null,
+    property.house_rules ? `Règles du logement : ${property.house_rules}` : null,
+    property.waste_instructions ? `Gestion des poubelles : ${property.waste_instructions}` : null,
+    property.general_info ? `Informations générales : ${property.general_info}` : null,
+    property.local_recommendations ? `Recommandations locales de l'hôte : ${property.local_recommendations}` : null,
+    `Contact de l'hôte (à donner si besoin) : ${contactLine(property)}`,
+  ].filter(Boolean);
+
+  return lines.join("\n");
 }
 
 export async function POST(request) {
@@ -53,16 +68,34 @@ export async function POST(request) {
   }
 
   const property = await getPropertyBySlug(slug);
-
   if (!property) {
     return Response.json({ error: "Logement introuvable" }, { status: 404 });
   }
 
-  const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
-  const reply = simulateReply(lastUserMessage?.content ?? "", property);
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return Response.json({ reply: simulateReply(lastUserMessage?.content ?? "", property) });
+  }
 
-  // Petite latence artificielle pour un rendu plus naturel dans le chat.
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  try {
+    const anthropic = new Anthropic({ apiKey });
+    const response = await anthropic.messages.create({
+      model: MODEL,
+      max_tokens: 1024,
+      thinking: { type: "adaptive" },
+      output_config: { effort: "low" },
+      system: buildSystemPrompt(property),
+      messages: messages.map((m) => ({ role: m.role, content: m.content })),
+    });
 
-  return Response.json({ reply });
+    const textBlock = response.content.find((b) => b.type === "text");
+    return Response.json({ reply: textBlock?.text ?? "Désolé, je n'ai pas pu répondre." });
+  } catch (err) {
+    console.error("Assistant Anthropic API failed:", err);
+    return Response.json(
+      { reply: `Désolé, une erreur est survenue. Tu peux contacter directement l'hôte : ${contactLine(property)}.` }
+    );
+  }
 }
