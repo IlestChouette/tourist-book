@@ -122,8 +122,50 @@ function CloseIcon() {
   );
 }
 
+function WhatsAppIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+      <path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5.2-1.4c1.4.8 3.1 1.2 4.8 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm5.9 14.1c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3.1s.8-2.2 1.1-2.5c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5.2.5.8 1.9.8 2 .1.2.1.3 0 .5-.1.2-.1.3-.3.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1.2.1 1.6.8 1.9.9.3.1.5.2.6.3.1.2.1.9-.1 1.6z" />
+    </svg>
+  );
+}
+
+function CopyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <rect x="8" y="8" width="12" height="12" rx="2" />
+      <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+    </svg>
+  );
+}
+
+// Choisit un nombre de colonnes (4 à 6) qui remplit la dernière rangée le
+// mieux possible pour N tuiles, plutôt qu'un nombre fixe qui laisse parfois
+// une rangée finale à moitié vide (ex. 10 tuiles sur 6 colonnes → 6 puis 4).
+function bestColumns(n) {
+  if (n <= 4) return Math.max(n, 1);
+  let best = 6;
+  let bestFullness = -1;
+  for (const c of [6, 5, 4]) {
+    const remainder = n % c;
+    const fullness = remainder === 0 ? 1 : remainder / c;
+    if (fullness > bestFullness) {
+      best = c;
+      bestFullness = fullness;
+    }
+  }
+  return best;
+}
+
+function whatsappHref(phone) {
+  const digits = (phone || "").replace(/[^\d+]/g, "").replace(/(?!^)\+/g, "");
+  if (digits.replace("+", "").length < 8) return null;
+  return `https://wa.me/${digits.replace("+", "")}`;
+}
+
 export default function LivretMenu({ property, slug }) {
   const [active, setActive] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const infoItems = [
     { key: "wifi", label: "Wifi", icon: <WifiIcon />, detail: `${property.wifi_ssid} · ${property.wifi_password}` },
@@ -134,7 +176,12 @@ export default function LivretMenu({ property, slug }) {
       detail: `Arrivée ${property.checkin.toLowerCase()} · Départ ${property.checkout.toLowerCase()}`,
     },
     { key: "parking", label: "Stationnement", icon: <ParkingIcon />, detail: property.parking },
-    { key: "contact", label: "Contact", icon: <PhoneIcon />, detail: property.contact },
+    {
+      key: "contact",
+      label: "Contact",
+      icon: <PhoneIcon />,
+      detail: [property.contact_name || property.contact, property.contact_phone].filter(Boolean).join(" · "),
+    },
     ...(property.house_rules
       ? [{ key: "rules", label: "Règles", icon: <RulesIcon />, detail: property.house_rules }]
       : []),
@@ -156,14 +203,31 @@ export default function LivretMenu({ property, slug }) {
   const tiles = [...infoItems, ...navItems];
   const activeItem = tiles.find((i) => i.key === active);
   const isNav = navItems.some((i) => i.key === active);
+  const cols = bestColumns(tiles.length);
+  const wideFillers = tiles.length % cols === 0 ? 0 : cols - (tiles.length % cols);
+  const whatsapp = whatsappHref(property.contact_phone);
 
   function close() {
     setActive(null);
+    setCopied(false);
+  }
+
+  async function copyWifiPassword() {
+    try {
+      await navigator.clipboard.writeText(property.wifi_password || "");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Presse-papiers indisponible (permissions navigateur) : on ignore silencieusement.
+    }
   }
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-3 lg:grid-cols-6">
+      <div
+        className="grid grid-cols-2 gap-4 sm:gap-3 tile-grid-wide"
+        style={{ "--tile-cols": cols }}
+      >
         {tiles.map((item) => {
           const isActive = active === item.key;
           return (
@@ -185,6 +249,9 @@ export default function LivretMenu({ property, slug }) {
           );
         })}
         {tiles.length % 2 !== 0 && <div aria-hidden="true" className="aspect-square sm:hidden" />}
+        {Array.from({ length: wideFillers }).map((_, i) => (
+          <div key={`filler-${i}`} aria-hidden="true" className="hidden aspect-square sm:block" />
+        ))}
       </div>
 
       {activeItem && (
@@ -216,6 +283,29 @@ export default function LivretMenu({ property, slug }) {
                 <>
                   {activeItem.detail && <p className="text-ink">{activeItem.detail}</p>}
 
+                  {active === "wifi" && property.wifi_password && (
+                    <button
+                      type="button"
+                      onClick={copyWifiPassword}
+                      className="mt-3 inline-flex items-center gap-2 rounded border border-aqua-deep px-4 py-2 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
+                    >
+                      <CopyIcon />
+                      {copied ? "Copié !" : "Copier le mot de passe"}
+                    </button>
+                  )}
+
+                  {active === "contact" && whatsapp && (
+                    <a
+                      href={whatsapp}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex items-center gap-2 rounded bg-[#25D366] px-4 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90"
+                    >
+                      <WhatsAppIcon />
+                      Écrire sur WhatsApp
+                    </a>
+                  )}
+
                   {active === "basuras" && property.waste_photo && (
                     <div className="mt-3">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -238,7 +328,7 @@ export default function LivretMenu({ property, slug }) {
                         )}
                         {property.key_lockbox_code && (
                           <p className="mt-2 text-ink">
-                            Code du cadenas :{" "}
+                            Code d&apos;accès :{" "}
                             <span className="font-bold tracking-widest">{property.key_lockbox_code}</span>
                           </p>
                         )}

@@ -16,7 +16,7 @@ export async function POST(request) {
 
   const { data: account } = await admin
     .from("guest_accounts")
-    .select("password_hash, reservations!inner(property_id)")
+    .select("password_hash, reservation_id, reservations!inner(property_id)")
     .eq("username", username)
     .eq("reservations.property_id", property.id)
     .single();
@@ -27,6 +27,12 @@ export async function POST(request) {
 
   const response = NextResponse.json({ ok: true });
   response.cookies.set(`access_${slug}`, "1", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30,
+  });
+  response.cookies.set(`guest_${slug}`, account.reservation_id, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",

@@ -44,7 +44,8 @@ export default function NuevoAlojamientoPage() {
     checkin: "",
     checkout: "",
     parking: "",
-    contact: "",
+    contact_name: "",
+    contact_phone: "",
     description: "",
     house_rules: "",
     waste_instructions: "",
@@ -132,7 +133,8 @@ export default function NuevoAlojamientoPage() {
           checkin: form.checkin,
           checkout: form.checkout,
           parking: form.parking,
-          contact: form.contact,
+          contact_name: form.contact_name,
+          contact_phone: form.contact_phone,
           description: form.description,
           house_rules: form.house_rules,
           waste_instructions: form.waste_instructions,
@@ -215,10 +217,23 @@ export default function NuevoAlojamientoPage() {
             <input value={form.parking} onChange={update("parking")} className="input" />
           </label>
 
-          <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.contact}</span>
-            <input value={form.contact} onChange={update("contact")} className="input" />
-          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <label className="grid gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.contactName}</span>
+              <input value={form.contact_name} onChange={update("contact_name")} className="input" />
+            </label>
+            <label className="grid gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.contactPhone}</span>
+              <input
+                type="tel"
+                placeholder={t.contactPhonePlaceholder}
+                value={form.contact_phone}
+                onChange={update("contact_phone")}
+                className="input"
+              />
+            </label>
+          </div>
+          <p className="-mt-2 text-xs text-ink/50">{t.contactPhoneHint}</p>
 
           <label className="grid gap-1.5">
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.welcomeMessage}</span>

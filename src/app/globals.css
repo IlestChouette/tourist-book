@@ -71,6 +71,12 @@
   border-color: rgba(247, 241, 228, 0.5);
 }
 
+@media (min-width: 640px) {
+  .tile-grid-wide {
+    grid-template-columns: repeat(var(--tile-cols, 4), minmax(0, 1fr));
+  }
+}
+
 .sheet-backdrop {
   transition: opacity 0.25s ease-out;
 }

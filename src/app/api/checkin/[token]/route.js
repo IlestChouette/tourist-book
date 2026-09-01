@@ -115,5 +115,12 @@ export async function POST(request, { params }) {
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   });
+  // Identifie ce voyageur pour lui afficher l'état de son check-in sur le livret.
+  response.cookies.set(`guest_${reservation.properties?.slug}`, reservation.id, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30,
+  });
   return response;
 }

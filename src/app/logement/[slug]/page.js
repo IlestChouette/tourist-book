@@ -1,8 +1,35 @@
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { getPropertyBySlug } from "@/lib/properties";
+import { createAdminClient } from "@/lib/supabase/admin";
 import LivretHero from "@/components/LivretHero";
 import LivretMenu from "@/components/LivretMenu";
+import PhotoCarousel from "@/components/PhotoCarousel";
+
+const CHECKIN_STATUS_BANNER = {
+  pendiente: {
+    className: "border-terracotta bg-terracotta/10 text-ink",
+    text: "Ton check-in est bien enregistré et en cours de vérification par l'hôte.",
+  },
+  rechazado: {
+    className: "border-terracotta-deep bg-terracotta-deep/10 text-ink",
+    text: "Tes documents de check-in n'ont pas pu être validés — contacte ton hôte pour en savoir plus.",
+  },
+};
+
+async function getGuestCheckinStatus(slug) {
+  const cookieStore = await cookies();
+  const reservationId = cookieStore.get(`guest_${slug}`)?.value;
+  if (!reservationId) return null;
+
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("guest_accounts")
+    .select("verification_status")
+    .eq("reservation_id", reservationId)
+    .single();
+  return data?.verification_status ?? null;
+}
 
 export default async function LivretPage({ params }) {
   const { slug } = await params;
@@ -10,6 +37,8 @@ export default async function LivretPage({ params }) {
   if (!property) notFound();
 
   const photos = property.photos ?? [];
+  const checkinStatus = await getGuestCheckinStatus(slug);
+  const banner = checkinStatus ? CHECKIN_STATUS_BANNER[checkinStatus] : null;
 
   const description =
     property.description ||
@@ -25,18 +54,15 @@ export default async function LivretPage({ params }) {
       />
 
       <section id="menu" className="mx-auto max-w-2xl px-6 py-8 md:max-w-5xl md:py-10">
+        {banner && (
+          <div className={`mb-6 rounded border p-4 text-sm ${banner.className}`}>{banner.text}</div>
+        )}
         <LivretMenu property={property} slug={slug} />
       </section>
 
       {photos.length > 1 && (
-        <div className="relative bg-sand pt-2">
-          <div className="mx-auto flex max-w-2xl gap-2 overflow-x-auto px-6 pb-10 md:max-w-5xl">
-            {photos.slice(1).map((url) => (
-              <div key={url} className="relative h-20 w-28 shrink-0 overflow-hidden rounded border border-sand-dim">
-                <Image src={url} alt="" fill sizes="112px" className="object-cover" />
-              </div>
-            ))}
-          </div>
+        <div className="relative bg-sand px-6 pb-10 pt-2">
+          <PhotoCarousel photos={photos.slice(1)} />
         </div>
       )}
     </main>
