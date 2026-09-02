@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { monthlyRevenue } from "@/lib/pricing";
+import { monthlyRevenue, PRICES } from "@/lib/pricing";
 import { stripe } from "@/lib/stripe";
 import LogoutButton from "@/components/LogoutButton";
 import { getLocale } from "@/lib/i18n/locale";
@@ -32,31 +32,38 @@ export const metadata = { robots: { index: false, follow: false } };
 
 const dateLocale = { fr: "fr-FR", en: "en-GB", es: "es-ES" };
 const MONTHLY_GOAL = 5000;
+// Estimation utilisée pour "combien de clients en plus" tant qu'il n'y a pas
+// encore de vrai client payant — moyenne mensuelle des 4 combinaisons prix/cycle.
+const planMonthlyPrices = Object.entries(PRICES).flatMap(([plan, cycles]) =>
+  Object.keys(cycles).map((cycle) => monthlyRevenue(plan, cycle))
+);
+const FALLBACK_AVG_MONTHLY_PRICE =
+  planMonthlyPrices.reduce((sum, p) => sum + p, 0) / planMonthlyPrices.length;
 
 const motivationTiers = {
   fr: [
-    "Chaque client compte — le premier est toujours le plus important 🚀",
-    "C'est parti ! Continue comme ça 💪",
-    "Un quart du chemin parcouru — le rythme est bon 🔥",
-    "Plus de la moitié ! Tu es en bonne voie 🎯",
-    "Presque là — l'objectif est à portée de main ✨",
-    "🎉 Objectif atteint ! Beau travail.",
+    "Chaque client compte — le premier est toujours le plus important.",
+    "C'est parti ! Continue comme ça.",
+    "Un quart du chemin parcouru — le rythme est bon.",
+    "Plus de la moitié ! Tu es en bonne voie.",
+    "Presque là — l'objectif est à portée de main.",
+    "Objectif atteint ! Beau travail.",
   ],
   en: [
-    "Every client counts — the first one is always the hardest 🚀",
-    "You're off and running — keep going 💪",
-    "A quarter of the way there — good pace 🔥",
-    "Over halfway! You're on track 🎯",
-    "Almost there — the goal is within reach ✨",
-    "🎉 Goal reached! Great work.",
+    "Every client counts — the first one is always the hardest.",
+    "You're off and running — keep going.",
+    "A quarter of the way there — good pace.",
+    "Over halfway! You're on track.",
+    "Almost there — the goal is within reach.",
+    "Goal reached! Great work.",
   ],
   es: [
-    "Cada cliente cuenta — el primero siempre es el más difícil 🚀",
-    "¡Ya arrancaste! Sigue así 💪",
-    "Un cuarto del camino recorrido — buen ritmo 🔥",
-    "¡Más de la mitad! Vas por buen camino 🎯",
-    "Casi lo logras — el objetivo está a la vuelta de la esquina ✨",
-    "🎉 ¡Objetivo alcanzado! Gran trabajo.",
+    "Cada cliente cuenta — el primero siempre es el más difícil.",
+    "Ya arrancaste. Sigue así.",
+    "Un cuarto del camino recorrido — buen ritmo.",
+    "Más de la mitad. Vas por buen camino.",
+    "Casi lo logras — el objetivo está a la vuelta de la esquina.",
+    "Objetivo alcanzado. Gran trabajo.",
   ],
 };
 
@@ -204,9 +211,8 @@ export default async function AdminPage() {
 
   const goalPercent = Math.min((mrr / MONTHLY_GOAL) * 100, 100);
   const goalRemaining = Math.max(MONTHLY_GOAL - mrr, 0);
-  const avgRevenuePerClient = payingProperties.length > 0 ? mrr / payingProperties.length : null;
-  const clientsNeeded =
-    avgRevenuePerClient && goalRemaining > 0 ? Math.ceil(goalRemaining / avgRevenuePerClient) : null;
+  const avgRevenuePerClient = payingProperties.length > 0 ? mrr / payingProperties.length : FALLBACK_AVG_MONTHLY_PRICE;
+  const clientsNeeded = goalRemaining > 0 ? Math.ceil(goalRemaining / avgRevenuePerClient) : null;
 
   return (
     <main className="flex-1 bg-sand">
