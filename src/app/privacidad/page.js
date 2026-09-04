@@ -4,6 +4,7 @@ import { getLocale } from "@/lib/i18n/locale";
 const content = {
   fr: {
     metaTitle: "Politique de confidentialité — Tourist Book",
+    metaDescription: "Politique de confidentialité de Tourist Book, le livret d'accueil numérique pour hôtes Airbnb de la Côte d'Azur.",
     eyebrow: "Légal",
     title: "Politique de confidentialité",
     notice:
@@ -74,6 +75,7 @@ const content = {
   },
   en: {
     metaTitle: "Privacy policy — Tourist Book",
+    metaDescription: "Privacy policy for Tourist Book, the digital welcome book for Airbnb hosts on the French Riviera.",
     eyebrow: "Legal",
     title: "Privacy policy",
     notice:
@@ -144,6 +146,7 @@ const content = {
   },
   es: {
     metaTitle: "Política de privacidad — Tourist Book",
+    metaDescription: "Política de privacidad de Tourist Book, el livret de bienvenida digital para anfitriones Airbnb en la Costa Azul.",
     eyebrow: "Legal",
     title: "Política de privacidad",
     notice:
@@ -216,7 +219,7 @@ const content = {
 
 export async function generateMetadata() {
   const locale = await getLocale();
-  return { title: content[locale].metaTitle };
+  return { title: content[locale].metaTitle, description: content[locale].metaDescription };
 }
 
 export default async function PrivacidadPage() {

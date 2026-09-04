@@ -100,7 +100,7 @@ const content = {
   fr: {
     metaTitle: "Tourist Book — Livret d'accueil numérique et check-in",
     metaDescription:
-      "Le livret d'accueil et le check-in électronique de vos hôtes, par logement, dès 7€/mois ou 39,99€/an avec 1 mois offert.",
+      "Livret d'accueil numérique et check-in électronique pour hôtes Airbnb de la Côte d'Azur — wifi, horaires et recommandations en un lien, dès 7€/mois.",
     login: "Se connecter",
     createAccount: "Créer un compte →",
     eyebrow: "Pour les hôteliers et loueurs de la Côte d'Azur",
@@ -152,12 +152,35 @@ const content = {
     positioningTitle: "Pensé pour la Côte d'Azur, pas pour une chaîne hôtelière",
     positioningBody:
       "Beausoleil, Roquebrune-Cap-Martin, Saint-Paul-de-Vence, Nice et d'autres villes de la Côte d'Azur — Tourist Book est fait pour l'hôte qui gère un ou plusieurs logements lui-même, pas pour une agence de cent biens.",
+    faqTitle: "Questions fréquentes",
+    faq: [
+      {
+        q: "Mes voyageurs doivent envoyer une pièce d'identité — est-ce sécurisé ?",
+        a: "Oui. Les documents et selfies sont stockés dans un espace privé, jamais accessible publiquement, et ne sont visibles que par vous depuis votre panel, via un lien à durée limitée. Aucune donnée n'est partagée avec des tiers.",
+      },
+      {
+        q: "Je peux résilier quand je veux ?",
+        a: "Sur l'offre saisonnière, oui, à tout moment. Sur l'offre annuelle, l'abonnement court jusqu'à la fin de l'année en cours — comme la plupart des engagements annuels — sans reconduction si vous ne renouvelez pas.",
+      },
+      {
+        q: "Combien de temps pour tout configurer ?",
+        a: "Environ 5 minutes pour un premier logement : nom, photos, wifi, horaires. Le lien du livret est utilisable immédiatement après.",
+      },
+      {
+        q: "Je gère plusieurs logements, dois-je payer plusieurs abonnements ?",
+        a: "L'offre se choisit par logement, pas par compte — un seul compte peut gérer autant de logements que vous voulez, chacun avec son propre plan.",
+      },
+      {
+        q: "Et si mes voyageurs ne parlent pas français ?",
+        a: "Le livret est disponible en français, anglais et espagnol — le voyageur choisit sa langue en un clic.",
+      },
+    ],
     finalCtaTitle: "Prêt à arrêter d'imprimer des livrets d'accueil ?",
   },
   en: {
     metaTitle: "Tourist Book — Digital welcome book and check-in",
     metaDescription:
-      "Your guests' welcome book and electronic check-in, per property, from €7/month or €39.99/year with 1 month free.",
+      "Digital welcome book and electronic check-in for Airbnb hosts on the French Riviera — wifi, schedule and local tips in one link, from €7/month.",
     login: "Log in",
     createAccount: "Create an account →",
     eyebrow: "For hosts and hoteliers on the French Riviera",
@@ -209,12 +232,35 @@ const content = {
     positioningTitle: "Built for the French Riviera, not a hotel chain",
     positioningBody:
       "Beausoleil, Roquebrune-Cap-Martin, Saint-Paul-de-Vence, Nice and other towns on the French Riviera — Tourist Book is made for the host who manages one or a few properties themselves, not an agency running a hundred listings.",
+    faqTitle: "Frequently asked questions",
+    faq: [
+      {
+        q: "My guests have to send an ID document — is that secure?",
+        a: "Yes. Documents and selfies are stored in a private space, never publicly accessible, and only visible to you from your panel via a time-limited link. No data is shared with third parties.",
+      },
+      {
+        q: "Can I cancel whenever I want?",
+        a: "On the seasonal plan, yes, anytime. On the annual plan, the subscription runs until the end of the current year — like most annual commitments — with no renewal if you don't sign up again.",
+      },
+      {
+        q: "How long does setup take?",
+        a: "About 5 minutes for a first property: name, photos, wifi, schedule. The livret link is usable right away.",
+      },
+      {
+        q: "I manage several properties — do I need several subscriptions?",
+        a: "The plan is chosen per property, not per account — one account can manage as many properties as you want, each with its own plan.",
+      },
+      {
+        q: "What if my guests don't speak French?",
+        a: "The livret is available in French, English and Spanish — the guest picks their language in one click.",
+      },
+    ],
     finalCtaTitle: "Ready to stop printing welcome books?",
   },
   es: {
     metaTitle: "Tourist Book — Livret de acogida digital y check-in",
     metaDescription:
-      "El livret de bienvenida y el check-in electrónico de tus huéspedes, por alojamiento, desde 7€/mes o 39,99€/año con 1 mes gratis.",
+      "Livret de bienvenida digital y check-in electrónico para anfitriones Airbnb en la Costa Azul — wifi, horarios y recomendaciones en un enlace, desde 7€/mes.",
     login: "Iniciar sesión",
     createAccount: "Crear cuenta →",
     eyebrow: "Para hoteleros y anfitriones de la Côte d'Azur",
@@ -266,6 +312,29 @@ const content = {
     positioningTitle: "Pensado para la Côte d'Azur, no para una cadena hotelera",
     positioningBody:
       "Beausoleil, Roquebrune-Cap-Martin, Saint-Paul-de-Vence, Niza y otras ciudades de la Côte d'Azur — Tourist Book está hecho para el anfitrión que gestiona uno o varios alojamientos él mismo, no para una gestora de cien propiedades.",
+    faqTitle: "Preguntas frecuentes",
+    faq: [
+      {
+        q: "Mis huéspedes tienen que enviar un documento de identidad — ¿es seguro?",
+        a: "Sí. Los documentos y selfies se guardan en un espacio privado, nunca accesible públicamente, y solo tú puedes verlos desde tu panel, mediante un enlace de duración limitada. Ningún dato se comparte con terceros.",
+      },
+      {
+        q: "¿Puedo cancelar cuando quiera?",
+        a: "En el plan por temporada, sí, en cualquier momento. En el plan anual, la suscripción corre hasta el fin del año en curso — como la mayoría de los compromisos anuales — sin renovarse si no vuelves a suscribirte.",
+      },
+      {
+        q: "¿Cuánto tiempo toma configurarlo?",
+        a: "Unos 5 minutos para el primer alojamiento: nombre, fotos, wifi, horarios. El enlace del livret se puede usar de inmediato.",
+      },
+      {
+        q: "Gestiono varios alojamientos, ¿debo pagar varias suscripciones?",
+        a: "El plan se elige por alojamiento, no por cuenta — una sola cuenta puede gestionar tantos alojamientos como quieras, cada uno con su propio plan.",
+      },
+      {
+        q: "¿Y si mis huéspedes no hablan español?",
+        a: "El livret está disponible en francés, inglés y español — el huésped elige su idioma con un clic.",
+      },
+    ],
     finalCtaTitle: "¿Listo para dejar de imprimir libros de bienvenida?",
   },
 };
@@ -301,11 +370,25 @@ export default async function Home() {
     },
   };
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: t.faq.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+
   return (
     <main className="flex-1">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <header className="bg-[#2f7d76]">
         <div className="flex items-center justify-between px-6 py-6">
@@ -447,6 +530,24 @@ export default async function Home() {
         </span>
         <h2 className="mt-5 font-display italic text-2xl text-ink">{t.positioningTitle}</h2>
         <p className="mx-auto mt-3 max-w-lg text-ink/70">{t.positioningBody}</p>
+      </section>
+
+      <section className="mx-auto max-w-2xl px-6 py-16">
+        <h2 className="text-center font-display italic text-3xl text-ink">{t.faqTitle}</h2>
+        <div className="mt-8 grid gap-3">
+          {t.faq.map((item) => (
+            <details
+              key={item.q}
+              className="group rounded border border-sand-dim bg-sand-card p-4 open:pb-4 [&_summary::-webkit-details-marker]:hidden"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-ink">
+                {item.q}
+                <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
+              </summary>
+              <p className="mt-3 text-ink/70">{item.a}</p>
+            </details>
+          ))}
+        </div>
       </section>
 
       <section className="bg-aqua-deep py-16 text-center">

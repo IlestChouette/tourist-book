@@ -4,6 +4,7 @@ import { getLocale } from "@/lib/i18n/locale";
 const content = {
   fr: {
     metaTitle: "Conditions d'utilisation et d'abonnement — Tourist Book",
+    metaDescription: "Conditions d'utilisation et d'abonnement de Tourist Book, le livret d'accueil numérique pour hôtes Airbnb de la Côte d'Azur.",
     eyebrow: "Légal",
     title: "Conditions d'utilisation et d'abonnement",
     notice:
@@ -39,6 +40,7 @@ const content = {
   },
   en: {
     metaTitle: "Terms of use and subscription — Tourist Book",
+    metaDescription: "Terms of use and subscription for Tourist Book, the digital welcome book for Airbnb hosts on the French Riviera.",
     eyebrow: "Legal",
     title: "Terms of use and subscription",
     notice:
@@ -74,6 +76,7 @@ const content = {
   },
   es: {
     metaTitle: "Términos de uso y suscripción — Tourist Book",
+    metaDescription: "Términos de uso y suscripción de Tourist Book, el livret de bienvenida digital para anfitriones Airbnb en la Costa Azul.",
     eyebrow: "Legal",
     title: "Términos de uso y suscripción",
     notice:
@@ -111,7 +114,7 @@ const content = {
 
 export async function generateMetadata() {
   const locale = await getLocale();
-  return { title: content[locale].metaTitle };
+  return { title: content[locale].metaTitle, description: content[locale].metaDescription };
 }
 
 export default async function TerminosPage() {
