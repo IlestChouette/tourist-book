@@ -15,6 +15,7 @@ const content = {
           { href: "/", label: "Accueil" },
           { href: "/#planes", label: "Offres et tarifs" },
           { href: "/#como-funciona", label: "Comment ça marche" },
+          { href: "/blog", label: "Blog" },
         ],
       },
       {
@@ -47,6 +48,7 @@ const content = {
           { href: "/", label: "Home" },
           { href: "/#planes", label: "Plans & pricing" },
           { href: "/#como-funciona", label: "How it works" },
+          { href: "/blog", label: "Blog" },
         ],
       },
       {
@@ -79,6 +81,7 @@ const content = {
           { href: "/", label: "Inicio" },
           { href: "/#planes", label: "Planes y precios" },
           { href: "/#como-funciona", label: "Cómo funciona" },
+          { href: "/blog", label: "Blog" },
         ],
       },
       {

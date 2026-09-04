@@ -24,6 +24,7 @@ export default async function Footer() {
             <ul className="mt-3 grid gap-2 text-sm">
               <li><Link href="/#planes" className="text-ink/70 hover:text-ink">{t.plans}</Link></li>
               <li><Link href="/#como-funciona" className="text-ink/70 hover:text-ink">{t.howItWorks}</Link></li>
+              <li><Link href="/blog" className="text-ink/70 hover:text-ink">Blog</Link></li>
             </ul>
           </div>
 
