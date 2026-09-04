@@ -54,10 +54,12 @@ export default function EditarAlojamientoPage({ params }) {
           description: data.description ?? "",
           house_rules: data.house_rules ?? "",
           waste_instructions: data.waste_instructions ?? "",
+          waste_video_url: data.waste_video_url ?? "",
           general_info: data.general_info ?? "",
           local_recommendations: data.local_recommendations ?? "",
           key_instructions: data.key_instructions ?? "",
           key_lockbox_code: data.key_lockbox_code ?? "",
+          key_video_url: data.key_video_url ?? "",
           slug: data.slug,
         });
         setExistingPhotos(data.photos ?? []);
@@ -158,10 +160,12 @@ export default function EditarAlojamientoPage({ params }) {
           house_rules: form.house_rules,
           waste_instructions: form.waste_instructions,
           waste_photo: wastePhotoUrl,
+          waste_video_url: form.waste_video_url,
           general_info: form.general_info,
           local_recommendations: form.local_recommendations,
           key_instructions: form.key_instructions,
           key_lockbox_code: form.key_lockbox_code,
+          key_video_url: form.key_video_url,
           photos: [...existingPhotos, ...uploadedUrls],
           key_photos: [...existingKeyPhotos, ...uploadedKeyUrls],
         })
@@ -409,6 +413,16 @@ export default function EditarAlojamientoPage({ params }) {
                 )}
               </div>
             </div>
+            <label className="grid gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.videoUrl}</span>
+              <input
+                type="url"
+                placeholder={t.videoUrlPlaceholder}
+                value={form.waste_video_url}
+                onChange={update("waste_video_url")}
+                className="input"
+              />
+            </label>
           </div>
 
           <label className="grid gap-1.5">
@@ -497,6 +511,16 @@ export default function EditarAlojamientoPage({ params }) {
                 )}
               </div>
             </div>
+            <label className="grid gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.videoUrl}</span>
+              <input
+                type="url"
+                placeholder={t.videoUrlPlaceholder}
+                value={form.key_video_url}
+                onChange={update("key_video_url")}
+                className="input"
+              />
+            </label>
           </div>
 
           <button

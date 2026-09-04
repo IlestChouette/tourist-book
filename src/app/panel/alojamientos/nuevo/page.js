@@ -51,10 +51,12 @@ export default function NuevoAlojamientoPage() {
     description: "",
     house_rules: "",
     waste_instructions: "",
+    waste_video_url: "",
     general_info: "",
     local_recommendations: "",
     key_instructions: "",
     key_lockbox_code: "",
+    key_video_url: "",
   });
   const [photos, setPhotos] = useState([]);
   const [wastePhoto, setWastePhoto] = useState(null);
@@ -144,10 +146,12 @@ export default function NuevoAlojamientoPage() {
           house_rules: form.house_rules,
           waste_instructions: form.waste_instructions,
           waste_photo: wastePhotoUrl,
+          waste_video_url: form.waste_video_url,
           general_info: form.general_info,
           local_recommendations: form.local_recommendations,
           key_instructions: form.key_instructions,
           key_lockbox_code: form.key_lockbox_code,
+          key_video_url: form.key_video_url,
           key_photos: keyPhotoUrls,
           access_code: randomCode(),
           photos: photoUrls,
@@ -350,6 +354,16 @@ export default function NuevoAlojamientoPage() {
                 )}
               </div>
             </div>
+            <label className="grid gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.videoUrl}</span>
+              <input
+                type="url"
+                placeholder={t.videoUrlPlaceholder}
+                value={form.waste_video_url}
+                onChange={update("waste_video_url")}
+                className="input"
+              />
+            </label>
           </div>
 
           <label className="grid gap-1.5">
@@ -425,6 +439,16 @@ export default function NuevoAlojamientoPage() {
                 )}
               </div>
             </div>
+            <label className="grid gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.videoUrl}</span>
+              <input
+                type="url"
+                placeholder={t.videoUrlPlaceholder}
+                value={form.key_video_url}
+                onChange={update("key_video_url")}
+                className="input"
+              />
+            </label>
           </div>
 
           <button

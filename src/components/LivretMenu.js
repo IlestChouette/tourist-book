@@ -162,6 +162,43 @@ function whatsappHref(phone) {
   return `https://wa.me/${digits.replace("+", "")}`;
 }
 
+// Accepte watch?v=, youtu.be/, embed/ et shorts/ — les formats de lien qu'un
+// hôte copierait sans y penser depuis l'app ou le navigateur YouTube.
+function youtubeEmbedUrl(url) {
+  if (!url) return null;
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+  let id = null;
+  if (parsed.hostname.includes("youtu.be")) {
+    id = parsed.pathname.slice(1);
+  } else if (parsed.hostname.includes("youtube.com")) {
+    if (parsed.pathname === "/watch") id = parsed.searchParams.get("v");
+    else if (parsed.pathname.startsWith("/embed/")) id = parsed.pathname.split("/embed/")[1];
+    else if (parsed.pathname.startsWith("/shorts/")) id = parsed.pathname.split("/shorts/")[1];
+  }
+  return id ? `https://www.youtube.com/embed/${id}` : null;
+}
+
+function VideoEmbed({ url }) {
+  const embedUrl = youtubeEmbedUrl(url);
+  if (!embedUrl) return null;
+  return (
+    <div className="relative mt-3 w-full overflow-hidden rounded" style={{ paddingTop: "56.25%" }}>
+      <iframe
+        src={embedUrl}
+        className="absolute inset-0 h-full w-full"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        title="Vidéo"
+      />
+    </div>
+  );
+}
+
 export default function LivretMenu({ property, slug }) {
   const [active, setActive] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -326,19 +363,25 @@ export default function LivretMenu({ property, slug }) {
                     </a>
                   )}
 
-                  {active === "basuras" && property.waste_photo && (
+                  {active === "basuras" && (property.waste_photo || property.waste_video_url) && (
                     <div className="mt-3">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={property.waste_photo}
-                        alt="Emplacement des poubelles"
-                        className="h-40 w-full rounded object-cover border border-sand-dim"
-                      />
+                      {property.waste_photo && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={property.waste_photo}
+                          alt="Emplacement des poubelles"
+                          className="h-40 w-full rounded object-cover border border-sand-dim"
+                        />
+                      )}
+                      <VideoEmbed url={property.waste_video_url} />
                     </div>
                   )}
 
                   {active === "horaires" &&
-                    (property.key_instructions || property.key_lockbox_code || property.key_photos?.length > 0) && (
+                    (property.key_instructions ||
+                      property.key_lockbox_code ||
+                      property.key_photos?.length > 0 ||
+                      property.key_video_url) && (
                       <div className="mt-4 border-t border-sand-dim pt-4">
                         <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
                           Récupération des clés
@@ -365,6 +408,7 @@ export default function LivretMenu({ property, slug }) {
                             ))}
                           </div>
                         )}
+                        <VideoEmbed url={property.key_video_url} />
                       </div>
                     )}
                 </>

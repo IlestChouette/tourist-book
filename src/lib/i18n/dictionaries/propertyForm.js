@@ -41,6 +41,8 @@ const dict = {
     lockboxCode: "Code d'accès (le cas échéant)",
     lockboxCodePlaceholder: "Ex : 4821",
     keyPhotos: (n, max) => `Photos de l'emplacement des clés (${n}/${max})`,
+    videoUrl: "Lien vidéo (YouTube, facultatif)",
+    videoUrlPlaceholder: "https://youtube.com/watch?v=...",
   },
   en: {
     name: "Name",
@@ -84,6 +86,8 @@ const dict = {
     lockboxCode: "Access code (if applicable)",
     lockboxCodePlaceholder: "E.g.: 4821",
     keyPhotos: (n, max) => `Photos of the key location (${n}/${max})`,
+    videoUrl: "Video link (YouTube, optional)",
+    videoUrlPlaceholder: "https://youtube.com/watch?v=...",
   },
   es: {
     name: "Nombre",
@@ -127,6 +131,8 @@ const dict = {
     lockboxCode: "Código de acceso (si aplica)",
     lockboxCodePlaceholder: "Ej: 4821",
     keyPhotos: (n, max) => `Fotos del lugar de las llaves (${n}/${max})`,
+    videoUrl: "Enlace de video (YouTube, opcional)",
+    videoUrlPlaceholder: "https://youtube.com/watch?v=...",
   },
 };
 
