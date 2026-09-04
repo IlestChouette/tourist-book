@@ -21,6 +21,15 @@ const content = {
     notes: "Remarques",
     copy: "Copier le message",
     copied: "Copié !",
+    ratesTitle: "Tarifs (privé)",
+    ratesHint: "Visible uniquement par vous — jamais montré au voyageur ni au transporteur. Sert de mémo pour répondre vite.",
+    ratesEmpty: "Aucun tarif enregistré pour l'instant.",
+    pickupLocation: "Lieu de prise en charge",
+    pickupPlaceholder: "Ex : Aéroport Nice Côte d'Azur",
+    passengersLabel: "Passagers",
+    price: "Prix (€)",
+    addRate: "Ajouter →",
+    delete: "Supprimer",
   },
   en: {
     eyebrow: "Host panel",
@@ -36,6 +45,15 @@ const content = {
     notes: "Notes",
     copy: "Copy message",
     copied: "Copied!",
+    ratesTitle: "Rates (private)",
+    ratesHint: "Only visible to you — never shown to the guest or the driver. A quick reference to answer fast.",
+    ratesEmpty: "No rate saved yet.",
+    pickupLocation: "Pickup location",
+    pickupPlaceholder: "E.g.: Nice Côte d'Azur Airport",
+    passengersLabel: "Passengers",
+    price: "Price (€)",
+    addRate: "Add →",
+    delete: "Delete",
   },
   es: {
     eyebrow: "Panel hotelero",
@@ -51,6 +69,15 @@ const content = {
     notes: "Comentarios",
     copy: "Copiar mensaje",
     copied: "¡Copiado!",
+    ratesTitle: "Tarifas (privado)",
+    ratesHint: "Solo lo ves tú — nunca se muestra al huésped ni al transportista. Sirve de referencia rápida para responder rápido.",
+    ratesEmpty: "Todavía no hay ninguna tarifa guardada.",
+    pickupLocation: "Lugar de recogida",
+    pickupPlaceholder: "Ej: Aeropuerto Niza Costa Azul",
+    passengersLabel: "Pasajeros",
+    price: "Precio (€)",
+    addRate: "Agregar →",
+    delete: "Eliminar",
   },
 };
 
@@ -61,8 +88,11 @@ export default function TransfertsPage({ params }) {
 
   const [property, setProperty] = useState(null);
   const [requests, setRequests] = useState([]);
+  const [rates, setRates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState(null);
+  const [newRate, setNewRate] = useState({ pickup_location: "", passengers: "1", price: "" });
+  const [savingRate, setSavingRate] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -72,10 +102,46 @@ export default function TransfertsPage({ params }) {
 
       const res = await fetch(`/api/requests?propertyId=${id}`);
       setRequests(res.ok ? await res.json() : []);
+
+      const { data: rateRows } = await supabase
+        .from("transfer_rates")
+        .select("*")
+        .eq("property_id", id)
+        .order("created_at", { ascending: true });
+      setRates(rateRows ?? []);
+
       setLoading(false);
     }
     load();
   }, [id]);
+
+  async function addRate(e) {
+    e.preventDefault();
+    if (!newRate.pickup_location || !newRate.price) return;
+    setSavingRate(true);
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("transfer_rates")
+      .insert({
+        property_id: id,
+        pickup_location: newRate.pickup_location,
+        passengers: Number(newRate.passengers),
+        price: Number(newRate.price),
+      })
+      .select()
+      .single();
+    setSavingRate(false);
+    if (!error) {
+      setRates((r) => [...r, data]);
+      setNewRate({ pickup_location: "", passengers: "1", price: "" });
+    }
+  }
+
+  async function deleteRate(rateId) {
+    const supabase = createClient();
+    await supabase.from("transfer_rates").delete().eq("id", rateId);
+    setRates((r) => r.filter((rate) => rate.id !== rateId));
+  }
 
   async function copyMessage(r) {
     const message = formatTransferWhatsAppMessage({
@@ -110,7 +176,66 @@ export default function TransfertsPage({ params }) {
         title={t.title}
       />
       <section className="mx-auto max-w-2xl px-6 py-10">
-        {requests.length === 0 && <p className="text-ink/60">{t.empty}</p>}
+        <div className="rounded border border-sand-dim bg-sand-card p-4">
+          <h2 className="font-display italic text-xl text-ink">{t.ratesTitle}</h2>
+          <p className="mt-1 text-xs text-ink/60">{t.ratesHint}</p>
+
+          {rates.length === 0 && <p className="mt-3 text-sm text-ink/60">{t.ratesEmpty}</p>}
+          {rates.length > 0 && (
+            <div className="mt-3 grid gap-2">
+              {rates.map((rate) => (
+                <div key={rate.id} className="flex items-center justify-between gap-2 rounded border border-sand-dim bg-sand p-2.5 text-sm">
+                  <span className="text-ink">
+                    {rate.pickup_location} · {rate.passengers} {t.passengers} · <strong>{Number(rate.price).toFixed(2)} €</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => deleteRate(rate.id)}
+                    className="shrink-0 text-xs font-bold uppercase tracking-wide text-terracotta-deep hover:underline"
+                  >
+                    {t.delete}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <form onSubmit={addRate} className="mt-4 grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
+            <input
+              placeholder={t.pickupPlaceholder}
+              value={newRate.pickup_location}
+              onChange={(e) => setNewRate((f) => ({ ...f, pickup_location: e.target.value }))}
+              className="input"
+            />
+            <input
+              type="number"
+              min="1"
+              placeholder={t.passengersLabel}
+              value={newRate.passengers}
+              onChange={(e) => setNewRate((f) => ({ ...f, passengers: e.target.value }))}
+              className="input"
+            />
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder={t.price}
+              value={newRate.price}
+              onChange={(e) => setNewRate((f) => ({ ...f, price: e.target.value }))}
+              className="input"
+            />
+            <button
+              type="submit"
+              disabled={savingRate}
+              className="rounded bg-aqua-deep px-4 py-2 text-sm font-bold text-sand-card transition-colors hover:bg-aqua-deep/90 disabled:opacity-60"
+            >
+              {t.addRate}
+            </button>
+          </form>
+        </div>
+
+        <h2 className="mt-8 font-display italic text-xl text-ink">{t.title}</h2>
+        {requests.length === 0 && <p className="mt-2 text-ink/60">{t.empty}</p>}
 
         <div className="grid gap-3">
           {requests.map((r) => {
