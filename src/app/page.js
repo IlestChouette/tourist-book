@@ -151,7 +151,7 @@ const content = {
       "Offre annuelle : 1 mois d'essai gratuit lors de votre première souscription (par compte, pas par logement) ; l'abonnement se renouvelle chaque année et ne peut être résilié qu'une fois l'année en cours terminée. Offre saisonnière : sans essai gratuit, facturation mensuelle, résiliable à tout moment.",
     positioningTitle: "Pensé pour la Côte d'Azur, pas pour une chaîne hôtelière",
     positioningBody:
-      "Beausoleil, Roquebrune-Cap-Martin, Saint-Paul-de-Vence, Nice et d'autres villes de la Côte d'Azur — Tourist Book est fait pour l'hôte qui gère un ou plusieurs logements lui-même, pas pour une agence de cent biens.",
+      "Beausoleil, Roquebrune-Cap-Martin, Saint-Paul-de-Vence, Nice et d'autres villes des Alpes-Maritimes et de la Côte d'Azur — Tourist Book est fait pour l'hôte qui gère un ou plusieurs logements lui-même, pas pour une agence de cent biens.",
     faqTitle: "Questions fréquentes",
     faq: [
       {
@@ -231,7 +231,7 @@ const content = {
       "Annual plan: 1 month free trial the first time you subscribe (per account, not per property); the subscription renews every year and can only be cancelled once the current year is over. Seasonal plan: no free trial, monthly billing, cancel anytime.",
     positioningTitle: "Built for the French Riviera, not a hotel chain",
     positioningBody:
-      "Beausoleil, Roquebrune-Cap-Martin, Saint-Paul-de-Vence, Nice and other towns on the French Riviera — Tourist Book is made for the host who manages one or a few properties themselves, not an agency running a hundred listings.",
+      "Beausoleil, Roquebrune-Cap-Martin, Saint-Paul-de-Vence, Nice and other towns in the Alpes-Maritimes and the French Riviera — Tourist Book is made for the host who manages one or a few properties themselves, not an agency running a hundred listings.",
     faqTitle: "Frequently asked questions",
     faq: [
       {
@@ -311,7 +311,7 @@ const content = {
       "Plan anual: 1 mes de prueba gratuita la primera vez que te suscribes (por cuenta, no por alojamiento); la suscripción se renueva cada año y solo puede cancelarse una vez transcurrido el año en curso. Plan por temporada: sin prueba gratuita, facturación mensual, cancela cuando quieras.",
     positioningTitle: "Pensado para la Côte d'Azur, no para una cadena hotelera",
     positioningBody:
-      "Beausoleil, Roquebrune-Cap-Martin, Saint-Paul-de-Vence, Niza y otras ciudades de la Côte d'Azur — Tourist Book está hecho para el anfitrión que gestiona uno o varios alojamientos él mismo, no para una gestora de cien propiedades.",
+      "Beausoleil, Roquebrune-Cap-Martin, Saint-Paul-de-Vence, Niza y otras ciudades de los Alpes-Marítimos y la Côte d'Azur — Tourist Book está hecho para el anfitrión que gestiona uno o varios alojamientos él mismo, no para una gestora de cien propiedades.",
     faqTitle: "Preguntas frecuentes",
     faq: [
       {
