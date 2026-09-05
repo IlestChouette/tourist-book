@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import Anthropic from "@anthropic-ai/sdk";
-import { getPropertyBySlug } from "@/lib/properties";
+import { getPropertyBySlug, hasActiveSubscription } from "@/lib/properties";
 
 const MODEL = "claude-opus-5";
 
@@ -70,6 +70,9 @@ export async function POST(request) {
   const property = await getPropertyBySlug(slug);
   if (!property) {
     return Response.json({ error: "Logement introuvable" }, { status: 404 });
+  }
+  if (!hasActiveSubscription(property)) {
+    return Response.json({ error: "Abonnement inactif" }, { status: 403 });
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;

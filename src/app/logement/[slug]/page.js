@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { getPropertyBySlug } from "@/lib/properties";
+import { getPropertyBySlug, hasActiveSubscription } from "@/lib/properties";
 import { createAdminClient } from "@/lib/supabase/admin";
 import LivretHero from "@/components/LivretHero";
 import LivretMenu from "@/components/LivretMenu";
@@ -34,6 +34,17 @@ export default async function LivretPage({ params }) {
   const { slug } = await params;
   const property = await getPropertyBySlug(slug);
   if (!property) notFound();
+
+  if (!hasActiveSubscription(property)) {
+    return (
+      <main className="flex flex-1 items-center justify-center px-6 py-20 text-center">
+        <p className="max-w-sm text-ink/70">
+          Ce livret n&apos;est plus disponible. Contacte directement ton hôte pour obtenir les informations de ton
+          séjour.
+        </p>
+      </main>
+    );
+  }
 
   const photos = property.photos ?? [];
   const checkinStatus = await getGuestCheckinStatus(slug);

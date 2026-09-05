@@ -14,7 +14,7 @@ export default function EntrerForm({ params }) {
   const [code, setCode] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(!!codeFromQr);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function EntrerForm({ params }) {
 
   async function submitCode(value) {
     setLoading(true);
-    setError(false);
+    setError(null);
 
     const res = await fetch("/api/access", {
       method: "POST",
@@ -47,7 +47,11 @@ export default function EntrerForm({ params }) {
       window.location.href = next;
     } else {
       setLoading(false);
-      setError(true);
+      setError(
+        res.status === 403
+          ? "Ce livret n'est pas encore disponible — contacte ton hôte."
+          : "Code incorrect, réessaie."
+      );
     }
   }
 
@@ -59,7 +63,7 @@ export default function EntrerForm({ params }) {
   async function handleLoginSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    setError(false);
+    setError(null);
 
     const res = await fetch("/api/guest-login", {
       method: "POST",
@@ -71,7 +75,11 @@ export default function EntrerForm({ params }) {
       window.location.href = next;
     } else {
       setLoading(false);
-      setError(true);
+      setError(
+        res.status === 403
+          ? "Ce livret n'est pas encore disponible — contacte ton hôte."
+          : "Identifiant ou mot de passe incorrect."
+      );
     }
   }
 
@@ -115,13 +123,13 @@ export default function EntrerForm({ params }) {
               >
                 {loading ? "Vérification…" : "Accéder au livret →"}
               </button>
-              {error && <p className="text-sm text-terracotta-deep">Code incorrect, réessaie.</p>}
+              {error && <p className="text-sm text-terracotta-deep">{error}</p>}
             </form>
             <button
               type="button"
               onClick={() => {
                 setMode("login");
-                setError(false);
+                setError(null);
               }}
               className="mt-4 text-xs font-bold uppercase tracking-wider text-ink/50 hover:text-ink"
             >
@@ -157,13 +165,13 @@ export default function EntrerForm({ params }) {
               >
                 {loading ? "Vérification…" : "Se connecter →"}
               </button>
-              {error && <p className="text-sm text-terracotta-deep">Identifiant ou mot de passe incorrect.</p>}
+              {error && <p className="text-sm text-terracotta-deep">{error}</p>}
             </form>
             <button
               type="button"
               onClick={() => {
                 setMode("code");
-                setError(false);
+                setError(null);
               }}
               className="mt-4 text-xs font-bold uppercase tracking-wider text-ink/50 hover:text-ink"
             >

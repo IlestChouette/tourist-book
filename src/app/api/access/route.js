@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPropertyBySlug } from "@/lib/properties";
+import { getPropertyBySlug, hasActiveSubscription } from "@/lib/properties";
 
 export async function POST(request) {
   const { slug, code } = await request.json();
@@ -7,6 +7,10 @@ export async function POST(request) {
 
   if (!property || String(code ?? "").trim() !== property.access_code) {
     return NextResponse.json({ ok: false }, { status: 401 });
+  }
+
+  if (!hasActiveSubscription(property)) {
+    return NextResponse.json({ ok: false, error: "Abonnement inactif" }, { status: 403 });
   }
 
   const response = NextResponse.json({ ok: true });

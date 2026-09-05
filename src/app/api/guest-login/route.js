@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyPassword } from "@/lib/password";
+import { hasActiveSubscription } from "@/lib/properties";
 
 export async function POST(request) {
   const { slug, username, password } = await request.json();
@@ -9,9 +10,12 @@ export async function POST(request) {
   }
 
   const admin = createAdminClient();
-  const { data: property } = await admin.from("properties").select("id").eq("slug", slug).single();
+  const { data: property } = await admin.from("properties").select("id, subscription_status").eq("slug", slug).single();
   if (!property) {
     return NextResponse.json({ error: "Logement introuvable" }, { status: 404 });
+  }
+  if (!hasActiveSubscription(property)) {
+    return NextResponse.json({ error: "Abonnement inactif" }, { status: 403 });
   }
 
   const { data: account } = await admin

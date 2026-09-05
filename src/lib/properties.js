@@ -8,3 +8,11 @@ export async function getPropertyBySlug(slug) {
   const { data } = await admin.from("properties").select("*").eq("slug", slug).single();
   return data;
 }
+
+// Un logement créé mais jamais souscrit (subscription_status: null) ou dont
+// l'abonnement a expiré/été annulé ne doit pas avoir de livret fonctionnel —
+// sans ça, un hôte pourrait créer un logement, ne jamais payer, et partager
+// quand même le lien à ses voyageurs indéfiniment.
+export function hasActiveSubscription(property) {
+  return ["trialing", "active"].includes(property?.subscription_status);
+}
