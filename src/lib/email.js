@@ -52,3 +52,36 @@ export async function sendTransferRequestNotification({ hostEmail, propertyName,
 
   return { sent: true };
 }
+
+const CONTACT_NOTIFICATION_EMAIL = "allo@ilestchouette.fr";
+
+// Notifie Fernando dès qu'un futur client remplit le formulaire de contact
+// de la landing page.
+export async function sendContactLeadNotification({ name, phone, email, propertiesCount }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const resend = new Resend(apiKey);
+
+  const lines = [
+    "Nouveau contact depuis tourist-book.com",
+    "",
+    `Nom : ${name}`,
+    `Téléphone : ${phone}`,
+    `Email : ${email}`,
+    `Logements gérés : ${propertiesCount ?? "-"}`,
+  ];
+
+  const { error } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject: `Nouveau contact — ${name}`,
+    text: lines.join("\n"),
+  });
+
+  if (error) {
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+
+  return { sent: true };
+}

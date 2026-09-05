@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import ContactButton from "@/components/ContactButton";
 import PricingCards from "@/components/PricingCards";
 import { getLocale } from "@/lib/i18n/locale";
 
@@ -547,6 +548,9 @@ export default async function Home() {
               <p className="mt-3 text-ink/70">{item.a}</p>
             </details>
           ))}
+        </div>
+        <div className="mt-8 text-center">
+          <ContactButton locale={locale} />
         </div>
       </section>
 
