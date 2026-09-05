@@ -74,8 +74,17 @@ function CategoryIcon({ label }) {
   }
 }
 
+// Une adresse seule ("12 rue de la République") est ambiguë pour Google Maps
+// sans la ville ni le code postal — ça ne pose pas de problème pour une rue
+// mondialement connue, mais pour une adresse normale, ça retombe souvent sur
+// une vue large (toute la France) au lieu de localiser le logement.
+function fullAddress(property) {
+  return [property.address, property.postal_code, property.city].filter(Boolean).join(", ");
+}
+
 export default function CarteInteractive({ property }) {
-  const [selected, setSelected] = useState({ name: property.name, mapsQuery: property.address });
+  const address = fullAddress(property);
+  const [selected, setSelected] = useState({ name: property.name, mapsQuery: address });
   const [activeCategory, setActiveCategory] = useState(null);
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState(null);
@@ -83,13 +92,13 @@ export default function CarteInteractive({ property }) {
   function resetToProperty() {
     setActiveCategory(null);
     setSearchResult(null);
-    setSelected({ name: property.name, mapsQuery: property.address });
+    setSelected({ name: property.name, mapsQuery: address });
   }
 
   function selectCategory(cat) {
     setActiveCategory(cat.key);
     setSearchResult(null);
-    setSelected({ name: cat.label, mapsQuery: `${cat.query} près de ${property.address}` });
+    setSelected({ name: cat.label, mapsQuery: `${cat.query} près de ${address}` });
   }
 
   function handleSearchSubmit(e) {
@@ -97,7 +106,7 @@ export default function CarteInteractive({ property }) {
     const query = search.trim();
     if (!query) return;
     setActiveCategory(null);
-    const mapsQuery = `${query} près de ${property.address}`;
+    const mapsQuery = `${query} près de ${address}`;
     setSelected({ name: query, mapsQuery });
     setSearchResult({ name: query, mapsQuery });
   }
@@ -198,7 +207,7 @@ export default function CarteInteractive({ property }) {
         ))}
       </div>
 
-      {selected.mapsQuery !== property.address && (
+      {selected.mapsQuery !== address && (
         <a
           href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(selected.mapsQuery)}`}
           target="_blank"
