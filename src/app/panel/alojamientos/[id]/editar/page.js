@@ -195,20 +195,15 @@ export default function EditarAlojamientoPage({ params }) {
     );
   }
 
-  // Ouvre le panneau des détails facultatifs par défaut si le logement en a
-  // déjà — pour ne pas cacher au propriétaire ce qu'il a déjà rempli.
-  const hasExtraDetails = Boolean(
-    form.description ||
-      form.house_rules ||
-      form.waste_instructions ||
-      form.waste_video_url ||
-      existingWastePhoto ||
-      form.general_info ||
-      form.local_recommendations ||
-      form.key_instructions ||
-      form.key_lockbox_code ||
-      form.key_video_url ||
-      existingKeyPhotos.length > 0
+  // Ouvre chaque panneau facultatif par défaut si le logement a déjà des
+  // données dedans — pour ne pas cacher au propriétaire ce qu'il a rempli.
+  const hasWelcomeMessage = Boolean(form.description);
+  const hasHouseRules = Boolean(form.house_rules);
+  const hasWasteManagement = Boolean(form.waste_instructions || form.waste_video_url || existingWastePhoto);
+  const hasGeneralInfo = Boolean(form.general_info);
+  const hasLocalRecommendations = Boolean(form.local_recommendations);
+  const hasKeyPickup = Boolean(
+    form.key_instructions || form.key_lockbox_code || form.key_video_url || existingKeyPhotos.length > 0
   );
 
   return (
@@ -352,202 +347,223 @@ export default function EditarAlojamientoPage({ params }) {
             </div>
           </div>
 
-          <details
-            open={hasExtraDetails}
-            className="group rounded border border-sand-dim [&_summary::-webkit-details-marker]:hidden"
-          >
+          <p className="mt-2 text-xs font-bold uppercase tracking-wider text-ink/40">{t.moreDetailsToggle}</p>
+
+          <details open={hasWelcomeMessage} className="group rounded border border-sand-dim [&_summary::-webkit-details-marker]:hidden">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-sand-card p-4 text-sm font-bold uppercase tracking-wider text-ink/70">
-              {t.moreDetailsToggle}
+              {t.welcomeMessage}
+              <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="grid gap-1.5 p-4">
+              <textarea
+                rows={5}
+                placeholder={t.welcomeMessagePlaceholder}
+                value={form.description}
+                onChange={update("description")}
+                className="input"
+              />
+              <span className="text-xs text-ink/50">{t.welcomeMessageHint}</span>
+            </div>
+          </details>
+
+          <details open={hasHouseRules} className="group rounded border border-sand-dim [&_summary::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-sand-card p-4 text-sm font-bold uppercase tracking-wider text-ink/70">
+              {t.houseRules}
+              <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="p-4">
+              <textarea
+                rows={3}
+                placeholder={t.houseRulesPlaceholder}
+                value={form.house_rules}
+                onChange={update("house_rules")}
+                className="input"
+              />
+            </div>
+          </details>
+
+          <details open={hasWasteManagement} className="group rounded border border-sand-dim [&_summary::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-sand-card p-4 text-sm font-bold uppercase tracking-wider text-ink/70">
+              {t.wasteManagement}
               <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
             </summary>
             <div className="grid gap-4 p-4">
               <label className="grid gap-1.5">
-                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.welcomeMessage}</span>
-                <textarea
-                  rows={5}
-                  placeholder={t.welcomeMessagePlaceholder}
-                  value={form.description}
-                  onChange={update("description")}
-                  className="input"
-                />
-                <span className="text-xs text-ink/50">{t.welcomeMessageHint}</span>
-              </label>
-
-              <label className="grid gap-1.5">
-                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.houseRules}</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wasteInstructions}</span>
                 <textarea
                   rows={3}
-                  placeholder={t.houseRulesPlaceholder}
-                  value={form.house_rules}
-                  onChange={update("house_rules")}
+                  placeholder={t.wasteInstructionsPlaceholder}
+                  value={form.waste_instructions}
+                  onChange={update("waste_instructions")}
                   className="input"
                 />
               </label>
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.photoOptional}</span>
+                <div className="mt-2 flex flex-wrap gap-3">
+                  {newWastePhoto ? (
+                    <div className="relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={URL.createObjectURL(newWastePhoto)}
+                        alt=""
+                        className="h-20 w-20 rounded object-cover border border-sand-dim"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setNewWastePhoto(null)}
+                        className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ) : existingWastePhoto ? (
+                    <div className="relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={existingWastePhoto}
+                        alt=""
+                        className="h-20 w-20 rounded object-cover border border-sand-dim"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setExistingWastePhoto(null)}
+                        className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded border border-dashed border-sand-dim text-xs text-ink/50">
+                      {t.addPhoto}
+                      <input type="file" accept="image/*" onChange={handleWastePhoto} className="hidden" />
+                    </label>
+                  )}
+                </div>
+              </div>
+              <label className="grid gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.videoUrl}</span>
+                <input
+                  type="url"
+                  placeholder={t.videoUrlPlaceholder}
+                  value={form.waste_video_url}
+                  onChange={update("waste_video_url")}
+                  className="input"
+                />
+              </label>
+            </div>
+          </details>
 
-          <div className="mt-2 grid gap-4 rounded border border-sand-dim bg-sand-card p-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wasteManagement}</span>
-            <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wasteInstructions}</span>
+          <details open={hasGeneralInfo} className="group rounded border border-sand-dim [&_summary::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-sand-card p-4 text-sm font-bold uppercase tracking-wider text-ink/70">
+              {t.generalInfo}
+              <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="p-4">
               <textarea
                 rows={3}
-                placeholder={t.wasteInstructionsPlaceholder}
-                value={form.waste_instructions}
-                onChange={update("waste_instructions")}
+                placeholder={t.generalInfoPlaceholder}
+                value={form.general_info}
+                onChange={update("general_info")}
                 className="input"
               />
-            </label>
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.photoOptional}</span>
-              <div className="mt-2 flex flex-wrap gap-3">
-                {newWastePhoto ? (
-                  <div className="relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={URL.createObjectURL(newWastePhoto)}
-                      alt=""
-                      className="h-20 w-20 rounded object-cover border border-sand-dim"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setNewWastePhoto(null)}
-                      className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ) : existingWastePhoto ? (
-                  <div className="relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={existingWastePhoto}
-                      alt=""
-                      className="h-20 w-20 rounded object-cover border border-sand-dim"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setExistingWastePhoto(null)}
-                      className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ) : (
-                  <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded border border-dashed border-sand-dim text-xs text-ink/50">
-                    {t.addPhoto}
-                    <input type="file" accept="image/*" onChange={handleWastePhoto} className="hidden" />
-                  </label>
-                )}
-              </div>
             </div>
-            <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.videoUrl}</span>
-              <input
-                type="url"
-                placeholder={t.videoUrlPlaceholder}
-                value={form.waste_video_url}
-                onChange={update("waste_video_url")}
-                className="input"
-              />
-            </label>
-          </div>
+          </details>
 
-          <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.generalInfo}</span>
-            <textarea
-              rows={3}
-              placeholder={t.generalInfoPlaceholder}
-              value={form.general_info}
-              onChange={update("general_info")}
-              className="input"
-            />
-          </label>
-
-          <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.localRecommendations}</span>
-            <textarea
-              rows={4}
-              placeholder={t.localRecommendationsPlaceholder}
-              value={form.local_recommendations}
-              onChange={update("local_recommendations")}
-              className="input"
-            />
-          </label>
-
-          <div className="mt-2 grid gap-4 rounded border border-sand-dim bg-sand-card p-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.keyPickup}</span>
-            <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.keyInstructions}</span>
+          <details open={hasLocalRecommendations} className="group rounded border border-sand-dim [&_summary::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-sand-card p-4 text-sm font-bold uppercase tracking-wider text-ink/70">
+              {t.localRecommendations}
+              <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="p-4">
               <textarea
-                rows={3}
-                placeholder={t.keyInstructionsPlaceholder}
-                value={form.key_instructions}
-                onChange={update("key_instructions")}
+                rows={4}
+                placeholder={t.localRecommendationsPlaceholder}
+                value={form.local_recommendations}
+                onChange={update("local_recommendations")}
                 className="input"
               />
-            </label>
-            <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.lockboxCode}</span>
-              <input
-                placeholder={t.lockboxCodePlaceholder}
-                value={form.key_lockbox_code}
-                onChange={update("key_lockbox_code")}
-                className="input"
-              />
-            </label>
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-                {t.keyPhotos(totalKeyPhotos, MAX_KEY_PHOTOS)}
-              </span>
-              <div className="mt-2 flex flex-wrap gap-3">
-                {existingKeyPhotos.map((url, i) => (
-                  <div key={url} className="relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={url} alt="" className="h-20 w-20 rounded object-cover border border-sand-dim" />
-                    <button
-                      type="button"
-                      onClick={() => removeExistingKeyPhoto(i)}
-                      className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-                {newKeyPhotos.map((file, i) => (
-                  <div key={i} className="relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt=""
-                      className="h-20 w-20 rounded object-cover border border-sand-dim"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeNewKeyPhoto(i)}
-                      className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-                {totalKeyPhotos < MAX_KEY_PHOTOS && (
-                  <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded border border-dashed border-sand-dim text-xs text-ink/50">
-                    {t.addPhoto}
-                    <input type="file" accept="image/*" multiple onChange={handleKeyPhotos} className="hidden" />
-                  </label>
-                )}
-              </div>
             </div>
-            <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.videoUrl}</span>
-              <input
-                type="url"
-                placeholder={t.videoUrlPlaceholder}
-                value={form.key_video_url}
-                onChange={update("key_video_url")}
-                className="input"
-              />
-            </label>
-          </div>
+          </details>
+
+          <details open={hasKeyPickup} className="group rounded border border-sand-dim [&_summary::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-sand-card p-4 text-sm font-bold uppercase tracking-wider text-ink/70">
+              {t.keyPickup}
+              <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="grid gap-4 p-4">
+              <label className="grid gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.keyInstructions}</span>
+                <textarea
+                  rows={3}
+                  placeholder={t.keyInstructionsPlaceholder}
+                  value={form.key_instructions}
+                  onChange={update("key_instructions")}
+                  className="input"
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.lockboxCode}</span>
+                <input
+                  placeholder={t.lockboxCodePlaceholder}
+                  value={form.key_lockbox_code}
+                  onChange={update("key_lockbox_code")}
+                  className="input"
+                />
+              </label>
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
+                  {t.keyPhotos(totalKeyPhotos, MAX_KEY_PHOTOS)}
+                </span>
+                <div className="mt-2 flex flex-wrap gap-3">
+                  {existingKeyPhotos.map((url, i) => (
+                    <div key={url} className="relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt="" className="h-20 w-20 rounded object-cover border border-sand-dim" />
+                      <button
+                        type="button"
+                        onClick={() => removeExistingKeyPhoto(i)}
+                        className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  {newKeyPhotos.map((file, i) => (
+                    <div key={i} className="relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt=""
+                        className="h-20 w-20 rounded object-cover border border-sand-dim"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeNewKeyPhoto(i)}
+                        className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-xs font-bold text-ink"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  {totalKeyPhotos < MAX_KEY_PHOTOS && (
+                    <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded border border-dashed border-sand-dim text-xs text-ink/50">
+                      {t.addPhoto}
+                      <input type="file" accept="image/*" multiple onChange={handleKeyPhotos} className="hidden" />
+                    </label>
+                  )}
+                </div>
+              </div>
+              <label className="grid gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.videoUrl}</span>
+                <input
+                  type="url"
+                  placeholder={t.videoUrlPlaceholder}
+                  value={form.key_video_url}
+                  onChange={update("key_video_url")}
+                  className="input"
+                />
+              </label>
             </div>
           </details>
 
