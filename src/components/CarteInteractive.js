@@ -74,6 +74,15 @@ function CategoryIcon({ label }) {
   }
 }
 
+function LocationIcon() {
+  return (
+    <svg {...iconProps} width="22" height="22">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+    </svg>
+  );
+}
+
 // Une adresse seule ("12 rue de la République") est ambiguë pour Google Maps
 // sans la ville ni le code postal — ça ne pose pas de problème pour une rue
 // mondialement connue, mais pour une adresse normale, ça retombe souvent sur
@@ -84,21 +93,53 @@ function fullAddress(property) {
 
 export default function CarteInteractive({ property }) {
   const address = fullAddress(property);
+  const propertyAnchor = { label: property.name, query: address, isUserLocation: false };
+
+  const [anchor, setAnchor] = useState(propertyAnchor);
   const [selected, setSelected] = useState({ name: property.name, mapsQuery: address });
   const [activeCategory, setActiveCategory] = useState(null);
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState(null);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState(null);
 
   function resetToProperty() {
+    setAnchor(propertyAnchor);
     setActiveCategory(null);
     setSearchResult(null);
+    setLocationError(null);
     setSelected({ name: property.name, mapsQuery: address });
+  }
+
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      setLocationError("La géolocalisation n'est pas disponible sur cet appareil.");
+      return;
+    }
+    setLocating(true);
+    setLocationError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = `${position.coords.latitude},${position.coords.longitude}`;
+        const nextAnchor = { label: "Ma position", query: coords, isUserLocation: true };
+        setAnchor(nextAnchor);
+        setLocating(false);
+        setActiveCategory(null);
+        setSearchResult(null);
+        setSelected({ name: "Ma position", mapsQuery: coords });
+      },
+      () => {
+        setLocating(false);
+        setLocationError("Impossible d'accéder à ta position — vérifie les autorisations de localisation.");
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
   }
 
   function selectCategory(cat) {
     setActiveCategory(cat.key);
     setSearchResult(null);
-    setSelected({ name: cat.label, mapsQuery: `${cat.query} près de ${address}` });
+    setSelected({ name: cat.label, mapsQuery: `${cat.query} près de ${anchor.query}` });
   }
 
   function handleSearchSubmit(e) {
@@ -106,7 +147,7 @@ export default function CarteInteractive({ property }) {
     const query = search.trim();
     if (!query) return;
     setActiveCategory(null);
-    const mapsQuery = `${query} près de ${address}`;
+    const mapsQuery = `${query} près de ${anchor.query}`;
     setSelected({ name: query, mapsQuery });
     setSearchResult({ name: query, mapsQuery });
   }
@@ -147,8 +188,9 @@ export default function CarteInteractive({ property }) {
       </form>
       <p className="mt-1.5 text-xs text-ink/50">
         Tape un lieu et appuie sur « Rechercher », ou choisis une catégorie ci-dessous — la carte
-        cherche toujours à proximité immédiate du logement.
+        cherche toujours à proximité de {anchor.isUserLocation ? "ta position actuelle" : "ton logement"}.
       </p>
+      {locationError && <p className="mt-1.5 text-xs text-terracotta-deep">{locationError}</p>}
 
       {searchResult && (
         <div className="mt-6">
@@ -157,7 +199,9 @@ export default function CarteInteractive({ property }) {
           </h2>
           <div className="mt-3 rounded border border-terracotta bg-sand-card p-4">
             <span className="block font-bold text-ink">{searchResult.name}</span>
-            <span className="block text-sm text-ink/70">Recherché près du logement</span>
+            <span className="block text-sm text-ink/70">
+              Recherché près {anchor.isUserLocation ? "de ta position" : "du logement"}
+            </span>
             <a
               href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(searchResult.mapsQuery)}`}
               target="_blank"
@@ -174,7 +218,7 @@ export default function CarteInteractive({ property }) {
         <button type="button" onClick={resetToProperty} className="flex w-16 flex-col items-center gap-1.5 text-center">
           <span
             className={`flex h-14 w-14 items-center justify-center rounded-full border-2 transition-colors ${
-              activeCategory === null
+              !anchor.isUserLocation && activeCategory === null
                 ? "border-terracotta bg-terracotta text-ink"
                 : "border-sand-dim bg-sand-card text-ink/70"
             }`}
@@ -182,6 +226,21 @@ export default function CarteInteractive({ property }) {
             <CategoryIcon label="Tout" />
           </span>
           <span className="text-[11px] font-bold uppercase tracking-wide text-ink/70">Logement</span>
+        </button>
+
+        <button type="button" onClick={useMyLocation} disabled={locating} className="flex w-16 flex-col items-center gap-1.5 text-center">
+          <span
+            className={`flex h-14 w-14 items-center justify-center rounded-full border-2 transition-colors ${
+              anchor.isUserLocation && activeCategory === null
+                ? "border-terracotta bg-terracotta text-ink"
+                : "border-sand-dim bg-sand-card text-ink/70"
+            } ${locating ? "opacity-60" : ""}`}
+          >
+            <LocationIcon />
+          </span>
+          <span className="text-[11px] font-bold uppercase tracking-wide text-ink/70">
+            {locating ? "…" : "Ma position"}
+          </span>
         </button>
 
         {categories.map((cat) => (
@@ -207,7 +266,7 @@ export default function CarteInteractive({ property }) {
         ))}
       </div>
 
-      {selected.mapsQuery !== address && (
+      {selected.mapsQuery !== anchor.query && (
         <a
           href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(selected.mapsQuery)}`}
           target="_blank"
