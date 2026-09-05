@@ -173,6 +173,9 @@ export default function NuevoAlojamientoPage() {
     <main className="flex-1">
       <Hero backHref="/panel/alojamientos" backLabel={p.properties} eyebrow={p.eyebrow} title={p.title} />
       <section className="mx-auto max-w-2xl px-6 py-10">
+        <p className="-mt-2 mb-4 rounded border border-aqua-deep/30 bg-aqua-deep/5 p-3 text-sm text-ink/70">
+          {t.quickCreateHint}
+        </p>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <label className="grid gap-1.5">
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.name}</span>
@@ -260,18 +263,6 @@ export default function NuevoAlojamientoPage() {
           </div>
           <p className="-mt-2 text-xs text-ink/50">{t.contactPhoneHint}</p>
 
-          <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.welcomeMessage}</span>
-            <textarea
-              rows={4}
-              placeholder={t.welcomeMessagePlaceholder}
-              value={form.description}
-              onChange={update("description")}
-              className="input"
-            />
-            <span className="text-xs text-ink/50">{t.welcomeMessageHint}</span>
-          </label>
-
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
               {t.photos(photos.length, MAX_PHOTOS)}
@@ -303,19 +294,37 @@ export default function NuevoAlojamientoPage() {
             </div>
           </div>
 
-          <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.houseRules}</span>
-            <textarea
-              rows={3}
-              placeholder={t.houseRulesPlaceholder}
-              value={form.house_rules}
-              onChange={update("house_rules")}
-              className="input"
-            />
-          </label>
+          <details className="group rounded border border-sand-dim [&_summary::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-sand-card p-4 text-sm font-bold uppercase tracking-wider text-ink/70">
+              {t.moreDetailsToggle}
+              <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="grid gap-4 p-4">
+              <label className="grid gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.welcomeMessage}</span>
+                <textarea
+                  rows={4}
+                  placeholder={t.welcomeMessagePlaceholder}
+                  value={form.description}
+                  onChange={update("description")}
+                  className="input"
+                />
+                <span className="text-xs text-ink/50">{t.welcomeMessageHint}</span>
+              </label>
 
-          <div className="mt-2 grid gap-4 rounded border border-sand-dim bg-sand-card p-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wasteManagement}</span>
+              <label className="grid gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.houseRules}</span>
+                <textarea
+                  rows={3}
+                  placeholder={t.houseRulesPlaceholder}
+                  value={form.house_rules}
+                  onChange={update("house_rules")}
+                  className="input"
+                />
+              </label>
+
+              <div className="grid gap-4 rounded border border-sand-dim bg-sand p-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wasteManagement}</span>
             <label className="grid gap-1.5">
               <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wasteInstructions}</span>
               <textarea
@@ -450,6 +459,8 @@ export default function NuevoAlojamientoPage() {
               />
             </label>
           </div>
+            </div>
+          </details>
 
           <button
             type="submit"

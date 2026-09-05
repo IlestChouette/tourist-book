@@ -22,6 +22,8 @@ const dict = {
       'Rendez-le personnel et chaleureux — c\'est la première chose que lit votre hôte. Par exemple : "Bienvenue ! Nous sommes ravis de vous accueillir. Nous avons tout préparé avec soin pour que vous vous sentiez chez vous dès la première minute. N\'hésitez pas à nous écrire pour tout besoin durant votre séjour — nous vous souhaitons un séjour inoubliable !" Vous pouvez aussi ajouter vos recommandations du quartier.',
     welcomeMessageHint:
       "Ce texte apparaît sur la première page du livret — c'est la première impression de votre hôte. Un message chaleureux et personnel vaut mieux qu'un message générique.",
+    quickCreateHint: "Le strict nécessaire suffit pour créer votre livret — vous pourrez ajouter le reste plus tard, à votre rythme, depuis la page de modification.",
+    moreDetailsToggle: "Ajouter plus de détails (facultatif)",
     photos: (n, max) => `Photos (${n}/${max})`,
     addPhoto: "+ Ajouter",
     houseRules: "Règles du logement (facultatif)",
@@ -67,6 +69,8 @@ const dict = {
       'Make it personal and warm — it\'s the first thing your guest reads. For example: "Welcome! We\'re so happy to have you. We\'ve prepared everything with care so you feel at home from the first minute. If you need anything during your stay, just reach out — we hope you have an unforgettable stay!" You can also add your neighborhood recommendations.',
     welcomeMessageHint:
       "This text appears on the first page of the welcome book — it's your guest's first impression. A warm, personal message is worth more than a generic one.",
+    quickCreateHint: "The essentials are enough to create your livret — you can add the rest later, at your own pace, from the edit page.",
+    moreDetailsToggle: "Add more details (optional)",
     photos: (n, max) => `Photos (${n}/${max})`,
     addPhoto: "+ Add",
     houseRules: "House rules (optional)",
@@ -112,6 +116,8 @@ const dict = {
       'Hazlo personal y cálido — es lo primero que lee tu huésped. Por ejemplo: "¡Bienvenido/a! Estamos muy felices de recibirte. Hemos preparado todo con cariño para que te sientas como en casa desde el primer minuto. Cualquier cosa que necesites durante tu estancia, no dudes en escribirnos — ¡esperamos que tengas una estancia inolvidable!" Puedes añadir también tus recomendaciones del barrio.',
     welcomeMessageHint:
       "Este texto aparece en la primera página del livret — es la primera impresión de tu huésped. Un mensaje cálido y personal vale más que uno genérico.",
+    quickCreateHint: "Con lo esencial ya puedes crear tu livret — puedes agregar el resto después, a tu ritmo, desde la página de edición.",
+    moreDetailsToggle: "Agregar más detalles (opcional)",
     photos: (n, max) => `Fotos (${n}/${max})`,
     addPhoto: "+ Añadir",
     houseRules: "Reglas del lugar (opcional)",

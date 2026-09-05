@@ -195,6 +195,22 @@ export default function EditarAlojamientoPage({ params }) {
     );
   }
 
+  // Ouvre le panneau des détails facultatifs par défaut si le logement en a
+  // déjà — pour ne pas cacher au propriétaire ce qu'il a déjà rempli.
+  const hasExtraDetails = Boolean(
+    form.description ||
+      form.house_rules ||
+      form.waste_instructions ||
+      form.waste_video_url ||
+      existingWastePhoto ||
+      form.general_info ||
+      form.local_recommendations ||
+      form.key_instructions ||
+      form.key_lockbox_code ||
+      form.key_video_url ||
+      existingKeyPhotos.length > 0
+  );
+
   return (
     <main className="flex-1">
       <Hero
@@ -205,6 +221,7 @@ export default function EditarAlojamientoPage({ params }) {
       />
       <section className="mx-auto max-w-2xl px-6 py-10">
         <form onSubmit={handleSubmit} className="grid gap-4">
+          <p className="-mt-2 mb-2 text-sm text-ink/60">{t.quickCreateHint}</p>
           <label className="grid gap-1.5">
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.name}</span>
             <input required value={form.name} onChange={update("name")} className="input" />
@@ -291,18 +308,6 @@ export default function EditarAlojamientoPage({ params }) {
           </div>
           <p className="-mt-2 text-xs text-ink/50">{t.contactPhoneHint}</p>
 
-          <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.welcomeMessage}</span>
-            <textarea
-              rows={4}
-              placeholder={t.welcomeMessagePlaceholder}
-              value={form.description}
-              onChange={update("description")}
-              className="input"
-            />
-            <span className="text-xs text-ink/50">{t.welcomeMessageHint}</span>
-          </label>
-
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
               {t.photos(totalPhotos, MAX_PHOTOS)}
@@ -347,16 +352,37 @@ export default function EditarAlojamientoPage({ params }) {
             </div>
           </div>
 
-          <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.houseRules}</span>
-            <textarea
-              rows={3}
-              placeholder={t.houseRulesPlaceholder}
-              value={form.house_rules}
-              onChange={update("house_rules")}
-              className="input"
-            />
-          </label>
+          <details
+            open={hasExtraDetails}
+            className="group rounded border border-sand-dim [&_summary::-webkit-details-marker]:hidden"
+          >
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-sand-card p-4 text-sm font-bold uppercase tracking-wider text-ink/70">
+              {t.moreDetailsToggle}
+              <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="grid gap-4 p-4">
+              <label className="grid gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.welcomeMessage}</span>
+                <textarea
+                  rows={5}
+                  placeholder={t.welcomeMessagePlaceholder}
+                  value={form.description}
+                  onChange={update("description")}
+                  className="input"
+                />
+                <span className="text-xs text-ink/50">{t.welcomeMessageHint}</span>
+              </label>
+
+              <label className="grid gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.houseRules}</span>
+                <textarea
+                  rows={3}
+                  placeholder={t.houseRulesPlaceholder}
+                  value={form.house_rules}
+                  onChange={update("house_rules")}
+                  className="input"
+                />
+              </label>
 
           <div className="mt-2 grid gap-4 rounded border border-sand-dim bg-sand-card p-4">
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wasteManagement}</span>
@@ -522,6 +548,8 @@ export default function EditarAlojamientoPage({ params }) {
               />
             </label>
           </div>
+            </div>
+          </details>
 
           <button
             type="submit"
