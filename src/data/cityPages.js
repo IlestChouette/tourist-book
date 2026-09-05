@@ -1,5 +1,5 @@
-// Pages locales SEO — français uniquement, même raison que blogPosts.js :
-// sans hreflang, seule cette version a une vraie chance d'être indexée.
+// Pages locales SEO — français uniquement : sans hreflang, seule cette
+// version a une vraie chance d'être indexée par Google.
 export const cityPages = [
   {
     slug: "nice",
