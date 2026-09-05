@@ -233,7 +233,9 @@ export default function LivretMenu({ property, slug }) {
   ];
 
   const navItems = [
-    { key: "transfert", label: "Réserver un transfert", icon: <CarIcon /> },
+    ...(property.postal_code?.startsWith("06")
+      ? [{ key: "transfert", label: "Réserver un transfert", icon: <CarIcon /> }]
+      : []),
     { key: "tours", label: "Tours", icon: <CompassIcon /> },
     { key: "carte", label: "Carte locale", icon: <PinIcon /> },
     { key: "carnet", label: "Livre d'or", icon: <BookIcon /> },

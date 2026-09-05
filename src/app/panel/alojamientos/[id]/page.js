@@ -209,7 +209,7 @@ export default function AlojamientoDetallePage({ params }) {
               {t.reservations}
             </Link>
           )}
-          {active && (
+          {active && property.postal_code?.startsWith("06") && (
             <Link
               href={`/panel/alojamientos/${id}/transferts`}
               className="inline-block rounded border border-aqua-deep px-5 py-3 font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"

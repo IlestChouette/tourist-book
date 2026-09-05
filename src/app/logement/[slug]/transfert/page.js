@@ -7,6 +7,7 @@ export default async function TransfertPage({ params }) {
   const { slug } = await params;
   const property = await getPropertyBySlug(slug);
   if (!property) notFound();
+  if (!property.postal_code?.startsWith("06")) notFound();
 
   return (
     <main className="flex-1">
