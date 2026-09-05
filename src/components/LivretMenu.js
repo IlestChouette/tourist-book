@@ -201,6 +201,8 @@ function VideoEmbed({ url }) {
 
 export default function LivretMenu({ property, slug }) {
   const [active, setActive] = useState(null);
+  const [displayedItem, setDisplayedItem] = useState(null);
+  const [isClosing, setIsClosing] = useState(false);
   const [copied, setCopied] = useState(false);
   const closeButtonRef = useRef(null);
 
@@ -239,7 +241,7 @@ export default function LivretMenu({ property, slug }) {
 
   const tiles = [...infoItems, ...navItems];
   const activeItem = tiles.find((i) => i.key === active);
-  const isNav = navItems.some((i) => i.key === active);
+  const isNav = navItems.some((i) => i.key === displayedItem?.key);
   const cols = bestColumns(tiles.length);
   const wideFillers = tiles.length % cols === 0 ? 0 : cols - (tiles.length % cols);
   const whatsapp = whatsappHref(property.contact_phone);
@@ -260,6 +262,25 @@ export default function LivretMenu({ property, slug }) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [active]);
 
+  // Le panneau reste monté pendant la fermeture (isClosing) pour pouvoir
+  // jouer une transition de sortie symétrique à l'entrée — sans ça, React
+  // le démonterait instantanément dès que `active` redevient null.
+  useEffect(() => {
+    if (activeItem) {
+      // Synchronise volontairement displayedItem sur l'ouverture — cf. le
+      // commentaire ci-dessus, ce n'est pas dérivable au rendu puisqu'on doit
+      // garder l'ancienne valeur pendant la fermeture.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDisplayedItem(activeItem);
+      setIsClosing(false);
+    } else if (displayedItem) {
+      setIsClosing(true);
+      const timer = setTimeout(() => setDisplayedItem(null), 280);
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+
   async function copyWifiPassword() {
     try {
       await navigator.clipboard.writeText(property.wifi_password || "");
@@ -275,7 +296,7 @@ export default function LivretMenu({ property, slug }) {
       <div
         className="grid grid-cols-2 gap-4 sm:gap-3 tile-grid-wide"
         style={{ "--tile-cols": cols }}
-        inert={!!activeItem}
+        inert={!!displayedItem}
       >
         {tiles.map((item) => {
           const isActive = active === item.key;
@@ -284,7 +305,7 @@ export default function LivretMenu({ property, slug }) {
               key={item.key}
               type="button"
               onClick={() => setActive(item.key)}
-              className={`flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl text-center transition-colors md:gap-1.5 md:rounded-xl md:border md:shadow-sm ${
+              className={`flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl text-center transition active:scale-[0.96] md:gap-1.5 md:rounded-xl md:border md:shadow-sm ${
                 isActive
                   ? "bg-terracotta text-ink ring-2 ring-inset ring-ink/60 md:border-terracotta md:bg-terracotta/10 md:text-ink md:ring-0"
                   : "bg-terracotta text-ink md:border-sand-dim md:bg-sand-card md:text-ink md:hover:border-terracotta/60"
@@ -303,25 +324,25 @@ export default function LivretMenu({ property, slug }) {
         ))}
       </div>
 
-      {activeItem && (
+      {displayedItem && (
         <div className="fixed inset-0 z-40 flex items-end justify-center sm:items-center sm:p-6">
           <div
-            className="sheet-backdrop absolute inset-0 bg-[#12202a]/60 backdrop-blur-sm"
+            className={`sheet-backdrop absolute inset-0 bg-[#12202a]/60 backdrop-blur-sm ${isClosing ? "is-closing" : ""}`}
             onClick={close}
           />
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="livret-sheet-title"
-            className="sheet-panel relative z-10 max-h-[85vh] w-full overflow-y-auto rounded-t-3xl bg-sand-card p-6 shadow-2xl sm:max-w-md sm:rounded-3xl"
+            className={`sheet-panel relative z-10 max-h-[85vh] w-full overflow-y-auto rounded-t-3xl bg-sand-card p-6 shadow-2xl sm:max-w-md sm:rounded-3xl ${isClosing ? "is-closing" : ""}`}
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-terracotta text-ink">
-                  <span className="h-5 w-5">{activeItem.icon}</span>
+                  <span className="h-5 w-5">{displayedItem.icon}</span>
                 </span>
                 <span id="livret-sheet-title" className="font-display italic text-xl text-ink">
-                  {activeItem.label}
+                  {displayedItem.label}
                 </span>
               </div>
               <button
@@ -329,7 +350,7 @@ export default function LivretMenu({ property, slug }) {
                 type="button"
                 onClick={close}
                 aria-label="Fermer"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink/40 transition-colors hover:bg-sand hover:text-ink"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink/40 transition hover:bg-sand hover:text-ink active:scale-90"
               >
                 <CloseIcon />
               </button>
@@ -338,9 +359,9 @@ export default function LivretMenu({ property, slug }) {
             <div className="mt-4">
               {!isNav && (
                 <>
-                  {activeItem.detail && <p className="text-ink">{activeItem.detail}</p>}
+                  {displayedItem.detail && <p className="text-ink">{displayedItem.detail}</p>}
 
-                  {active === "wifi" && property.wifi_password && (
+                  {displayedItem.key === "wifi" && property.wifi_password && (
                     <button
                       type="button"
                       onClick={copyWifiPassword}
@@ -351,7 +372,7 @@ export default function LivretMenu({ property, slug }) {
                     </button>
                   )}
 
-                  {active === "contact" && whatsapp && (
+                  {displayedItem.key === "contact" && whatsapp && (
                     <a
                       href={whatsapp}
                       target="_blank"
@@ -363,7 +384,7 @@ export default function LivretMenu({ property, slug }) {
                     </a>
                   )}
 
-                  {active === "basuras" && (property.waste_photo || property.waste_video_url) && (
+                  {displayedItem.key === "basuras" && (property.waste_photo || property.waste_video_url) && (
                     <div className="mt-3">
                       {property.waste_photo && (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -377,7 +398,7 @@ export default function LivretMenu({ property, slug }) {
                     </div>
                   )}
 
-                  {active === "horaires" &&
+                  {displayedItem.key === "horaires" &&
                     (property.key_instructions ||
                       property.key_lockbox_code ||
                       property.key_photos?.length > 0 ||
@@ -416,10 +437,10 @@ export default function LivretMenu({ property, slug }) {
 
               {isNav && (
                 <>
-                  {active === "transfert" && (
+                  {displayedItem.key === "transfert" && (
                     <TransfertForm slug={slug} propertyName={property.name} propertyAddress={property.address} />
                   )}
-                  {active === "tours" && (
+                  {displayedItem.key === "tours" && (
                     <div className="rounded border border-sand-dim bg-sand p-5">
                       <p className="text-ink">
                         La réservation de tours et d&apos;activités arrive bientôt — le partenaire est en cours de
@@ -427,10 +448,10 @@ export default function LivretMenu({ property, slug }) {
                       </p>
                     </div>
                   )}
-                  {active === "carte" && (
+                  {displayedItem.key === "carte" && (
                     <CarteInteractive property={property} />
                   )}
-                  {active === "carnet" && <CarnetPanel slug={slug} />}
+                  {displayedItem.key === "carnet" && <CarnetPanel slug={slug} />}
                 </>
               )}
             </div>
