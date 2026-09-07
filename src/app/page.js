@@ -105,7 +105,7 @@ const content = {
     login: "Se connecter",
     createAccount: "Créer un compte →",
     eyebrow: "Pour les hôteliers et loueurs de la Côte d'Azur",
-    title: "Le livret d'accueil de vos hôtes, sans imprimer une seule page",
+    title: "Le livret d'accueil de vos hôtes, entièrement en ligne",
     subtitle:
       "Wifi, horaires, recommandations locales et check-in électronique — le tout dans un lien envoyé avant leur arrivée. De Beausoleil à Nice.",
     ctaPrimary: "Créer mon compte gratuit →",
@@ -119,9 +119,9 @@ const content = {
       "Un seul lien, mis à jour à l'instant, en trois langues, à vos couleurs — et le check-in fait avant même l'arrivée de vos hôtes.",
     featuresTitle: "Tout ce dont votre hôte a besoin",
     features: [
-      { title: "Wifi et horaires en un instant", desc: "Mot de passe, arrivée, départ et stationnement, comment accéder au logement — sans répéter le même message à chaque hôte." },
+      { title: "Wifi et horaires en un instant", desc: "Mot de passe, arrivée, départ et stationnement, comment accéder au logement — vos hôtes trouvent tout seuls, à toute heure." },
       { title: "Guide local avec recherche", desc: "Vos recommandations de restaurants, plages et musées, classées par catégorie." },
-      { title: "Réservation de transfert", desc: "L'hôte demande son transfert directement depuis le livret, sans appel ni tarif fixe." },
+      { title: "Réservation de transfert", desc: "L'hôte réserve son transfert directement depuis le livret, en quelques clics." },
       { title: "Livre d'or", desc: "Un livre de souvenirs numérique où vos hôtes laissent leur message." },
       { title: "Assistant virtuel", desc: "Répond aux questions fréquentes de l'hôte à toute heure." },
       { title: "Avec votre propre logo", desc: "Votre marque sur chaque page vue par l'hôte, dès le premier clic." },
@@ -176,7 +176,7 @@ const content = {
         a: "Le livret est disponible en français, anglais et espagnol — le voyageur choisit sa langue en un clic.",
       },
     ],
-    finalCtaTitle: "Prêt à arrêter d'imprimer des livrets d'accueil ?",
+    finalCtaTitle: "Prêt à passer au livret 100 % numérique ?",
   },
   en: {
     metaTitle: "Tourist Book — Digital welcome book and check-in",
@@ -185,7 +185,7 @@ const content = {
     login: "Log in",
     createAccount: "Create an account →",
     eyebrow: "For hosts and hoteliers on the French Riviera",
-    title: "Your guests' welcome book, without printing a single page",
+    title: "Your guests' welcome book, fully online",
     subtitle:
       "Wifi, schedules, local recommendations and electronic check-in — all in one link you send before they arrive. From Beausoleil to Nice.",
     ctaPrimary: "Create my free account →",
@@ -199,9 +199,9 @@ const content = {
       "One single link, updated instantly, in three languages, with your branding — and check-in done before your guests even arrive.",
     featuresTitle: "Everything your guest needs",
     features: [
-      { title: "Wifi and schedules, instantly", desc: "Password, check-in, check-out and parking, how to reach the property — without repeating the same message to every guest." },
+      { title: "Wifi and schedules, instantly", desc: "Password, check-in, check-out and parking, how to reach the property — guests find it all themselves, any time of day." },
       { title: "Local guide with search", desc: "Your restaurant, beach and museum recommendations, organized by category." },
-      { title: "Transfer booking", desc: "Guests request their transfer straight from the welcome book, no calls or fixed rates." },
+      { title: "Transfer booking", desc: "Guests book their transfer straight from the welcome book, in just a few taps." },
       { title: "Guestbook", desc: "A digital keepsake book where your guests leave their message." },
       { title: "Virtual assistant", desc: "Answers your guest's frequent questions at any hour." },
       { title: "With your own branding", desc: "Your logo on every page your guest sees, from the very first click." },
@@ -256,7 +256,7 @@ const content = {
         a: "The livret is available in French, English and Spanish — the guest picks their language in one click.",
       },
     ],
-    finalCtaTitle: "Ready to stop printing welcome books?",
+    finalCtaTitle: "Ready to go fully digital?",
   },
   es: {
     metaTitle: "Tourist Book — Livret de acogida digital y check-in",
@@ -265,7 +265,7 @@ const content = {
     login: "Iniciar sesión",
     createAccount: "Crear cuenta →",
     eyebrow: "Para hoteleros y anfitriones de la Côte d'Azur",
-    title: "El libro de bienvenida de tus huéspedes, sin imprimir una sola página",
+    title: "El libro de bienvenida de tus huéspedes, totalmente en línea",
     subtitle:
       "Wifi, horarios, recomendaciones locales y check-in electrónico — todo en un enlace que envías antes de que lleguen. Desde Beausoleil hasta Niza.",
     ctaPrimary: "Crear mi cuenta gratis →",
@@ -279,9 +279,9 @@ const content = {
       "Un único enlace, actualizado al instante, en tres idiomas, con tu logo — y el check-in hecho antes de que lleguen tus huéspedes.",
     featuresTitle: "Todo lo que necesita tu huésped",
     features: [
-      { title: "Wifi y horarios al instante", desc: "Contraseña, llegada, salida y aparcamiento, indicaciones de cómo acceder a la propiedad — sin repetir el mismo mensaje a cada huésped." },
+      { title: "Wifi y horarios al instante", desc: "Contraseña, llegada, salida y aparcamiento, indicaciones de cómo acceder a la propiedad — tus huéspedes lo encuentran solos, a cualquier hora." },
       { title: "Guía local con buscador", desc: "Tus recomendaciones de restaurantes, playas y museos, organizadas por categoría." },
-      { title: "Reserva de transfer", desc: "El huésped pide su traslado directamente desde el livret, sin llamadas con tarifas fijas." },
+      { title: "Reserva de transfer", desc: "El huésped reserva su traslado directamente desde el livret, en unos pocos clics." },
       { title: "Libro de oro", desc: "Un libro de recuerdos digital donde tus huéspedes dejan su mensaje." },
       { title: "Asistente virtual", desc: "Responde las preguntas frecuentes del huésped a cualquier hora." },
       { title: "Con tu propio logo", desc: "Tu marca en cada página que ve el huésped, desde el primer clic." },
@@ -336,7 +336,7 @@ const content = {
         a: "El livret está disponible en francés, inglés y español — el huésped elige su idioma con un clic.",
       },
     ],
-    finalCtaTitle: "¿Listo para dejar de imprimir libros de bienvenida?",
+    finalCtaTitle: "¿Listo para pasar al libro 100 % digital?",
   },
 };
 
