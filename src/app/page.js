@@ -343,7 +343,7 @@ const content = {
 export async function generateMetadata() {
   const locale = await getLocale();
   const t = content[locale];
-  return { title: t.metaTitle, description: t.metaDescription };
+  return { title: t.metaTitle, description: t.metaDescription, alternates: { canonical: "/" } };
 }
 
 export default async function Home() {

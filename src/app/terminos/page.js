@@ -114,7 +114,11 @@ const content = {
 
 export async function generateMetadata() {
   const locale = await getLocale();
-  return { title: content[locale].metaTitle, description: content[locale].metaDescription };
+  return {
+    title: content[locale].metaTitle,
+    description: content[locale].metaDescription,
+    alternates: { canonical: "/terminos" },
+  };
 }
 
 export default async function TerminosPage() {

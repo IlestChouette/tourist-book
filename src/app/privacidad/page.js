@@ -219,7 +219,11 @@ const content = {
 
 export async function generateMetadata() {
   const locale = await getLocale();
-  return { title: content[locale].metaTitle, description: content[locale].metaDescription };
+  return {
+    title: content[locale].metaTitle,
+    description: content[locale].metaDescription,
+    alternates: { canonical: "/privacidad" },
+  };
 }
 
 export default async function PrivacidadPage() {

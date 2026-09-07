@@ -103,7 +103,7 @@ const content = {
 
 export async function generateMetadata() {
   const locale = await getLocale();
-  return { title: content[locale].metaTitle };
+  return { title: content[locale].metaTitle, alternates: { canonical: "/mapa-del-sitio" } };
 }
 
 export default async function MapaDelSitioPage() {
