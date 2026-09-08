@@ -284,20 +284,32 @@ export default function LivretMenu({ property, slug, locale = "fr" }) {
   const closeButtonRef = useRef(null);
 
   const infoItems = [
-    { key: "wifi", label: t.wifi, icon: <WifiIcon />, detail: `${property.wifi_ssid} · ${property.wifi_password}` },
-    {
-      key: "horaires",
-      label: t.horaires,
-      icon: <ClockIcon />,
-      detail: t.schedule(property.checkin.toLowerCase(), property.checkout.toLowerCase()),
-    },
-    { key: "parking", label: t.parking, icon: <ParkingIcon />, detail: property.parking },
-    {
-      key: "contact",
-      label: t.contact,
-      icon: <PhoneIcon />,
-      detail: [property.contact_name || property.contact, property.contact_phone].filter(Boolean).join(" · "),
-    },
+    ...(property.wifi_ssid && property.wifi_password
+      ? [{ key: "wifi", label: t.wifi, icon: <WifiIcon />, detail: `${property.wifi_ssid} · ${property.wifi_password}` }]
+      : []),
+    ...(property.checkin || property.checkout
+      ? [
+          {
+            key: "horaires",
+            label: t.horaires,
+            icon: <ClockIcon />,
+            detail: t.schedule((property.checkin || "").toLowerCase(), (property.checkout || "").toLowerCase()),
+          },
+        ]
+      : []),
+    ...(property.parking
+      ? [{ key: "parking", label: t.parking, icon: <ParkingIcon />, detail: property.parking }]
+      : []),
+    ...(property.contact_name || property.contact || property.contact_phone
+      ? [
+          {
+            key: "contact",
+            label: t.contact,
+            icon: <PhoneIcon />,
+            detail: [property.contact_name || property.contact, property.contact_phone].filter(Boolean).join(" · "),
+          },
+        ]
+      : []),
     ...(property.house_rules
       ? [{ key: "rules", label: t.rules, icon: <RulesIcon />, detail: property.house_rules }]
       : []),
