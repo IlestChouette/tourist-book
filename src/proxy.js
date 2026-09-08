@@ -57,7 +57,9 @@ export async function proxy(request) {
     return response;
   }
 
-  // Livret voyageur ("/logement/[slug]") : protégé par code d'accès.
+  // Livret voyageur ("/logement/[slug]") : protégé par code d'accès, sauf
+  // pour un compte admin qui peut consulter n'importe quel livret depuis
+  // le panel admin sans connaître le code du voyageur.
   const match = pathname.match(/^\/logement\/([^/]+)(\/.*)?$/);
   if (match) {
     const [, slug, rest = ""] = match;
@@ -65,10 +67,15 @@ export async function proxy(request) {
 
     const unlocked = request.cookies.get(`access_${slug}`)?.value === "1";
     if (!unlocked) {
-      const url = request.nextUrl.clone();
-      url.pathname = `/logement/${slug}/entrer`;
-      url.search = `?next=${encodeURIComponent(pathname)}`;
-      return NextResponse.redirect(url);
+      const isAdmin =
+        user &&
+        (await supabase.from("hosts").select("is_admin").eq("id", user.id).single()).data?.is_admin === true;
+      if (!isAdmin) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/logement/${slug}/entrer`;
+        url.search = `?next=${encodeURIComponent(pathname)}`;
+        return NextResponse.redirect(url);
+      }
     }
   }
 

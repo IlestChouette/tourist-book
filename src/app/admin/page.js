@@ -107,6 +107,7 @@ const content = {
     cycle: "Cycle",
     status: "Statut",
     noSubscription: "sans abonnement",
+    viewLivret: "Voir le livret →",
     name: "Nom",
     email: "Email",
     phone: "Téléphone",
@@ -136,6 +137,7 @@ const content = {
     cycle: "Cycle",
     status: "Status",
     noSubscription: "no subscription",
+    viewLivret: "View livret →",
     name: "Name",
     email: "Email",
     phone: "Phone",
@@ -165,6 +167,7 @@ const content = {
     cycle: "Ciclo",
     status: "Estado",
     noSubscription: "sin suscripción",
+    viewLivret: "Ver el livret →",
     name: "Nombre",
     email: "Email",
     phone: "Teléfono",
@@ -205,7 +208,7 @@ export default async function AdminPage() {
     admin
       .from("properties")
       .select(
-        "id, name, city, host_id, plan, billing_cycle, subscription_status, stripe_subscription_id, created_at, hosts(name, email)"
+        "id, name, city, slug, host_id, plan, billing_cycle, subscription_status, stripe_subscription_id, created_at, hosts(name, email)"
       )
       .order("created_at", { ascending: false }),
     admin
@@ -351,6 +354,7 @@ export default async function AdminPage() {
                 <th className="px-4 py-2 font-bold text-ink/70">{t.plan}</th>
                 <th className="px-4 py-2 font-bold text-ink/70">{t.cycle}</th>
                 <th className="px-4 py-2 font-bold text-ink/70">{t.status}</th>
+                <th className="px-4 py-2 font-bold text-ink/70"></th>
               </tr>
             </thead>
             <tbody>
@@ -361,6 +365,16 @@ export default async function AdminPage() {
                   <td className="px-4 py-2 text-ink/70">{p.plan ?? "—"}</td>
                   <td className="px-4 py-2 text-ink/70">{p.billing_cycle ?? "—"}</td>
                   <td className="px-4 py-2 text-ink/70">{statusLabel[p.subscription_status] ?? p.subscription_status ?? t.noSubscription}</td>
+                  <td className="px-4 py-2">
+                    <a
+                      href={`/logement/${p.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-aqua-deep hover:underline"
+                    >
+                      {t.viewLivret}
+                    </a>
+                  </td>
                 </tr>
               ))}
             </tbody>
