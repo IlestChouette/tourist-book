@@ -20,19 +20,26 @@ function ChatIcon() {
   );
 }
 
-export default function AssistantFab({ slug }) {
+const content = {
+  fr: { open: "Ouvrir l'assistant", label: "Assistant" },
+  en: { open: "Open the assistant", label: "Assistant" },
+  es: { open: "Abrir el asistente", label: "Asistente" },
+};
+
+export default function AssistantFab({ slug, locale = "fr" }) {
+  const t = content[locale];
   const pathname = usePathname();
   if (pathname.endsWith("/assistant") || pathname.endsWith("/entrer")) return null;
 
   return (
     <Link
       href={`/logement/${slug}/assistant`}
-      aria-label="Ouvrir l'assistant"
+      aria-label={t.open}
       className="fixed right-0 top-1/2 z-40 flex -translate-y-1/2 items-center gap-2 rounded-l-2xl bg-terracotta py-4 pl-4 pr-3 text-ink shadow-lg transition-colors hover:bg-terracotta-deep"
     >
       <ChatIcon />
       <span className="text-[11px] font-bold uppercase tracking-wide [writing-mode:vertical-rl]">
-        Assistant
+        {t.label}
       </span>
     </Link>
   );

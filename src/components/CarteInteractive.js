@@ -3,12 +3,66 @@
 import { useState } from "react";
 
 const categories = [
-  { key: "visiter", label: "Zone à visiter", query: "lieux touristiques" },
-  { key: "restaurant", label: "Restaurant", query: "restaurants" },
-  { key: "shopping", label: "Shopping", query: "shopping" },
-  { key: "mobilite", label: "Mobilité", query: "transports en commun" },
-  { key: "toilettes", label: "Toilettes publiques", query: "toilettes publiques" },
+  { key: "visiter", labelKey: "sightseeing", query: "lieux touristiques" },
+  { key: "restaurant", labelKey: "restaurant", query: "restaurants" },
+  { key: "shopping", labelKey: "shopping", query: "shopping" },
+  { key: "mobilite", labelKey: "transport", query: "transports en commun" },
+  { key: "toilettes", labelKey: "restrooms", query: "toilettes publiques" },
 ];
+
+const content = {
+  fr: {
+    sightseeing: "Zone à visiter",
+    restaurant: "Restaurant",
+    shopping: "Shopping",
+    transport: "Mobilité",
+    restrooms: "Toilettes publiques",
+    property: "Logement",
+    mapTitle: "Carte",
+    onMap: "Sur la carte : ",
+    searchPlaceholder: "Rechercher un lieu (restaurant, plage, musée…)",
+    search: "Rechercher",
+    searchHint:
+      "Tape un lieu et appuie sur « Rechercher », ou choisis une catégorie ci-dessous — la carte cherche toujours à proximité immédiate du logement.",
+    searchResult: "Résultat de recherche",
+    searchedNear: "Recherché près du logement",
+    directions: "Itinéraire →",
+  },
+  en: {
+    sightseeing: "Sights",
+    restaurant: "Restaurant",
+    shopping: "Shopping",
+    transport: "Transport",
+    restrooms: "Public restrooms",
+    property: "Property",
+    mapTitle: "Map",
+    onMap: "On the map: ",
+    searchPlaceholder: "Search a place (restaurant, beach, museum…)",
+    search: "Search",
+    searchHint:
+      "Type a place and press \"Search\", or pick a category below — the map always searches right around the property.",
+    searchResult: "Search result",
+    searchedNear: "Searched near the property",
+    directions: "Directions →",
+  },
+  es: {
+    sightseeing: "Zona para visitar",
+    restaurant: "Restaurante",
+    shopping: "Compras",
+    transport: "Movilidad",
+    restrooms: "Baños públicos",
+    property: "Alojamiento",
+    mapTitle: "Mapa",
+    onMap: "En el mapa: ",
+    searchPlaceholder: "Buscar un lugar (restaurante, playa, museo…)",
+    search: "Buscar",
+    searchHint:
+      "Escribe un lugar y pulsa «Buscar», o elige una categoría abajo — el mapa siempre busca muy cerca del alojamiento.",
+    searchResult: "Resultado de búsqueda",
+    searchedNear: "Buscado cerca del alojamiento",
+    directions: "Cómo llegar →",
+  },
+};
 
 const iconProps = {
   viewBox: "0 0 24 24",
@@ -19,30 +73,30 @@ const iconProps = {
   strokeLinejoin: "round",
 };
 
-function CategoryIcon({ label }) {
-  switch (label) {
-    case "Zone à visiter":
+function CategoryIcon({ categoryKey }) {
+  switch (categoryKey) {
+    case "visiter":
       return (
         <svg {...iconProps} width="22" height="22">
           <circle cx="17" cy="7" r="2" />
           <path d="M3 18l5-7 4 5 3-4 6 6" />
         </svg>
       );
-    case "Restaurant":
+    case "restaurant":
       return (
         <svg {...iconProps} width="22" height="22">
           <path d="M7 2v7a2 2 0 0 0 4 0V2M9 2v20" />
           <path d="M17 2c-1.6 1-2.5 2.8-2.5 4.5S15.4 10 17 11v11" />
         </svg>
       );
-    case "Shopping":
+    case "shopping":
       return (
         <svg {...iconProps} width="22" height="22">
           <path d="M6 8h12l-1 13H7L6 8z" />
           <path d="M9 8V6a3 3 0 0 1 6 0v2" />
         </svg>
       );
-    case "Mobilité":
+    case "mobilite":
       return (
         <svg {...iconProps} width="22" height="22">
           <rect x="4" y="5" width="16" height="12" rx="2" />
@@ -51,7 +105,7 @@ function CategoryIcon({ label }) {
           <circle cx="16" cy="19" r="1.3" fill="currentColor" stroke="none" />
         </svg>
       );
-    case "Toilettes publiques":
+    case "toilettes":
       return (
         <svg {...iconProps} width="22" height="22">
           <circle cx="8.5" cy="4.5" r="2" />
@@ -82,7 +136,8 @@ function fullAddress(property) {
   return [property.address, property.postal_code, property.city].filter(Boolean).join(", ");
 }
 
-export default function CarteInteractive({ property }) {
+export default function CarteInteractive({ property, locale = "fr" }) {
+  const t = content[locale];
   const address = fullAddress(property);
   const [selected, setSelected] = useState({ name: property.name, mapsQuery: address });
   const [activeCategory, setActiveCategory] = useState(null);
@@ -98,7 +153,7 @@ export default function CarteInteractive({ property }) {
   function selectCategory(cat) {
     setActiveCategory(cat.key);
     setSearchResult(null);
-    setSelected({ name: cat.label, mapsQuery: `${cat.query} près de ${address}` });
+    setSelected({ name: t[cat.labelKey], mapsQuery: `${cat.query} près de ${address}` });
   }
 
   function handleSearchSubmit(e) {
@@ -116,14 +171,14 @@ export default function CarteInteractive({ property }) {
       <div className="overflow-hidden rounded border border-sand-dim">
         <iframe
           key={selected.mapsQuery}
-          title={`Carte — ${selected.name}`}
+          title={`${t.mapTitle} — ${selected.name}`}
           src={`https://www.google.com/maps?q=${encodeURIComponent(selected.mapsQuery)}&output=embed`}
           className="h-72 w-full sm:h-96"
           loading="lazy"
         />
       </div>
       <p className="mt-2 text-sm text-ink/60">
-        Sur la carte : <span className="font-bold text-ink">{selected.name}</span>
+        {t.onMap}<span className="font-bold text-ink">{selected.name}</span>
       </p>
 
       <form onSubmit={handleSearchSubmit} className="mt-4 flex gap-2">
@@ -135,36 +190,33 @@ export default function CarteInteractive({ property }) {
             setSearch(v);
             if (!v) setSearchResult(null);
           }}
-          placeholder="Rechercher un lieu (restaurant, plage, musée…)"
+          placeholder={t.searchPlaceholder}
           className="input flex-1"
         />
         <button
           type="submit"
           className="shrink-0 rounded bg-terracotta px-5 py-2.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
         >
-          Rechercher
+          {t.search}
         </button>
       </form>
-      <p className="mt-1.5 text-xs text-ink/50">
-        Tape un lieu et appuie sur « Rechercher », ou choisis une catégorie ci-dessous — la carte
-        cherche toujours à proximité immédiate du logement.
-      </p>
+      <p className="mt-1.5 text-xs text-ink/50">{t.searchHint}</p>
 
       {searchResult && (
         <div className="mt-6">
           <h2 className="text-xs font-bold uppercase tracking-widest text-terracotta">
-            Résultat de recherche
+            {t.searchResult}
           </h2>
           <div className="mt-3 rounded border border-terracotta bg-sand-card p-4">
             <span className="block font-bold text-ink">{searchResult.name}</span>
-            <span className="block text-sm text-ink/70">Recherché près du logement</span>
+            <span className="block text-sm text-ink/70">{t.searchedNear}</span>
             <a
               href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(searchResult.mapsQuery)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-2 inline-block text-xs font-bold uppercase tracking-wider text-aqua-deep"
             >
-              Itinéraire →
+              {t.directions}
             </a>
           </div>
         </div>
@@ -179,9 +231,9 @@ export default function CarteInteractive({ property }) {
                 : "border-sand-dim bg-sand-card text-ink/70"
             }`}
           >
-            <CategoryIcon label="Tout" />
+            <CategoryIcon categoryKey={null} />
           </span>
-          <span className="text-[11px] font-bold uppercase tracking-wide text-ink/70">Logement</span>
+          <span className="text-[11px] font-bold uppercase tracking-wide text-ink/70">{t.property}</span>
         </button>
 
         {categories.map((cat) => (
@@ -198,10 +250,10 @@ export default function CarteInteractive({ property }) {
                   : "border-sand-dim bg-sand-card text-ink/70"
               }`}
             >
-              <CategoryIcon label={cat.label} />
+              <CategoryIcon categoryKey={cat.key} />
             </span>
             <span className="text-[11px] font-bold uppercase tracking-wide text-ink/70">
-              {cat.label}
+              {t[cat.labelKey]}
             </span>
           </button>
         ))}
@@ -214,7 +266,7 @@ export default function CarteInteractive({ property }) {
           rel="noopener noreferrer"
           className="mt-4 inline-block text-xs font-bold uppercase tracking-wider text-aqua-deep"
         >
-          Itinéraire →
+          {t.directions}
         </a>
       )}
     </div>

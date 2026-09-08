@@ -2,7 +2,38 @@
 
 import { useEffect, useState } from "react";
 
-export default function CarnetPanel({ slug }) {
+const content = {
+  fr: {
+    yourName: "Ton prénom",
+    yourMessage: "Ton message",
+    sending: "Envoi…",
+    submit: "Laisser un message",
+    loading: "Chargement…",
+    empty: "Aucun message pour l'instant — sois le premier.",
+    dateLocale: "fr-FR",
+  },
+  en: {
+    yourName: "Your first name",
+    yourMessage: "Your message",
+    sending: "Sending…",
+    submit: "Leave a message",
+    loading: "Loading…",
+    empty: "No messages yet — be the first.",
+    dateLocale: "en-GB",
+  },
+  es: {
+    yourName: "Tu nombre",
+    yourMessage: "Tu mensaje",
+    sending: "Enviando…",
+    submit: "Dejar un mensaje",
+    loading: "Cargando…",
+    empty: "Todavía no hay mensajes — sé el primero.",
+    dateLocale: "es-ES",
+  },
+};
+
+export default function CarnetPanel({ slug, locale = "fr" }) {
+  const t = content[locale];
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ nom: "", message: "" });
@@ -36,7 +67,7 @@ export default function CarnetPanel({ slug }) {
     <div>
       <form onSubmit={handleSubmit} className="grid gap-4 rounded border border-sand-dim bg-sand-card p-5">
         <label className="grid gap-1.5">
-          <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Ton prénom</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.yourName}</span>
           <input
             required
             className="input"
@@ -45,7 +76,7 @@ export default function CarnetPanel({ slug }) {
           />
         </label>
         <label className="grid gap-1.5">
-          <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Ton message</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.yourMessage}</span>
           <textarea
             required
             rows={3}
@@ -59,21 +90,21 @@ export default function CarnetPanel({ slug }) {
           disabled={sending}
           className="rounded bg-terracotta px-5 py-3 text-center font-bold text-ink transition-colors hover:bg-terracotta-deep disabled:opacity-60"
         >
-          {sending ? "Envoi…" : "Laisser un message"}
+          {sending ? t.sending : t.submit}
         </button>
       </form>
 
       <div className="mt-8 grid gap-4">
-        {loading && <p className="text-ink/60">Chargement…</p>}
+        {loading && <p className="text-ink/60">{t.loading}</p>}
         {!loading && entries.length === 0 && (
-          <p className="text-ink/60">Aucun message pour l'instant — sois le premier.</p>
+          <p className="text-ink/60">{t.empty}</p>
         )}
         {entries.map((entry) => (
           <div key={entry.id} className="rounded border border-sand-dim bg-sand-card p-4">
             <div className="flex items-baseline justify-between">
               <span className="font-bold text-ink">{entry.nom}</span>
               <span className="text-xs text-ink/50">
-                {new Date(entry.createdAt).toLocaleDateString("fr-FR")}
+                {new Date(entry.createdAt).toLocaleDateString(t.dateLocale)}
               </span>
             </div>
             <p className="mt-2 text-ink/80">{entry.message}</p>

@@ -3,7 +3,65 @@
 import { use, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function EntrerForm({ params }) {
+const content = {
+  fr: {
+    eyebrow: "Livret d'accueil",
+    defaultTitle: "Accès au livret",
+    codeIntro: "Entre le code d'accès transmis par ton hôte pour consulter le livret.",
+    codePlaceholder: "••••",
+    verifying: "Vérification…",
+    accessSubmit: "Accéder au livret →",
+    switchToLogin: "Déjà fait ton check-in ? Connecte-toi avec ton identifiant →",
+    loginIntro: "Connecte-toi avec l'identifiant et le mot de passe reçus à la fin de ton check-in.",
+    usernamePlaceholder: "Identifiant",
+    passwordPlaceholder: "Mot de passe",
+    loginSubmit: "Se connecter →",
+    switchToCode: "← J'ai plutôt un code d'accès",
+    opening: "Ouverture du livret…",
+    errorUnavailable: "Ce livret n'est pas encore disponible — contacte ton hôte.",
+    errorCode: "Code incorrect, réessaie.",
+    errorLogin: "Identifiant ou mot de passe incorrect.",
+  },
+  en: {
+    eyebrow: "Welcome book",
+    defaultTitle: "Access the welcome book",
+    codeIntro: "Enter the access code your host sent you to view the welcome book.",
+    codePlaceholder: "••••",
+    verifying: "Checking…",
+    accessSubmit: "Open the welcome book →",
+    switchToLogin: "Already checked in? Log in with your username →",
+    loginIntro: "Log in with the username and password you received at the end of your check-in.",
+    usernamePlaceholder: "Username",
+    passwordPlaceholder: "Password",
+    loginSubmit: "Log in →",
+    switchToCode: "← I have an access code instead",
+    opening: "Opening the welcome book…",
+    errorUnavailable: "This welcome book isn't available yet — contact your host.",
+    errorCode: "Incorrect code, try again.",
+    errorLogin: "Incorrect username or password.",
+  },
+  es: {
+    eyebrow: "Livret de bienvenida",
+    defaultTitle: "Acceso al livret",
+    codeIntro: "Ingresa el código de acceso que te dio tu anfitrión para ver el livret.",
+    codePlaceholder: "••••",
+    verifying: "Verificando…",
+    accessSubmit: "Acceder al livret →",
+    switchToLogin: "¿Ya hiciste tu check-in? Inicia sesión con tu usuario →",
+    loginIntro: "Inicia sesión con el usuario y la contraseña que recibiste al terminar tu check-in.",
+    usernamePlaceholder: "Usuario",
+    passwordPlaceholder: "Contraseña",
+    loginSubmit: "Iniciar sesión →",
+    switchToCode: "← Tengo un código de acceso",
+    opening: "Abriendo el livret…",
+    errorUnavailable: "Este livret todavía no está disponible — contacta a tu anfitrión.",
+    errorCode: "Código incorrecto, intenta de nuevo.",
+    errorLogin: "Usuario o contraseña incorrectos.",
+  },
+};
+
+export default function EntrerForm({ params, locale = "fr" }) {
+  const t = content[locale];
   const { slug } = use(params);
   const [property, setProperty] = useState(null);
   const searchParams = useSearchParams();
@@ -47,11 +105,7 @@ export default function EntrerForm({ params }) {
       window.location.href = next;
     } else {
       setLoading(false);
-      setError(
-        res.status === 403
-          ? "Ce livret n'est pas encore disponible — contacte ton hôte."
-          : "Code incorrect, réessaie."
-      );
+      setError(res.status === 403 ? t.errorUnavailable : t.errorCode);
     }
   }
 
@@ -75,18 +129,14 @@ export default function EntrerForm({ params }) {
       window.location.href = next;
     } else {
       setLoading(false);
-      setError(
-        res.status === 403
-          ? "Ce livret n'est pas encore disponible — contacte ton hôte."
-          : "Identifiant ou mot de passe incorrect."
-      );
+      setError(res.status === 403 ? t.errorUnavailable : t.errorLogin);
     }
   }
 
   if (codeFromQr && loading && !error) {
     return (
       <main className="flex flex-1 items-center justify-center bg-aqua px-6 py-14">
-        <p className="text-sand-card">Ouverture du livret…</p>
+        <p className="text-sand-card">{t.opening}</p>
       </main>
     );
   }
@@ -94,18 +144,14 @@ export default function EntrerForm({ params }) {
   return (
     <main className="flex flex-1 items-center justify-center bg-aqua px-6 py-14">
       <div className="w-full max-w-sm rounded border border-sand-dim bg-sand-card p-6 text-center">
-        <span className="text-xs font-bold uppercase tracking-widest text-ink/60">
-          Livret d&apos;accueil
-        </span>
+        <span className="text-xs font-bold uppercase tracking-widest text-ink/60">{t.eyebrow}</span>
         <h1 className="mt-2 font-display italic text-3xl text-ink">
-          {property ? property.name : "Accès au livret"}
+          {property ? property.name : t.defaultTitle}
         </h1>
 
         {mode === "code" ? (
           <>
-            <p className="mt-2 text-sm text-ink/70">
-              Entre le code d&apos;accès transmis par ton hôte pour consulter le livret.
-            </p>
+            <p className="mt-2 text-sm text-ink/70">{t.codeIntro}</p>
             <form onSubmit={handleCodeSubmit} className="mt-5 grid gap-3">
               <input
                 required
@@ -114,14 +160,14 @@ export default function EntrerForm({ params }) {
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 className="input text-center text-lg tracking-[0.3em]"
-                placeholder="••••"
+                placeholder={t.codePlaceholder}
               />
               <button
                 type="submit"
                 disabled={loading}
                 className="rounded bg-terracotta px-5 py-3 font-bold text-ink transition-colors hover:bg-terracotta-deep disabled:opacity-60"
               >
-                {loading ? "Vérification…" : "Accéder au livret →"}
+                {loading ? t.verifying : t.accessSubmit}
               </button>
               {error && <p className="text-sm text-terracotta-deep">{error}</p>}
             </form>
@@ -133,14 +179,12 @@ export default function EntrerForm({ params }) {
               }}
               className="mt-4 text-xs font-bold uppercase tracking-wider text-ink/50 hover:text-ink"
             >
-              Déjà fait ton check-in ? Connecte-toi avec ton identifiant →
+              {t.switchToLogin}
             </button>
           </>
         ) : (
           <>
-            <p className="mt-2 text-sm text-ink/70">
-              Connecte-toi avec l&apos;identifiant et le mot de passe reçus à la fin de ton check-in.
-            </p>
+            <p className="mt-2 text-sm text-ink/70">{t.loginIntro}</p>
             <form onSubmit={handleLoginSubmit} className="mt-5 grid gap-3">
               <input
                 required
@@ -148,7 +192,7 @@ export default function EntrerForm({ params }) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="input text-center"
-                placeholder="Identifiant"
+                placeholder={t.usernamePlaceholder}
               />
               <input
                 required
@@ -156,14 +200,14 @@ export default function EntrerForm({ params }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="input text-center"
-                placeholder="Mot de passe"
+                placeholder={t.passwordPlaceholder}
               />
               <button
                 type="submit"
                 disabled={loading}
                 className="rounded bg-terracotta px-5 py-3 font-bold text-ink transition-colors hover:bg-terracotta-deep disabled:opacity-60"
               >
-                {loading ? "Vérification…" : "Se connecter →"}
+                {loading ? t.verifying : t.loginSubmit}
               </button>
               {error && <p className="text-sm text-terracotta-deep">{error}</p>}
             </form>
@@ -175,7 +219,7 @@ export default function EntrerForm({ params }) {
               }}
               className="mt-4 text-xs font-bold uppercase tracking-wider text-ink/50 hover:text-ink"
             >
-              ← J&apos;ai plutôt un code d&apos;accès
+              {t.switchToCode}
             </button>
           </>
         )}

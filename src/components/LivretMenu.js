@@ -5,6 +5,81 @@ import TransfertForm from "./TransfertForm";
 import CarnetPanel from "./CarnetPanel";
 import CarteInteractive from "./CarteInteractive";
 
+const content = {
+  fr: {
+    wifi: "Wifi",
+    horaires: "Horaires",
+    schedule: (checkin, checkout) => `Arrivée ${checkin} · Départ ${checkout}`,
+    parking: "Stationnement",
+    contact: "Contact",
+    rules: "Règles",
+    trash: "Poubelles",
+    info: "Informations",
+    transfert: "Réserver un transfert",
+    tours: "Tours",
+    carteLocale: "Carte locale",
+    livreOr: "Livre d'or",
+    close: "Fermer",
+    copyPassword: "Copier le mot de passe",
+    copied: "Copié !",
+    whatsapp: "Écrire sur WhatsApp",
+    trashPhotoAlt: "Emplacement des poubelles",
+    keyPickup: "Récupération des clés",
+    accessCode: "Code d'accès :",
+    keyPhotoAlt: "Photo d'aide pour la récupération des clés",
+    video: "Vidéo",
+    toursComingSoon: "La réservation de tours et d'activités arrive bientôt — le partenaire est en cours de configuration.",
+  },
+  en: {
+    wifi: "Wifi",
+    horaires: "Schedule",
+    schedule: (checkin, checkout) => `Check-in ${checkin} · Check-out ${checkout}`,
+    parking: "Parking",
+    contact: "Contact",
+    rules: "Rules",
+    trash: "Trash",
+    info: "Information",
+    transfert: "Book a transfer",
+    tours: "Tours",
+    carteLocale: "Local map",
+    livreOr: "Guestbook",
+    close: "Close",
+    copyPassword: "Copy password",
+    copied: "Copied!",
+    whatsapp: "Message on WhatsApp",
+    trashPhotoAlt: "Trash location",
+    keyPickup: "Key pickup",
+    accessCode: "Access code:",
+    keyPhotoAlt: "Help photo for key pickup",
+    video: "Video",
+    toursComingSoon: "Tour and activity booking is coming soon — the partner is being set up.",
+  },
+  es: {
+    wifi: "Wifi",
+    horaires: "Horarios",
+    schedule: (checkin, checkout) => `Llegada ${checkin} · Salida ${checkout}`,
+    parking: "Aparcamiento",
+    contact: "Contacto",
+    rules: "Reglas",
+    trash: "Basura",
+    info: "Información",
+    transfert: "Reservar un transfer",
+    tours: "Tours",
+    carteLocale: "Mapa local",
+    livreOr: "Libro de oro",
+    close: "Cerrar",
+    copyPassword: "Copiar contraseña",
+    copied: "¡Copiado!",
+    whatsapp: "Escribir por WhatsApp",
+    trashPhotoAlt: "Ubicación de la basura",
+    keyPickup: "Recogida de llaves",
+    accessCode: "Código de acceso:",
+    keyPhotoAlt: "Foto de ayuda para la recogida de llaves",
+    video: "Video",
+    toursComingSoon: "La reserva de tours y actividades llega pronto — el socio está en proceso de configuración.",
+  },
+};
+
 const iconProps = {
   viewBox: "0 0 24 24",
   fill: "none",
@@ -183,7 +258,7 @@ function youtubeEmbedUrl(url) {
   return id ? `https://www.youtube.com/embed/${id}` : null;
 }
 
-function VideoEmbed({ url }) {
+function VideoEmbed({ url, title }) {
   const embedUrl = youtubeEmbedUrl(url);
   if (!embedUrl) return null;
   return (
@@ -193,13 +268,14 @@ function VideoEmbed({ url }) {
         className="absolute inset-0 h-full w-full"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
-        title="Vidéo"
+        title={title}
       />
     </div>
   );
 }
 
-export default function LivretMenu({ property, slug }) {
+export default function LivretMenu({ property, slug, locale = "fr" }) {
+  const t = content[locale];
   const [active, setActive] = useState(null);
   const [displayedItem, setDisplayedItem] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
@@ -207,38 +283,38 @@ export default function LivretMenu({ property, slug }) {
   const closeButtonRef = useRef(null);
 
   const infoItems = [
-    { key: "wifi", label: "Wifi", icon: <WifiIcon />, detail: `${property.wifi_ssid} · ${property.wifi_password}` },
+    { key: "wifi", label: t.wifi, icon: <WifiIcon />, detail: `${property.wifi_ssid} · ${property.wifi_password}` },
     {
       key: "horaires",
-      label: "Horaires",
+      label: t.horaires,
       icon: <ClockIcon />,
-      detail: `Arrivée ${property.checkin.toLowerCase()} · Départ ${property.checkout.toLowerCase()}`,
+      detail: t.schedule(property.checkin.toLowerCase(), property.checkout.toLowerCase()),
     },
-    { key: "parking", label: "Stationnement", icon: <ParkingIcon />, detail: property.parking },
+    { key: "parking", label: t.parking, icon: <ParkingIcon />, detail: property.parking },
     {
       key: "contact",
-      label: "Contact",
+      label: t.contact,
       icon: <PhoneIcon />,
       detail: [property.contact_name || property.contact, property.contact_phone].filter(Boolean).join(" · "),
     },
     ...(property.house_rules
-      ? [{ key: "rules", label: "Règles", icon: <RulesIcon />, detail: property.house_rules }]
+      ? [{ key: "rules", label: t.rules, icon: <RulesIcon />, detail: property.house_rules }]
       : []),
     ...(property.waste_instructions || property.waste_photo
-      ? [{ key: "basuras", label: "Poubelles", icon: <TrashIcon />, detail: property.waste_instructions }]
+      ? [{ key: "basuras", label: t.trash, icon: <TrashIcon />, detail: property.waste_instructions }]
       : []),
     ...(property.general_info
-      ? [{ key: "info", label: "Informations", icon: <InfoIcon />, detail: property.general_info }]
+      ? [{ key: "info", label: t.info, icon: <InfoIcon />, detail: property.general_info }]
       : []),
   ];
 
   const navItems = [
     ...(property.postal_code?.startsWith("06")
-      ? [{ key: "transfert", label: "Réserver un transfert", icon: <CarIcon /> }]
+      ? [{ key: "transfert", label: t.transfert, icon: <CarIcon /> }]
       : []),
-    { key: "tours", label: "Tours", icon: <CompassIcon /> },
-    { key: "carte", label: "Carte locale", icon: <PinIcon /> },
-    { key: "carnet", label: "Livre d'or", icon: <BookIcon /> },
+    { key: "tours", label: t.tours, icon: <CompassIcon /> },
+    { key: "carte", label: t.carteLocale, icon: <PinIcon /> },
+    { key: "carnet", label: t.livreOr, icon: <BookIcon /> },
   ];
 
   const tiles = [...infoItems, ...navItems];
@@ -351,7 +427,7 @@ export default function LivretMenu({ property, slug }) {
                 ref={closeButtonRef}
                 type="button"
                 onClick={close}
-                aria-label="Fermer"
+                aria-label={t.close}
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink/40 transition hover:bg-sand hover:text-ink active:scale-90"
               >
                 <CloseIcon />
@@ -370,7 +446,7 @@ export default function LivretMenu({ property, slug }) {
                       className="mt-3 inline-flex items-center gap-2 rounded border border-aqua-deep px-4 py-2 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
                     >
                       <CopyIcon />
-                      {copied ? "Copié !" : "Copier le mot de passe"}
+                      {copied ? t.copied : t.copyPassword}
                     </button>
                   )}
 
@@ -382,7 +458,7 @@ export default function LivretMenu({ property, slug }) {
                       className="mt-3 inline-flex items-center gap-2 rounded bg-[#25D366] px-4 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90"
                     >
                       <WhatsAppIcon />
-                      Écrire sur WhatsApp
+                      {t.whatsapp}
                     </a>
                   )}
 
@@ -392,11 +468,11 @@ export default function LivretMenu({ property, slug }) {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={property.waste_photo}
-                          alt="Emplacement des poubelles"
+                          alt={t.trashPhotoAlt}
                           className="h-40 w-full rounded object-cover border border-sand-dim"
                         />
                       )}
-                      <VideoEmbed url={property.waste_video_url} />
+                      <VideoEmbed url={property.waste_video_url} title={t.video} />
                     </div>
                   )}
 
@@ -407,14 +483,14 @@ export default function LivretMenu({ property, slug }) {
                       property.key_video_url) && (
                       <div className="mt-4 border-t border-sand-dim pt-4">
                         <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
-                          Récupération des clés
+                          {t.keyPickup}
                         </span>
                         {property.key_instructions && (
                           <p className="mt-2 text-ink">{property.key_instructions}</p>
                         )}
                         {property.key_lockbox_code && (
                           <p className="mt-2 text-ink">
-                            Code d&apos;accès :{" "}
+                            {t.accessCode}{" "}
                             <span className="font-bold tracking-widest">{property.key_lockbox_code}</span>
                           </p>
                         )}
@@ -425,13 +501,13 @@ export default function LivretMenu({ property, slug }) {
                               <img
                                 key={url}
                                 src={url}
-                                alt="Photo d'aide pour la récupération des clés"
+                                alt={t.keyPhotoAlt}
                                 className="h-24 w-24 shrink-0 rounded object-cover border border-sand-dim"
                               />
                             ))}
                           </div>
                         )}
-                        <VideoEmbed url={property.key_video_url} />
+                        <VideoEmbed url={property.key_video_url} title={t.video} />
                       </div>
                     )}
                 </>
@@ -440,20 +516,22 @@ export default function LivretMenu({ property, slug }) {
               {isNav && (
                 <>
                   {displayedItem.key === "transfert" && (
-                    <TransfertForm slug={slug} propertyName={property.name} propertyAddress={property.address} />
+                    <TransfertForm
+                      slug={slug}
+                      propertyName={property.name}
+                      propertyAddress={property.address}
+                      locale={locale}
+                    />
                   )}
                   {displayedItem.key === "tours" && (
                     <div className="rounded border border-sand-dim bg-sand p-5">
-                      <p className="text-ink">
-                        La réservation de tours et d&apos;activités arrive bientôt — le partenaire est en cours de
-                        configuration.
-                      </p>
+                      <p className="text-ink">{t.toursComingSoon}</p>
                     </div>
                   )}
                   {displayedItem.key === "carte" && (
-                    <CarteInteractive property={property} />
+                    <CarteInteractive property={property} locale={locale} />
                   )}
-                  {displayedItem.key === "carnet" && <CarnetPanel slug={slug} />}
+                  {displayedItem.key === "carnet" && <CarnetPanel slug={slug} locale={locale} />}
                 </>
               )}
             </div>

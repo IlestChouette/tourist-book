@@ -2,8 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const MAX_DESCRIPTION_LENGTH = 220;
+
+const content = {
+  fr: { menu: "Aller au menu", seeMenu: "Voir le menu" },
+  en: { menu: "Go to menu", seeMenu: "See menu" },
+  es: { menu: "Ir al menú", seeMenu: "Ver el menú" },
+};
 
 function truncate(text, max) {
   if (!text) return text;
@@ -16,7 +23,8 @@ function truncate(text, max) {
 // carrousel plein écran et fixe (comme styQR) qui défile tout seul entre
 // les photos du logement — il reste visible derrière le titre ET la grille
 // de tuiles, pas seulement dans un bandeau du haut.
-export default function LivretHero({ title, subtitle, description, photos = [] }) {
+export default function LivretHero({ title, subtitle, description, photos = [], locale = "fr" }) {
+  const t = content[locale];
   const [index, setIndex] = useState(0);
   const shortDescription = truncate(description, MAX_DESCRIPTION_LENGTH);
   const mainPhoto = photos[0] ?? null;
@@ -52,13 +60,18 @@ export default function LivretHero({ title, subtitle, description, photos = [] }
       <header className="relative flex min-h-[62vh] flex-col items-center justify-center px-6 pb-12 pt-6 text-center md:min-h-[52vh]">
         <a
           href="#menu"
-          aria-label="Aller au menu"
+          aria-label={t.menu}
           className="fixed left-5 top-6 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/35 text-[#f7f1e4] backdrop-blur-sm transition-colors hover:bg-black/50 md:left-8 md:top-8"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" className="h-5 w-5">
             <path d="M4 7h16M4 12h16M4 17h16" />
           </svg>
         </a>
+
+        <LanguageSwitcher
+          locale={locale}
+          className="fixed right-5 top-6 z-10 rounded-full bg-black/35 px-3 py-2 text-[#f7f1e4] backdrop-blur-sm [&_button]:text-[#f7f1e4]/60 [&_button:disabled]:text-[#f7f1e4] [&_button:hover]:text-[#f7f1e4] [&_span]:text-[#f7f1e4]/40 md:right-8 md:top-8"
+        />
 
         {mainPhoto && (
           <div className="mb-5 h-28 w-28 shrink-0 overflow-hidden rounded-full border-4 border-[#f7f1e4] shadow-lg md:h-32 md:w-32">
@@ -81,7 +94,7 @@ export default function LivretHero({ title, subtitle, description, photos = [] }
 
         <a
           href="#menu"
-          aria-label="Voir le menu"
+          aria-label={t.seeMenu}
           className="absolute bottom-3 left-1/2 -translate-x-1/2 animate-bounce text-[#f7f1e4]/80 transition-colors hover:text-[#f7f1e4]"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
