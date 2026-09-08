@@ -13,6 +13,8 @@ const content = {
     title: "Créer un compte hôtelier",
     name: "Nom",
     email: "Email",
+    phone: "Téléphone",
+    phonePlaceholder: "Ex : +33 6 12 34 56 78",
     password: "Mot de passe",
     logoLabel: "Logo (facultatif — apparaîtra lors du check-in de vos hôtes)",
     acceptPrefix: "J'ai lu et j'accepte les",
@@ -32,6 +34,8 @@ const content = {
     title: "Create a host account",
     name: "Name",
     email: "Email",
+    phone: "Phone",
+    phonePlaceholder: "E.g.: +33 6 12 34 56 78",
     password: "Password",
     logoLabel: "Logo (optional — will appear during your guests' check-in)",
     acceptPrefix: "I have read and accept the",
@@ -51,6 +55,8 @@ const content = {
     title: "Crear cuenta de hotelero",
     name: "Nombre",
     email: "Email",
+    phone: "Teléfono",
+    phonePlaceholder: "Ej: +33 6 12 34 56 78",
     password: "Contraseña",
     logoLabel: "Logo (opcional — aparecerá en el check-in de tus huéspedes)",
     acceptPrefix: "He leído y acepto los",
@@ -71,7 +77,7 @@ export default function RegistroPage() {
   const [locale] = useState(getClientLocale);
   const t = content[locale];
 
-  const [form, setForm] = useState({ nombre: "", email: "", password: "" });
+  const [form, setForm] = useState({ nombre: "", email: "", phone: "", password: "" });
   const [logo, setLogo] = useState(null);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [sending, setSending] = useState(false);
@@ -125,6 +131,7 @@ export default function RegistroPage() {
       id: data.user.id,
       email: form.email,
       name: form.nombre,
+      phone: form.phone,
       logo_url: logoUrl,
       accepted_terms_at: new Date().toISOString(),
     });
@@ -135,6 +142,12 @@ export default function RegistroPage() {
       setError(insertError.message);
       return;
     }
+
+    fetch("/api/host-signup-notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: form.nombre, email: form.email, phone: form.phone }),
+    }).catch(() => {});
 
     window.location.href = "/panel";
   }
@@ -151,6 +164,17 @@ export default function RegistroPage() {
           <label className="grid gap-1.5">
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.email}</span>
             <input required type="email" value={form.email} onChange={update("email")} className="input" />
+          </label>
+          <label className="grid gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.phone}</span>
+            <input
+              required
+              type="tel"
+              placeholder={t.phonePlaceholder}
+              value={form.phone}
+              onChange={update("phone")}
+              className="input"
+            />
           </label>
           <label className="grid gap-1.5">
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.password}</span>

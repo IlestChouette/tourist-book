@@ -109,6 +109,9 @@ const content = {
     noSubscription: "sans abonnement",
     name: "Nom",
     email: "Email",
+    phone: "Téléphone",
+    hostProperties: "Logements",
+    noProperties: "Aucun",
     joined: "Inscription",
     analytics: "Analytics →",
     searchConsole: "Search Console →",
@@ -135,6 +138,9 @@ const content = {
     noSubscription: "no subscription",
     name: "Name",
     email: "Email",
+    phone: "Phone",
+    hostProperties: "Properties",
+    noProperties: "None",
     joined: "Joined",
     analytics: "Analytics →",
     searchConsole: "Search Console →",
@@ -161,6 +167,9 @@ const content = {
     noSubscription: "sin suscripción",
     name: "Nombre",
     email: "Email",
+    phone: "Teléfono",
+    hostProperties: "Alojamientos",
+    noProperties: "Ninguno",
     joined: "Alta",
     analytics: "Analytics →",
     searchConsole: "Search Console →",
@@ -188,7 +197,11 @@ export default async function AdminPage() {
   const admin = createAdminClient();
 
   const [{ data: hosts }, { data: properties }, { data: requests }] = await Promise.all([
-    admin.from("hosts").select("id, name, email, created_at").eq("is_admin", false).order("created_at", { ascending: false }),
+    admin
+      .from("hosts")
+      .select("id, name, email, phone, created_at")
+      .eq("is_admin", false)
+      .order("created_at", { ascending: false }),
     admin
       .from("properties")
       .select(
@@ -208,6 +221,12 @@ export default async function AdminPage() {
   const payingProperties = activeProperties.filter((p) => p.subscription_status === "active");
   const mrr = (await Promise.all(payingProperties.map(realMonthlyRevenue))).reduce((sum, v) => sum + v, 0);
   const pendingRequests = (requests ?? []).filter((r) => r.status === "pendiente");
+
+  const propertiesByHost = new Map();
+  for (const p of properties ?? []) {
+    if (!propertiesByHost.has(p.host_id)) propertiesByHost.set(p.host_id, []);
+    propertiesByHost.get(p.host_id).push(p.name);
+  }
 
   const goalPercent = Math.min((mrr / MONTHLY_GOAL) * 100, 100);
   const goalRemaining = Math.max(MONTHLY_GOAL - mrr, 0);
@@ -350,11 +369,13 @@ export default async function AdminPage() {
 
         <h2 className="mt-12 font-display italic text-2xl text-ink">{t.clients}</h2>
         <div className="mt-4 overflow-x-auto rounded border border-sand-dim">
-          <table className="w-full min-w-[480px] border-collapse text-sm">
+          <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-sand-dim bg-sand-card text-left">
                 <th className="px-4 py-2 font-bold text-ink/70">{t.name}</th>
                 <th className="px-4 py-2 font-bold text-ink/70">{t.email}</th>
+                <th className="px-4 py-2 font-bold text-ink/70">{t.phone}</th>
+                <th className="px-4 py-2 font-bold text-ink/70">{t.hostProperties}</th>
                 <th className="px-4 py-2 font-bold text-ink/70">{t.joined}</th>
               </tr>
             </thead>
@@ -363,6 +384,8 @@ export default async function AdminPage() {
                 <tr key={h.id} className="border-b border-sand-dim last:border-0">
                   <td className="px-4 py-2 text-ink">{h.name}</td>
                   <td className="px-4 py-2 text-ink/70">{h.email}</td>
+                  <td className="px-4 py-2 text-ink/70">{h.phone || "—"}</td>
+                  <td className="px-4 py-2 text-ink/70">{(propertiesByHost.get(h.id) ?? []).join(", ") || t.noProperties}</td>
                   <td className="px-4 py-2 text-ink/70">{new Date(h.created_at).toLocaleDateString(dateLocale[locale])}</td>
                 </tr>
               ))}

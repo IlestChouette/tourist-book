@@ -85,3 +85,33 @@ export async function sendContactLeadNotification({ name, phone, email, properti
 
   return { sent: true };
 }
+
+// Notifie Fernando dès qu'un hôtelier crée un compte, pour savoir qui vient
+// de s'inscrire sans devoir aller vérifier la page admin.
+export async function sendHostSignupNotification({ name, email, phone }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const resend = new Resend(apiKey);
+
+  const lines = [
+    "Nouvelle inscription hôtelier sur tourist-book.com",
+    "",
+    `Nom : ${name || "-"}`,
+    `Email : ${email}`,
+    `Téléphone : ${phone || "-"}`,
+  ];
+
+  const { error: sendError } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject: `Nouvelle inscription — ${name || email}`,
+    text: lines.join("\n"),
+  });
+
+  if (sendError) {
+    throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
+  }
+
+  return { sent: true };
+}
