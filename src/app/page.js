@@ -140,7 +140,7 @@ const content = {
     examplePremium: "Voir un exemple — Premium →",
     comparisonHeader: { includes: "Inclus", basic: "Essentiel", premium: "Premium" },
     comparison: [
-      { label: "Livret numérique en FR / EN / ES, traduit automatiquement", basico: true, premium: true },
+      { label: "Livret numérique en FR / EN / ES, traduit automatiquement par IA", basico: true, premium: true },
       { label: "Wifi, horaires, stationnement, contact", basico: true, premium: true },
       { label: "Guide local avec recherche", basico: true, premium: true },
       { label: "Réservation de transfert et livre d'or", basico: true, premium: true },
@@ -176,7 +176,7 @@ const content = {
       },
       {
         q: "Et si mes voyageurs ne parlent pas français ?",
-        a: "Le livret est disponible en français, anglais et espagnol — le voyageur choisit sa langue en un clic, et même le texte que vous rédigez vous-même (règles, recommandations…) est traduit automatiquement, vous n'avez rien à faire.",
+        a: "Le livret est disponible en français, anglais et espagnol — le voyageur choisit sa langue en un clic, et même le texte que vous rédigez vous-même (règles, recommandations…) est traduit automatiquement par une IA, vous n'avez rien à faire.",
       },
     ],
     finalCtaTitle: "Prêt à passer au livret 100 % numérique ?",
@@ -222,7 +222,7 @@ const content = {
     examplePremium: "See an example — Premium →",
     comparisonHeader: { includes: "Includes", basic: "Essential", premium: "Premium" },
     comparison: [
-      { label: "Digital welcome book in FR / EN / ES, automatically translated", basico: true, premium: true },
+      { label: "Digital welcome book in FR / EN / ES, automatically translated by AI", basico: true, premium: true },
       { label: "Wifi, schedules, parking, contact", basico: true, premium: true },
       { label: "Local guide with search", basico: true, premium: true },
       { label: "Transfer booking and guestbook", basico: true, premium: true },
@@ -258,7 +258,7 @@ const content = {
       },
       {
         q: "What if my guests don't speak French?",
-        a: "The livret is available in French, English and Spanish — the guest picks their language in one click, and even the text you write yourself (rules, recommendations…) gets automatically translated, no extra work on your end.",
+        a: "The livret is available in French, English and Spanish — the guest picks their language in one click, and even the text you write yourself (rules, recommendations…) gets automatically translated by AI, no extra work on your end.",
       },
     ],
     finalCtaTitle: "Ready to go fully digital?",
@@ -304,7 +304,7 @@ const content = {
     examplePremium: "Ver un ejemplo — Premium →",
     comparisonHeader: { includes: "Incluye", basic: "Básico", premium: "Premium" },
     comparison: [
-      { label: "Livret digital en FR / EN / ES, traducido automáticamente", basico: true, premium: true },
+      { label: "Livret digital en FR / EN / ES, traducido automáticamente con IA", basico: true, premium: true },
       { label: "Wifi, horarios, aparcamiento, contacto", basico: true, premium: true },
       { label: "Guía local con buscador", basico: true, premium: true },
       { label: "Reserva de transfer y libro de oro", basico: true, premium: true },
@@ -340,7 +340,7 @@ const content = {
       },
       {
         q: "¿Y si mis huéspedes no hablan español?",
-        a: "El livret está disponible en francés, inglés y español — el huésped elige su idioma con un clic, y hasta el texto que tú mismo escribes (reglas, recomendaciones…) se traduce automáticamente, sin que tengas que hacer nada.",
+        a: "El livret está disponible en francés, inglés y español — el huésped elige su idioma con un clic, y hasta el texto que tú mismo escribes (reglas, recomendaciones…) se traduce automáticamente con IA, sin que tengas que hacer nada.",
       },
     ],
     finalCtaTitle: "¿Listo para pasar al libro 100 % digital?",
