@@ -12,7 +12,11 @@ export default async function LogementLayout({ children, params }) {
   const locale = await getLocale();
 
   const admin = createAdminClient();
-  const { data: property } = await admin.from("properties").select("accent_color").eq("slug", slug).maybeSingle();
+  const { data: property } = await admin
+    .from("properties")
+    .select("accent_color, plan")
+    .eq("slug", slug)
+    .maybeSingle();
   const accent = property?.accent_color || DEFAULT_ACCENT;
 
   return (
@@ -29,7 +33,7 @@ export default async function LogementLayout({ children, params }) {
       }}
     >
       {children}
-      <AssistantWidget slug={slug} locale={locale} />
+      {property?.plan === "premium" && <AssistantWidget slug={slug} locale={locale} />}
     </div>
   );
 }

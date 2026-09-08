@@ -74,6 +74,11 @@ export async function POST(request) {
   if (!hasActiveSubscription(property)) {
     return Response.json({ error: "Abonnement inactif" }, { status: 403 });
   }
+  // L'assistant a un coût d'API réel (appels Claude) — réservé au plan
+  // premium, pas inclus dans l'offre essentielle.
+  if (property.plan !== "premium") {
+    return Response.json({ error: "Fonctionnalité réservée au plan Premium" }, { status: 403 });
+  }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
