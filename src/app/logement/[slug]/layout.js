@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getLocale } from "@/lib/i18n/locale";
-import { DEFAULT_ACCENT, accentDeep } from "@/lib/accentPalette";
+import { DEFAULT_ACCENT, accentDeep, accentTint } from "@/lib/accentPalette";
 import AssistantWidget from "@/components/AssistantWidget";
 
 // Contenu propre à chaque logement, accessible uniquement avec le code
@@ -19,7 +19,15 @@ export default async function LogementLayout({ children, params }) {
     // display: contents — ne participe pas à la mise en page (le flex column
     // du body doit voir <main> directement), mais laisse les variables CSS
     // se propager à la fois au contenu du livret et au widget assistant.
-    <div style={{ display: "contents", "--host-accent": accent, "--host-accent-deep": accentDeep(accent) }}>
+    <div
+      style={{
+        display: "contents",
+        "--host-accent": accent,
+        "--host-accent-deep": accentDeep(accent),
+        "--host-accent-tint": accentTint(accent, 18),
+        "--host-accent-tint-strong": accentTint(accent, 35),
+      }}
+    >
       {children}
       <AssistantWidget slug={slug} locale={locale} />
     </div>

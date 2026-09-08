@@ -19,3 +19,12 @@ export const ACCENT_PALETTE = [
 export function accentDeep(hex) {
   return `color-mix(in srgb, ${hex} 82%, black)`;
 }
+
+// Teinte OPAQUE (mélangée avec le fond sable, pas avec de la transparence)
+// pour les tuiles desktop — une tuile avec un fond à 10% d'opacité laisse
+// passer la photo fixe du hero derrière elle, rendant le texte illisible
+// selon la zone de la photo. color-mix() avec --sand-card donne la même
+// teinte pastel visuelle mais un fond entièrement solide.
+export function accentTint(hex, amount = 18) {
+  return `color-mix(in srgb, ${hex} ${amount}%, var(--sand-card))`;
+}

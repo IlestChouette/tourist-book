@@ -398,8 +398,8 @@ export default function LivretMenu({ property, slug, locale = "fr" }) {
               onClick={() => setActive(item.key)}
               className={`flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl text-center transition active:scale-[0.96] md:gap-1.5 md:rounded-xl md:border md:shadow-sm ${
                 isActive
-                  ? "bg-[var(--host-accent)] text-ink ring-2 ring-inset ring-ink/60 md:border-[var(--host-accent)] md:bg-[var(--host-accent)]/25 md:text-ink md:ring-0"
-                  : "bg-[var(--host-accent)] text-ink md:border-[var(--host-accent)]/30 md:bg-[var(--host-accent)]/10 md:text-ink md:hover:border-[var(--host-accent)]"
+                  ? "bg-[var(--host-accent)] text-ink ring-2 ring-inset ring-ink/60 md:border-[var(--host-accent)] md:bg-[var(--host-accent-tint-strong)] md:text-ink md:ring-0"
+                  : "bg-[var(--host-accent)] text-ink md:border-[var(--host-accent)]/30 md:bg-[var(--host-accent-tint)] md:text-ink md:hover:border-[var(--host-accent)]"
               }`}
             >
               <span className="h-9 w-9 md:h-6 md:w-6">{item.icon}</span>
