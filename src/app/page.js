@@ -136,6 +136,8 @@ const content = {
     pricingTitle: "Une offre par logement",
     pricingSubtitle:
       "Pas par compte — si vous gérez plusieurs logements, chacun choisit son offre. Sans vous inscrire, vous pouvez voir ici même ce qu'inclut chaque offre.",
+    exampleEssentiel: "Voir un exemple — Essentiel →",
+    examplePremium: "Voir un exemple — Premium →",
     comparisonHeader: { includes: "Inclus", basic: "Essentiel", premium: "Premium" },
     comparison: [
       { label: "Livret numérique en FR / EN / ES", basico: true, premium: true },
@@ -216,6 +218,8 @@ const content = {
     pricingTitle: "One plan per property",
     pricingSubtitle:
       "Not per account — if you manage several properties, each one picks its own plan. Without signing up, you can see right here what each plan includes.",
+    exampleEssentiel: "See an example — Essential →",
+    examplePremium: "See an example — Premium →",
     comparisonHeader: { includes: "Includes", basic: "Essential", premium: "Premium" },
     comparison: [
       { label: "Digital welcome book in FR / EN / ES", basico: true, premium: true },
@@ -296,6 +300,8 @@ const content = {
     pricingTitle: "Un plan por cada alojamiento",
     pricingSubtitle:
       "No por cuenta — si gestionas varias propiedades, cada una elige su plan. Sin registrarte puedes ver aquí mismo lo que incluye cada uno.",
+    exampleEssentiel: "Ver un ejemplo — Essentiel →",
+    examplePremium: "Ver un ejemplo — Premium →",
     comparisonHeader: { includes: "Incluye", basic: "Básico", premium: "Premium" },
     comparison: [
       { label: "Livret digital en FR / EN / ES", basico: true, premium: true },
@@ -496,6 +502,24 @@ export default async function Home() {
           <div className="text-center">
             <h2 className="font-display italic text-3xl text-ink">{t.pricingTitle}</h2>
             <p className="mx-auto mt-3 max-w-xl text-ink/70">{t.pricingSubtitle}</p>
+            <div className="mt-5 flex flex-wrap justify-center gap-3">
+              <a
+                href="/logement/exemple/entrer?code=0000"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded border border-aqua-deep px-5 py-2.5 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
+              >
+                {t.exampleEssentiel}
+              </a>
+              <a
+                href="/logement/exemple-premium/entrer?code=0000"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded border border-aqua-deep px-5 py-2.5 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
+              >
+                {t.examplePremium}
+              </a>
+            </div>
           </div>
 
           <div className="mt-12">
