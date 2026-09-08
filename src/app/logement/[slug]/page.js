@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getPropertyBySlug, hasActiveSubscription } from "@/lib/properties";
+import { fullAddress } from "@/lib/address";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getLocale } from "@/lib/i18n/locale";
 import { translateProperty } from "@/lib/translate";
@@ -102,7 +103,7 @@ export default async function LivretPage({ params }) {
     <main className="flex-1">
       <LivretHero
         title={property.name}
-        subtitle={property.address}
+        subtitle={fullAddress(property)}
         description={description}
         photos={photos}
         locale={locale}

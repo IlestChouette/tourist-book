@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { fullAddress } from "@/lib/address";
 
 const categories = [
   { key: "visiter", labelKey: "sightseeing", query: "lieux touristiques" },
@@ -126,14 +127,6 @@ function CategoryIcon({ categoryKey }) {
         </svg>
       );
   }
-}
-
-// Une adresse seule ("12 rue de la République") est ambiguë pour Google Maps
-// sans la ville ni le code postal — ça ne pose pas de problème pour une rue
-// mondialement connue, mais pour une adresse normale, ça retombe souvent sur
-// une vue large (toute la France) au lieu de localiser le logement.
-function fullAddress(property) {
-  return [property.address, property.postal_code, property.city].filter(Boolean).join(", ");
 }
 
 export default function CarteInteractive({ property, locale = "fr" }) {

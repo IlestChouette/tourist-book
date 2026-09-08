@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { fullAddress } from "@/lib/address";
 import { sendTransferRequestWhatsApp } from "@/lib/whatsapp";
 import { sendTransferRequestNotification } from "@/lib/email";
 
@@ -52,7 +53,7 @@ export async function POST(request) {
   const admin = createAdminClient();
   const { data: property } = await admin
     .from("properties")
-    .select("id, name, address, hosts(email)")
+    .select("id, name, address, postal_code, city, hosts(email)")
     .eq("slug", slug)
     .single();
   if (!property) {
@@ -92,7 +93,7 @@ export async function POST(request) {
       await sendTransferRequestNotification({
         hostEmail: property.hosts?.email,
         propertyName: property.name,
-        propertyAddress: property.address,
+        propertyAddress: fullAddress(property),
         request: inserted,
       });
     } catch (err) {

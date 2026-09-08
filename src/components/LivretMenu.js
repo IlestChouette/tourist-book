@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { fullAddress } from "@/lib/address";
 import TransfertForm from "./TransfertForm";
 import CarnetPanel from "./CarnetPanel";
 import CarteInteractive from "./CarteInteractive";
@@ -519,7 +520,7 @@ export default function LivretMenu({ property, slug, locale = "fr" }) {
                     <TransfertForm
                       slug={slug}
                       propertyName={property.name}
-                      propertyAddress={property.address}
+                      propertyAddress={fullAddress(property)}
                       locale={locale}
                     />
                   )}
