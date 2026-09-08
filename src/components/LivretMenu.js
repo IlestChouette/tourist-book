@@ -490,7 +490,9 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
           <div key={`filler-${i}`} aria-hidden="true" className="hidden aspect-square sm:block" />
         ))}
       </div>
-      {demoItem && <p className="mt-4 text-xs text-ink/50">{t.demoHint}</p>}
+      {demoItem && (
+        <p className="mt-4 rounded border border-sand-dim bg-sand-card p-3 text-xs text-ink/60">{t.demoHint}</p>
+      )}
 
       {displayedItem && (
         <div className="fixed inset-0 z-40 flex items-end justify-center sm:items-center sm:p-6">

@@ -11,31 +11,31 @@ import LivretMenu from "@/components/LivretMenu";
 const CHECKIN_STATUS_BANNER = {
   fr: {
     pendiente: {
-      className: "border-terracotta bg-terracotta/10 text-ink",
+      className: "border-terracotta bg-sand-card text-ink",
       text: "Ton check-in est bien enregistré et en cours de vérification par l'hôte.",
     },
     rechazado: {
-      className: "border-terracotta-deep bg-terracotta-deep/10 text-ink",
+      className: "border-terracotta-deep bg-sand-card text-ink",
       text: "Tes documents de check-in n'ont pas pu être validés — contacte ton hôte pour en savoir plus.",
     },
   },
   en: {
     pendiente: {
-      className: "border-terracotta bg-terracotta/10 text-ink",
+      className: "border-terracotta bg-sand-card text-ink",
       text: "Your check-in has been recorded and is being reviewed by your host.",
     },
     rechazado: {
-      className: "border-terracotta-deep bg-terracotta-deep/10 text-ink",
+      className: "border-terracotta-deep bg-sand-card text-ink",
       text: "Your check-in documents couldn't be validated — contact your host to find out more.",
     },
   },
   es: {
     pendiente: {
-      className: "border-terracotta bg-terracotta/10 text-ink",
+      className: "border-terracotta bg-sand-card text-ink",
       text: "Tu check-in quedó registrado y está siendo verificado por tu anfitrión.",
     },
     rechazado: {
-      className: "border-terracotta-deep bg-terracotta-deep/10 text-ink",
+      className: "border-terracotta-deep bg-sand-card text-ink",
       text: "Tus documentos de check-in no pudieron validarse — contacta a tu anfitrión para más información.",
     },
   },

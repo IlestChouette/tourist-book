@@ -137,13 +137,24 @@ export default async function DemoCheckinPage() {
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.idDocument}</span>
-                <div className="mt-2 flex aspect-[4/3] w-full items-center justify-center rounded border border-dashed border-sand-dim bg-sand p-4 text-center text-sm text-ink/40">
+                <div className="mt-2 flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded border border-dashed border-sand-dim bg-sand p-4 text-center text-sm text-ink/40">
+                  <svg viewBox="0 0 64 44" width="64" height="44" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="60" height="40" rx="4" />
+                    <circle cx="18" cy="22" r="8" />
+                    <path d="M8 36c1-6 5-9 10-9s9 3 10 9" />
+                    <path d="M36 14h20M36 21h20M36 28h14" />
+                  </svg>
                   {t.idDocumentPlaceholder}
                 </div>
               </div>
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.selfie}</span>
-                <div className="mt-2 flex aspect-[4/3] w-full items-center justify-center rounded border border-dashed border-sand-dim bg-sand p-4 text-center text-sm text-ink/40">
+                <div className="mt-2 flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded border border-dashed border-sand-dim bg-sand p-4 text-center text-sm text-ink/40">
+                  <svg viewBox="0 0 44 44" width="44" height="44" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="40" height="40" rx="20" />
+                    <circle cx="22" cy="18" r="7" />
+                    <path d="M9 34c1.5-7 6.5-10.5 13-10.5S33.5 27 35 34" />
+                  </svg>
                   {t.selfiePlaceholder}
                 </div>
               </div>
