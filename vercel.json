@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/no-property-reminder",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/listing-tips-reminder",
+      "schedule": "15 9 * * *"
     }
   ]
 }

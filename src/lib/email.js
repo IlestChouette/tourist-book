@@ -131,7 +131,7 @@ export async function sendNoPropertyReminder({ name, email }) {
 
 Bienvenue sur Tourist Book, et merci de faire partie de l'aventure !
 
-On a remarqué que vous n'avez pas encore créé votre logement — pas de souci, ça prend à peine 5 minutes avec les informations essentielles (vous pourrez compléter le reste plus tard, à votre rythme, depuis la page de modification).
+On a remarqué que vous n'avez pas encore créé votre logement. Pas de souci, ça prend à peine 5 minutes avec les informations essentielles (vous pourrez compléter le reste plus tard, à votre rythme, depuis la page de modification).
 
 Pour vous donner une idée de ce que ça donne une fois en ligne, voici deux exemples concrets, un pour chaque offre :
 
@@ -179,6 +179,73 @@ export async function sendReminderBatchNotification({ sentTo }) {
     from: "Tourist Book <notifications@tourist-book.com>",
     to: CONTACT_NOTIFICATION_EMAIL,
     subject: `Relance envoyée à ${sentTo.length} hôtelier${sentTo.length > 1 ? "s" : ""}`,
+    text: lines.join("\n"),
+  });
+
+  if (sendError) {
+    throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
+  }
+
+  return { sent: true };
+}
+
+// Message de bienvenue/conseils envoyé une fois (cf. hosts.listing_tips_sent_at)
+// aux hôteliers qui ont déjà créé au moins un logement — les encourage à
+// remplir les sections facultatives et à choisir leur couleur, avec un
+// exemple complet en référence.
+export async function sendListingTipsEmail({ name, email }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const resend = new Resend(apiKey);
+  const greeting = name?.trim() ? `Bonjour ${name.trim()},` : "Bonjour,";
+
+  const text = `${greeting}
+
+Merci infiniment pour votre confiance et votre soutien dans ce projet. Voir des hôtes comme vous rejoindre Tourist Book, c'est ce qui nous motive chaque jour.
+
+On veut vous accompagner à chaque étape. Un conseil simple pour commencer : pour que votre livret soit aussi clair et complet que possible pour vos voyageurs, pensez à remplir chaque section depuis la page « Modifier » de votre logement : message de bienvenue, règles, gestion des poubelles, informations générales, recommandations locales, récupération des clés... Tout est facultatif, mais plus vous en ajoutez, moins vos voyageurs auront de questions à vous poser pendant leur séjour. Vous pouvez aussi y choisir la couleur des boutons de votre livret, pour lui donner votre touche personnelle.
+
+Pour vous donner une idée de ce que ça donne une fois tout rempli, voici un exemple complet avec toutes les informations en place :
+https://tourist-book.com/logement/exemple-premium/entrer?code=0000
+
+N'hésitez pas à nous écrire si vous avez la moindre question, on est là pour vous aider à en tirer le meilleur.
+
+Merci encore, et à très vite,
+L'équipe Tourist Book`;
+
+  const { error: sendError } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: email,
+    replyTo: CONTACT_NOTIFICATION_EMAIL,
+    subject: "Merci de faire partie de l'aventure Tourist Book",
+    text,
+  });
+
+  if (sendError) {
+    throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
+  }
+
+  return { sent: true };
+}
+
+// Même principe que sendReminderBatchNotification, pour le cron listing-tips.
+export async function sendListingTipsBatchNotification({ sentTo }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || sentTo.length === 0) return { sent: false, reason: "not_configured_or_empty" };
+
+  const resend = new Resend(apiKey);
+
+  const lines = [
+    "Email de bienvenue/conseils envoyé à :",
+    "",
+    ...sentTo.map((h) => `- ${h.name || "(sans nom)"} — ${h.email}`),
+  ];
+
+  const { error: sendError } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject: `Email de bienvenue envoyé à ${sentTo.length} hôtelier${sentTo.length > 1 ? "s" : ""}`,
     text: lines.join("\n"),
   });
 
