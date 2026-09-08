@@ -393,12 +393,9 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
     { key: "carnet", label: t.livreOr, icon: <BookIcon /> },
   ];
 
-  const demoItem =
-    isDemo && property.plan === "premium"
-      ? { key: "demo-checkin", label: t.demoHostView, icon: <IdCardIcon />, href: "/demo-checkin" }
-      : null;
+  const showDemoLink = isDemo && property.plan === "premium";
 
-  const tiles = [...infoItems, ...navItems, ...(demoItem ? [demoItem] : [])];
+  const tiles = [...infoItems, ...navItems];
   const activeItem = tiles.find((i) => i.key === active);
   const isNav = navItems.some((i) => i.key === displayedItem?.key);
   const cols = bestColumns(tiles.length);
@@ -461,27 +458,16 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
           const isActive = active === item.key;
           const hint = isDemo ? hints[item.key] : undefined;
           const className = `flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl text-center transition active:scale-[0.96] md:gap-1.5 md:rounded-xl md:border md:shadow-sm ${
-            item.href
-              ? "border-2 border-dashed border-[var(--host-accent-deep)] bg-transparent text-ink md:bg-transparent"
-              : isActive
-                ? "bg-[var(--host-accent)] text-ink ring-2 ring-inset ring-ink/60 md:border-[var(--host-accent)] md:bg-[var(--host-accent-tint-strong)] md:text-ink md:ring-0"
-                : "bg-[var(--host-accent)] text-ink md:border-[var(--host-accent)]/30 md:bg-[var(--host-accent-tint)] md:text-ink md:hover:border-[var(--host-accent)]"
+            isActive
+              ? "bg-[var(--host-accent)] text-ink ring-2 ring-inset ring-ink/60 md:border-[var(--host-accent)] md:bg-[var(--host-accent-tint-strong)] md:text-ink md:ring-0"
+              : "bg-[var(--host-accent)] text-ink md:border-[var(--host-accent)]/30 md:bg-[var(--host-accent-tint)] md:text-ink md:hover:border-[var(--host-accent)]"
           }`;
-          const inner = (
-            <>
+          return (
+            <button key={item.key} type="button" onClick={() => setActive(item.key)} title={hint} className={className}>
               <span className="h-9 w-9 md:h-6 md:w-6">{item.icon}</span>
               <span className="text-sm font-bold uppercase leading-tight tracking-wide md:text-[11px]">
                 {item.label}
               </span>
-            </>
-          );
-          return item.href ? (
-            <a key={item.key} href={item.href} title={hint} className={className}>
-              {inner}
-            </a>
-          ) : (
-            <button key={item.key} type="button" onClick={() => setActive(item.key)} title={hint} className={className}>
-              {inner}
             </button>
           );
         })}
@@ -490,8 +476,20 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
           <div key={`filler-${i}`} aria-hidden="true" className="hidden aspect-square sm:block" />
         ))}
       </div>
-      {demoItem && (
-        <p className="mt-4 rounded border border-sand-dim bg-sand-card p-3 text-xs text-ink/60">{t.demoHint}</p>
+
+      {showDemoLink && (
+        <div className="mt-6 rounded border border-dashed border-[var(--host-accent-deep)] bg-sand-card p-4">
+          <p className="text-xs text-ink/60">{t.demoHint}</p>
+          <a
+            href="/demo-checkin"
+            className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-[var(--host-accent-deep)] hover:underline"
+          >
+            <span className="h-4 w-4">
+              <IdCardIcon />
+            </span>
+            {t.demoHostView} →
+          </a>
+        </div>
       )}
 
       {displayedItem && (
