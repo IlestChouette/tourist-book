@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { uploadMedia } from "@/lib/uploadMedia";
 import Hero from "@/components/Hero";
-import AccentColorPicker from "@/components/AccentColorPicker";
+import AccentColorButton from "@/components/AccentColorButton";
 import { getClientLocale } from "@/lib/i18n/clientLocale";
 import fieldsDict from "@/lib/i18n/dictionaries/propertyForm";
 
@@ -176,6 +176,13 @@ export default function NuevoAlojamientoPage() {
     <main className="flex-1">
       <Hero backHref="/panel/alojamientos" backLabel={p.properties} eyebrow={p.eyebrow} title={p.title} />
       <section className="mx-auto max-w-2xl px-6 py-10">
+        <div className="mb-4 flex justify-end">
+          <AccentColorButton
+            value={form.accent_color}
+            onChange={(hex) => setForm((f) => ({ ...f, accent_color: hex }))}
+            locale={locale}
+          />
+        </div>
         <p className="-mt-2 mb-4 rounded border border-aqua-deep/30 bg-aqua-deep/5 p-3 text-sm text-ink/70">
           {t.quickCreateHint}
         </p>
@@ -486,21 +493,6 @@ export default function NuevoAlojamientoPage() {
                   className="input"
                 />
               </label>
-            </div>
-          </details>
-
-          <details className="group rounded border border-sand-dim [&_summary::-webkit-details-marker]:hidden">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-sand-card p-4 text-sm font-bold uppercase tracking-wider text-ink/70">
-              {t.accentColor}
-              <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
-            </summary>
-            <div className="grid gap-2 p-4">
-              <AccentColorPicker
-                value={form.accent_color}
-                onChange={(hex) => setForm((f) => ({ ...f, accent_color: hex }))}
-                locale={locale}
-              />
-              <span className="text-xs text-ink/50">{t.accentColorHint}</span>
             </div>
           </details>
 
