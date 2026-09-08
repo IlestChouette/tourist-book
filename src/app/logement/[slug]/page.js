@@ -113,7 +113,7 @@ export default async function LivretPage({ params }) {
         {banner && (
           <div className={`mb-6 rounded border p-4 text-sm ${banner.className}`}>{banner.text}</div>
         )}
-        <LivretMenu property={property} slug={slug} locale={locale} />
+        <LivretMenu property={property} slug={slug} locale={locale} isDemo={slug.startsWith("exemple")} />
       </section>
     </main>
   );

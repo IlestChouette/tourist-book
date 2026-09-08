@@ -30,6 +30,8 @@ const content = {
     keyPhotoAlt: "Photo d'aide pour la récupération des clés",
     video: "Vidéo",
     toursComingSoon: "La réservation de tours et d'activités arrive bientôt — le partenaire est en cours de configuration.",
+    demoHostView: "Vue hôte (démo)",
+    demoHint: "* Le bouton « Vue hôte (démo) » n'existe pas sur un vrai livret — il vous montre ce que verrait l'hôte à la réception de ce check-in.",
   },
   en: {
     wifi: "Wifi",
@@ -54,6 +56,8 @@ const content = {
     keyPhotoAlt: "Help photo for key pickup",
     video: "Video",
     toursComingSoon: "Tour and activity booking is coming soon — the partner is being set up.",
+    demoHostView: "Host view (demo)",
+    demoHint: "* The \"Host view (demo)\" button doesn't exist on a real livret — it shows you what the host would see upon receiving this check-in.",
   },
   es: {
     wifi: "Wifi",
@@ -78,6 +82,53 @@ const content = {
     keyPhotoAlt: "Foto de ayuda para la recogida de llaves",
     video: "Video",
     toursComingSoon: "La reserva de tours y actividades llega pronto — el socio está en proceso de configuración.",
+    demoHostView: "Vista del hotelero (demo)",
+    demoHint: "* El botón «Vista del hotelero (demo)» no existe en un livret real — te muestra lo que vería el hotelero al recibir este check-in.",
+  },
+};
+
+// Textes affichés en info-bulle (attribut title) uniquement sur les livrets
+// de démonstration — pour qu'un futur hôte comprenne chaque tuile sans avoir
+// à demander, sans jamais alourdir le vrai produit vu par les voyageurs.
+const tileHints = {
+  fr: {
+    wifi: "Le wifi que vous configurez apparaît ici, prêt à copier pour votre voyageur.",
+    horaires: "Vos horaires d'arrivée et de départ, dans la langue du voyageur.",
+    parking: "Vos indications de stationnement, écrites une fois pour toutes.",
+    contact: "Votre voyageur peut vous écrire sur WhatsApp en un clic depuis ici.",
+    rules: "Vos règles du logement, traduites automatiquement.",
+    basuras: "Vos indications de tri sélectif.",
+    info: "Toutes les infos pratiques du logement que vous voulez transmettre.",
+    transfert: "Le voyageur réserve son transfert directement, sans appel.",
+    tours: "Réservation de tours et activités (bientôt disponible).",
+    carte: "Une carte qui localise précisément votre logement et les environs.",
+    carnet: "Vos voyageurs laissent un message — un vrai livre d'or numérique.",
+  },
+  en: {
+    wifi: "The wifi you set up appears here, ready to copy for your guest.",
+    horaires: "Your check-in and check-out times, in your guest's own language.",
+    parking: "Your parking instructions, written once and shown to everyone.",
+    contact: "Your guest can message you on WhatsApp in one tap from here.",
+    rules: "Your house rules, automatically translated.",
+    basuras: "Your waste-sorting instructions.",
+    info: "Any practical info about the property you want to share.",
+    transfert: "The guest books their transfer directly, no phone call needed.",
+    tours: "Tour and activity booking (coming soon).",
+    carte: "A map that pinpoints your property and the area around it.",
+    carnet: "Your guests leave a message — a real digital guestbook.",
+  },
+  es: {
+    wifi: "El wifi que configuras aparece aquí, listo para copiar para tu huésped.",
+    horaires: "Tus horarios de llegada y salida, en el idioma del huésped.",
+    parking: "Tus indicaciones de aparcamiento, escritas una sola vez.",
+    contact: "Tu huésped puede escribirte por WhatsApp con un clic desde aquí.",
+    rules: "Tus reglas del alojamiento, traducidas automáticamente.",
+    basuras: "Tus indicaciones de separación de basura.",
+    info: "Cualquier información práctica del alojamiento que quieras compartir.",
+    transfert: "El huésped reserva su transfer directamente, sin llamadas.",
+    tours: "Reserva de tours y actividades (próximamente).",
+    carte: "Un mapa que ubica con precisión tu alojamiento y los alrededores.",
+    carnet: "Tus huéspedes dejan un mensaje — un verdadero libro de oro digital.",
   },
 };
 
@@ -189,6 +240,17 @@ function BookIcon() {
   );
 }
 
+function IdCardIcon() {
+  return (
+    <svg {...iconProps} className="h-full w-full">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <circle cx="8.5" cy="11" r="1.8" />
+      <path d="M5 16c.5-1.8 2-2.6 3.5-2.6s3 .8 3.5 2.6" />
+      <path d="M14 9.5h4M14 13h4" />
+    </svg>
+  );
+}
+
 function CloseIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" className="h-4 w-4">
@@ -275,8 +337,9 @@ function VideoEmbed({ url, title }) {
   );
 }
 
-export default function LivretMenu({ property, slug, locale = "fr" }) {
+export default function LivretMenu({ property, slug, locale = "fr", isDemo = false }) {
   const t = content[locale];
+  const hints = tileHints[locale];
   const [active, setActive] = useState(null);
   const [displayedItem, setDisplayedItem] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
@@ -330,7 +393,12 @@ export default function LivretMenu({ property, slug, locale = "fr" }) {
     { key: "carnet", label: t.livreOr, icon: <BookIcon /> },
   ];
 
-  const tiles = [...infoItems, ...navItems];
+  const demoItem =
+    isDemo && property.plan === "premium"
+      ? { key: "demo-checkin", label: t.demoHostView, icon: <IdCardIcon />, href: "/demo-checkin" }
+      : null;
+
+  const tiles = [...infoItems, ...navItems, ...(demoItem ? [demoItem] : [])];
   const activeItem = tiles.find((i) => i.key === active);
   const isNav = navItems.some((i) => i.key === displayedItem?.key);
   const cols = bestColumns(tiles.length);
@@ -391,21 +459,29 @@ export default function LivretMenu({ property, slug, locale = "fr" }) {
       >
         {tiles.map((item) => {
           const isActive = active === item.key;
-          return (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => setActive(item.key)}
-              className={`flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl text-center transition active:scale-[0.96] md:gap-1.5 md:rounded-xl md:border md:shadow-sm ${
-                isActive
-                  ? "bg-[var(--host-accent)] text-ink ring-2 ring-inset ring-ink/60 md:border-[var(--host-accent)] md:bg-[var(--host-accent-tint-strong)] md:text-ink md:ring-0"
-                  : "bg-[var(--host-accent)] text-ink md:border-[var(--host-accent)]/30 md:bg-[var(--host-accent-tint)] md:text-ink md:hover:border-[var(--host-accent)]"
-              }`}
-            >
+          const hint = isDemo ? hints[item.key] : undefined;
+          const className = `flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl text-center transition active:scale-[0.96] md:gap-1.5 md:rounded-xl md:border md:shadow-sm ${
+            item.href
+              ? "border-2 border-dashed border-[var(--host-accent-deep)] bg-transparent text-ink md:bg-transparent"
+              : isActive
+                ? "bg-[var(--host-accent)] text-ink ring-2 ring-inset ring-ink/60 md:border-[var(--host-accent)] md:bg-[var(--host-accent-tint-strong)] md:text-ink md:ring-0"
+                : "bg-[var(--host-accent)] text-ink md:border-[var(--host-accent)]/30 md:bg-[var(--host-accent-tint)] md:text-ink md:hover:border-[var(--host-accent)]"
+          }`;
+          const inner = (
+            <>
               <span className="h-9 w-9 md:h-6 md:w-6">{item.icon}</span>
               <span className="text-sm font-bold uppercase leading-tight tracking-wide md:text-[11px]">
                 {item.label}
               </span>
+            </>
+          );
+          return item.href ? (
+            <a key={item.key} href={item.href} title={hint} className={className}>
+              {inner}
+            </a>
+          ) : (
+            <button key={item.key} type="button" onClick={() => setActive(item.key)} title={hint} className={className}>
+              {inner}
             </button>
           );
         })}
@@ -414,6 +490,7 @@ export default function LivretMenu({ property, slug, locale = "fr" }) {
           <div key={`filler-${i}`} aria-hidden="true" className="hidden aspect-square sm:block" />
         ))}
       </div>
+      {demoItem && <p className="mt-4 text-xs text-ink/50">{t.demoHint}</p>}
 
       {displayedItem && (
         <div className="fixed inset-0 z-40 flex items-end justify-center sm:items-center sm:p-6">
