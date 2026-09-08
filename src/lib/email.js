@@ -159,3 +159,32 @@ L'équipe Tourist Book`;
 
   return { sent: true };
 }
+
+// Prévient Fernando à chaque déclenchement du cron de relance — sans ça,
+// il n'a aucune visibilité sur qui a reçu quoi (le reply_to de l'email
+// voyageur ne lui envoie rien tant que le voyageur ne répond pas).
+export async function sendReminderBatchNotification({ sentTo }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || sentTo.length === 0) return { sent: false, reason: "not_configured_or_empty" };
+
+  const resend = new Resend(apiKey);
+
+  const lines = [
+    "Relance automatique \"créez votre logement\" envoyée à :",
+    "",
+    ...sentTo.map((h) => `- ${h.name || "(sans nom)"} — ${h.email}`),
+  ];
+
+  const { error: sendError } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject: `Relance envoyée à ${sentTo.length} hôtelier${sentTo.length > 1 ? "s" : ""}`,
+    text: lines.join("\n"),
+  });
+
+  if (sendError) {
+    throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
+  }
+
+  return { sent: true };
+}

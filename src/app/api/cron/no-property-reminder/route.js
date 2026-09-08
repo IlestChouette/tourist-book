@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendNoPropertyReminder } from "@/lib/email";
+import { sendNoPropertyReminder, sendReminderBatchNotification } from "@/lib/email";
 
 // Déclenché une fois par jour par Vercel Cron (voir vercel.json). Protégé
 // par CRON_SECRET pour qu'on ne puisse pas le déclencher depuis l'extérieur
@@ -30,15 +30,23 @@ export async function GET(request) {
   const targets = (hosts ?? []).filter((h) => !hostsWithProperty.has(h.id));
 
   const results = [];
+  const sentTo = [];
   for (const host of targets) {
     try {
       await sendNoPropertyReminder({ name: host.name, email: host.email });
       await admin.from("hosts").update({ no_property_reminder_sent_at: new Date().toISOString() }).eq("id", host.id);
       results.push({ email: host.email, sent: true });
+      sentTo.push({ name: host.name, email: host.email });
     } catch (err) {
       console.error(`sendNoPropertyReminder failed for ${host.email}:`, err);
       results.push({ email: host.email, sent: false, error: err.message });
     }
+  }
+
+  try {
+    await sendReminderBatchNotification({ sentTo });
+  } catch (err) {
+    console.error("sendReminderBatchNotification failed:", err);
   }
 
   return NextResponse.json({ checked: targets.length, results });
