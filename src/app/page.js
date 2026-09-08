@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ContactButton from "@/components/ContactButton";
 import PricingCards from "@/components/PricingCards";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { getLocale } from "@/lib/i18n/locale";
 
 const iconProps = {
@@ -404,6 +405,10 @@ export default async function Home() {
             />
           </Link>
           <nav className="flex items-center gap-5">
+            <LanguageSwitcher
+              locale={locale}
+              className="[&_button]:text-[#f7f1e4]/60 [&_button:disabled]:text-[#f7f1e4] [&_button:hover]:text-[#f7f1e4] [&_span]:text-[#f7f1e4]/40"
+            />
             <Link href="/panel/login" className="text-sm font-bold text-[#f7f1e4]/80 hover:text-[#f7f1e4]">
               {t.login}
             </Link>

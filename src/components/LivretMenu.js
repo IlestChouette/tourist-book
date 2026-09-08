@@ -386,8 +386,8 @@ export default function LivretMenu({ property, slug, locale = "fr" }) {
               onClick={() => setActive(item.key)}
               className={`flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl text-center transition active:scale-[0.96] md:gap-1.5 md:rounded-xl md:border md:shadow-sm ${
                 isActive
-                  ? "bg-terracotta text-ink ring-2 ring-inset ring-ink/60 md:border-terracotta md:bg-terracotta/10 md:text-ink md:ring-0"
-                  : "bg-terracotta text-ink md:border-sand-dim md:bg-sand-card md:text-ink md:hover:border-terracotta/60"
+                  ? "bg-[var(--host-accent)] text-ink ring-2 ring-inset ring-ink/60 md:border-[var(--host-accent)] md:bg-[var(--host-accent)]/10 md:text-ink md:ring-0"
+                  : "bg-[var(--host-accent)] text-ink md:border-sand-dim md:bg-sand-card md:text-ink md:hover:border-[var(--host-accent)]/60"
               }`}
             >
               <span className="h-9 w-9 md:h-6 md:w-6">{item.icon}</span>
@@ -417,7 +417,7 @@ export default function LivretMenu({ property, slug, locale = "fr" }) {
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-terracotta text-ink">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--host-accent)] text-ink">
                   <span className="h-5 w-5">{displayedItem.icon}</span>
                 </span>
                 <span id="livret-sheet-title" className="font-display italic text-xl text-ink">

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { uploadMedia } from "@/lib/uploadMedia";
 import Hero from "@/components/Hero";
+import AccentColorPicker from "@/components/AccentColorPicker";
 import { getClientLocale } from "@/lib/i18n/clientLocale";
 import fieldsDict from "@/lib/i18n/dictionaries/propertyForm";
 
@@ -57,6 +58,7 @@ export default function NuevoAlojamientoPage() {
     key_instructions: "",
     key_lockbox_code: "",
     key_video_url: "",
+    accent_color: "",
   });
   const [photos, setPhotos] = useState([]);
   const [wastePhoto, setWastePhoto] = useState(null);
@@ -153,6 +155,7 @@ export default function NuevoAlojamientoPage() {
           key_lockbox_code: form.key_lockbox_code,
           key_video_url: form.key_video_url,
           key_photos: keyPhotoUrls,
+          accent_color: form.accent_color || null,
           access_code: randomCode(),
           photos: photoUrls,
         })
@@ -483,6 +486,21 @@ export default function NuevoAlojamientoPage() {
                   className="input"
                 />
               </label>
+            </div>
+          </details>
+
+          <details className="group rounded border border-sand-dim [&_summary::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-sand-card p-4 text-sm font-bold uppercase tracking-wider text-ink/70">
+              {t.accentColor}
+              <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="grid gap-2 p-4">
+              <AccentColorPicker
+                value={form.accent_color}
+                onChange={(hex) => setForm((f) => ({ ...f, accent_color: hex }))}
+                locale={locale}
+              />
+              <span className="text-xs text-ink/50">{t.accentColorHint}</span>
             </div>
           </details>
 

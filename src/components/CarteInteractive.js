@@ -188,7 +188,7 @@ export default function CarteInteractive({ property, locale = "fr" }) {
         />
         <button
           type="submit"
-          className="shrink-0 rounded bg-terracotta px-5 py-2.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
+          className="shrink-0 rounded bg-[var(--host-accent)] px-5 py-2.5 font-bold text-ink transition-colors hover:bg-[var(--host-accent-deep)]"
         >
           {t.search}
         </button>
@@ -197,10 +197,10 @@ export default function CarteInteractive({ property, locale = "fr" }) {
 
       {searchResult && (
         <div className="mt-6">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-terracotta">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--host-accent-deep)]">
             {t.searchResult}
           </h2>
-          <div className="mt-3 rounded border border-terracotta bg-sand-card p-4">
+          <div className="mt-3 rounded border border-[var(--host-accent)] bg-sand-card p-4">
             <span className="block font-bold text-ink">{searchResult.name}</span>
             <span className="block text-sm text-ink/70">{t.searchedNear}</span>
             <a
@@ -220,7 +220,7 @@ export default function CarteInteractive({ property, locale = "fr" }) {
           <span
             className={`flex h-14 w-14 items-center justify-center rounded-full border-2 transition-colors ${
               activeCategory === null
-                ? "border-terracotta bg-terracotta text-ink"
+                ? "border-[var(--host-accent)] bg-[var(--host-accent)] text-ink"
                 : "border-sand-dim bg-sand-card text-ink/70"
             }`}
           >
@@ -239,7 +239,7 @@ export default function CarteInteractive({ property, locale = "fr" }) {
             <span
               className={`flex h-14 w-14 items-center justify-center rounded-full border-2 transition-colors ${
                 activeCategory === cat.key
-                  ? "border-terracotta bg-terracotta text-ink"
+                  ? "border-[var(--host-accent)] bg-[var(--host-accent)] text-ink"
                   : "border-sand-dim bg-sand-card text-ink/70"
               }`}
             >

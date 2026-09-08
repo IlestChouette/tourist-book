@@ -88,7 +88,7 @@ export default function CarnetPanel({ slug, locale = "fr" }) {
         <button
           type="submit"
           disabled={sending}
-          className="rounded bg-terracotta px-5 py-3 text-center font-bold text-ink transition-colors hover:bg-terracotta-deep disabled:opacity-60"
+          className="rounded bg-[var(--host-accent)] px-5 py-3 text-center font-bold text-ink transition-colors hover:bg-[var(--host-accent-deep)] disabled:opacity-60"
         >
           {sending ? t.sending : t.submit}
         </button>
