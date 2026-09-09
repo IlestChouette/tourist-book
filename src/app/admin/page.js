@@ -350,18 +350,18 @@ export default async function AdminPage() {
 
   return (
     <main className="flex-1 bg-sand">
-      <div className="flex items-center justify-between bg-[#2f7d76] px-6 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 bg-[#2f7d76] px-6 py-4">
         <div className="flex items-center gap-3">
           <Image
             src="/tourist book long.png"
             alt="Tourist Book"
             width={278}
             height={106}
-            className="h-20 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] sm:h-24"
+            className="h-14 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] sm:h-20 md:h-24"
           />
           <span className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70">Admin</span>
         </div>
-        <div className="flex items-center gap-5">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <a
             href="https://analytics.google.com/"
             target="_blank"
