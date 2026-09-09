@@ -153,6 +153,7 @@ const content = {
     plan: "Offre",
     cycle: "Cycle",
     status: "Statut",
+    created: "Créé le",
     noSubscription: "sans abonnement",
     viewLivret: "Voir le livret →",
     name: "Nom",
@@ -193,6 +194,7 @@ const content = {
     plan: "Plan",
     cycle: "Cycle",
     status: "Status",
+    created: "Created",
     noSubscription: "no subscription",
     viewLivret: "View livret →",
     name: "Name",
@@ -233,6 +235,7 @@ const content = {
     plan: "Plan",
     cycle: "Ciclo",
     status: "Estado",
+    created: "Creado el",
     noSubscription: "sin suscripción",
     viewLivret: "Ver el livret →",
     name: "Nombre",
@@ -464,6 +467,7 @@ export default async function AdminPage() {
                 <th className="px-4 py-2 font-bold text-ink/70">{t.plan}</th>
                 <th className="px-4 py-2 font-bold text-ink/70">{t.cycle}</th>
                 <th className="px-4 py-2 font-bold text-ink/70">{t.status}</th>
+                <th className="px-4 py-2 font-bold text-ink/70">{t.created}</th>
                 <th className="px-4 py-2 font-bold text-ink/70"></th>
               </tr>
             </thead>
@@ -475,6 +479,9 @@ export default async function AdminPage() {
                   <td className="px-4 py-2 text-ink/70">{p.plan ?? "—"}</td>
                   <td className="px-4 py-2 text-ink/70">{p.billing_cycle ?? "—"}</td>
                   <td className="px-4 py-2 text-ink/70">{statusLabel[p.subscription_status] ?? p.subscription_status ?? t.noSubscription}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-ink/70">
+                    {new Date(p.created_at).toLocaleString(dateLocale[locale])}
+                  </td>
                   <td className="px-4 py-2">
                     <a
                       href={`/logement/${p.slug}`}
