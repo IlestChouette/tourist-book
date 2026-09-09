@@ -112,7 +112,7 @@ const content = {
     ctaPrimary: "Créer mon compte gratuit →",
     ctaSecondary: "Voir les offres",
     priceNote: "Dès 7 €/mois sans engagement · Ou annuel dès 39,99 €/an avec 1 mois offert",
-    legalBadge: "La fiche de police obligatoire (art. R.611-42) ? Elle se remplit toute seule, à chaque réservation.",
+    legalBadge: "Conforme à l'article R.611-42 : vous êtes en règle avec la loi à chaque check-in, sans rien faire.",
     beforeLabel: "Avant",
     beforeText:
       "Un PDF perdu dans les emails, un groupe WhatsApp que personne ne relit, un formulaire compliqué, et la même question sur le wifi à 23h.",
@@ -195,7 +195,7 @@ const content = {
     ctaPrimary: "Create my free account →",
     ctaSecondary: "See the plans",
     priceNote: "From €7/month, no commitment · Or annual from €39.99/year with 1 month free",
-    legalBadge: "The mandatory police form (Art. R.611-42)? Filled in automatically, every booking.",
+    legalBadge: "Compliant with Article R.611-42: you're covered by the law on every check-in, without lifting a finger.",
     beforeLabel: "Before",
     beforeText:
       "A PDF lost in email, a WhatsApp group nobody reads, an awkward form, and the same wifi question at 11pm.",
@@ -278,7 +278,7 @@ const content = {
     ctaPrimary: "Crear mi cuenta gratis →",
     ctaSecondary: "Ver los planes",
     priceNote: "Desde 7 €/mes sin permanencia · O anual desde 39,99 €/año con 1 mes gratis",
-    legalBadge: "¿La ficha de policía obligatoria (art. R.611-42)? Se rellena sola, en cada reserva.",
+    legalBadge: "Cumpliendo el artículo R.611-42: estás en regla con la ley en cada check-in, sin hacer nada.",
     beforeLabel: "Antes",
     beforeText:
       "Un PDF perdido en el email, un grupo de WhatsApp que nadie relee, un formulario difícil de utilizar, y la misma pregunta del wifi a las 23h.",
