@@ -31,6 +31,53 @@ async function realMonthlyRevenue(property) {
 export const metadata = { robots: { index: false, follow: false } };
 
 const dateLocale = { fr: "fr-FR", en: "en-GB", es: "es-ES" };
+
+// Ordre d'affichage des groupes dans "Emails sent" : les emails aux hôtes
+// eux-mêmes d'abord (plus intéressants à suivre au quotidien), puis les
+// notifications internes. Tout template inconnu est ajouté à la fin.
+const EMAIL_TEMPLATE_ORDER = [
+  "no_property_reminder",
+  "listing_tips",
+  "transfer_request_notification",
+  "host_signup_notification",
+  "contact_lead_notification",
+  "reminder_batch_notification",
+  "listing_tips_batch_notification",
+  "other",
+];
+
+const emailTemplateLabels = {
+  fr: {
+    no_property_reminder: "Relance — premier logement pas encore créé",
+    listing_tips: "Conseils logement — hôtes déjà inscrits",
+    transfer_request_notification: "Demandes de transfert",
+    host_signup_notification: "Nouvelles inscriptions",
+    contact_lead_notification: "Contacts — formulaire landing page",
+    reminder_batch_notification: "Résumé cron — relance premier logement",
+    listing_tips_batch_notification: "Résumé cron — conseils logement",
+    other: "Autres",
+  },
+  en: {
+    no_property_reminder: "Reminder — first listing not created yet",
+    listing_tips: "Listing tips — existing hosts",
+    transfer_request_notification: "Transfer requests",
+    host_signup_notification: "New signups",
+    contact_lead_notification: "Contacts — landing page form",
+    reminder_batch_notification: "Cron summary — no-listing reminder",
+    listing_tips_batch_notification: "Cron summary — listing tips",
+    other: "Other",
+  },
+  es: {
+    no_property_reminder: "Recordatorio — primer alojamiento sin crear",
+    listing_tips: "Consejos de alojamiento — hoteleros ya inscritos",
+    transfer_request_notification: "Solicitudes de transporte",
+    host_signup_notification: "Nuevas inscripciones",
+    contact_lead_notification: "Contactos — formulario landing page",
+    reminder_batch_notification: "Resumen cron — recordatorio primer alojamiento",
+    listing_tips_batch_notification: "Resumen cron — consejos de alojamiento",
+    other: "Otros",
+  },
+};
 const MONTHLY_GOAL = 5000;
 // Estimation utilisée pour "combien de clients en plus" tant qu'il n'y a pas
 // encore de vrai client payant — moyenne mensuelle des 4 combinaisons prix/cycle.
@@ -269,6 +316,20 @@ export default async function AdminPage() {
   const potentialMrr = trialingProperties.reduce((sum, p) => sum + monthlyRevenue(p.plan, p.billing_cycle), 0);
   const pendingRequests = (requests ?? []).filter((r) => r.status === "pendiente");
 
+  // Regroupe le journal d'emails par type plutôt qu'une seule liste
+  // chronologique — plus facile de suivre un fil (ex. toutes les relances
+  // "premier logement") sans le mélanger avec les demandes de transfert.
+  const emailsByTemplate = new Map();
+  for (const e of emailLog ?? []) {
+    const key = e.template ?? "other";
+    if (!emailsByTemplate.has(key)) emailsByTemplate.set(key, []);
+    emailsByTemplate.get(key).push(e);
+  }
+  const orderedEmailTemplates = [
+    ...EMAIL_TEMPLATE_ORDER.filter((key) => emailsByTemplate.has(key)),
+    ...[...emailsByTemplate.keys()].filter((key) => !EMAIL_TEMPLATE_ORDER.includes(key)),
+  ];
+
   const propertiesByHost = new Map();
   for (const p of properties ?? []) {
     if (!propertiesByHost.has(p.host_id)) propertiesByHost.set(p.host_id, []);
@@ -457,46 +518,48 @@ export default async function AdminPage() {
         </div>
 
         <h2 className="mt-12 font-display italic text-2xl text-ink">{t.emailsSent}</h2>
-        <div className="mt-4 overflow-x-auto rounded border border-sand-dim">
-          <table className="w-full min-w-[720px] border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-sand-dim bg-sand-card text-left">
-                <th className="px-4 py-2 font-bold text-ink/70">{t.sentAt}</th>
-                <th className="px-4 py-2 font-bold text-ink/70">{t.recipient}</th>
-                <th className="px-4 py-2 font-bold text-ink/70">{t.subject}</th>
-                <th className="px-4 py-2 font-bold text-ink/70">{t.template}</th>
-                <th className="px-4 py-2 font-bold text-ink/70">{t.status}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(emailLog ?? []).length === 0 && (
-                <tr>
-                  <td className="px-4 py-3 text-ink/60" colSpan={5}>{t.noEmails}</td>
-                </tr>
-              )}
-              {(emailLog ?? []).map((e) => (
-                <tr key={e.id} className="border-b border-sand-dim last:border-0">
-                  <td className="px-4 py-2 whitespace-nowrap text-ink/70">
-                    {new Date(e.created_at).toLocaleString(dateLocale[locale])}
-                  </td>
-                  <td className="px-4 py-2 text-ink">{e.recipient}</td>
-                  <td className="px-4 py-2 text-ink/70">{e.subject}</td>
-                  <td className="px-4 py-2 text-ink/70">{e.template}</td>
-                  <td className="px-4 py-2">
-                    <span
-                      className={`rounded px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${
-                        e.status === "sent" ? "bg-sage text-ink" : "bg-terracotta text-ink"
-                      }`}
-                      title={e.error ?? undefined}
-                    >
-                      {e.status === "sent" ? t.emailStatusSent : t.emailStatusFailed}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {(emailLog ?? []).length === 0 && <p className="mt-4 text-ink/60">{t.noEmails}</p>}
+        {orderedEmailTemplates.map((templateKey) => (
+          <div key={templateKey} className="mt-6">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-ink/60">
+              {emailTemplateLabels[locale]?.[templateKey] ?? templateKey}{" "}
+              <span className="text-ink/40">({emailsByTemplate.get(templateKey).length})</span>
+            </h3>
+            <div className="mt-2 overflow-x-auto rounded border border-sand-dim">
+              <table className="w-full min-w-[600px] border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-sand-dim bg-sand-card text-left">
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.sentAt}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.recipient}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.subject}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.status}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {emailsByTemplate.get(templateKey).map((e) => (
+                    <tr key={e.id} className="border-b border-sand-dim last:border-0">
+                      <td className="px-4 py-2 whitespace-nowrap text-ink/70">
+                        {new Date(e.created_at).toLocaleString(dateLocale[locale])}
+                      </td>
+                      <td className="px-4 py-2 text-ink">{e.recipient}</td>
+                      <td className="px-4 py-2 text-ink/70">{e.subject}</td>
+                      <td className="px-4 py-2">
+                        <span
+                          className={`rounded px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${
+                            e.status === "sent" ? "bg-sage text-ink" : "bg-terracotta text-ink"
+                          }`}
+                          title={e.error ?? undefined}
+                        >
+                          {e.status === "sent" ? t.emailStatusSent : t.emailStatusFailed}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
       </section>
     </main>
   );
