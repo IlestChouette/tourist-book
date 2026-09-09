@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { monthlyRevenue, PRICES } from "@/lib/pricing";
@@ -164,6 +165,7 @@ const content = {
     joined: "Inscription",
     analytics: "Analytics →",
     searchConsole: "Search Console →",
+    identityLookup: "Retrouver un check-in →",
     goalLabel: "Objectif mensuel",
     remaining: (amount) => `Il reste ${amount.toFixed(0)} € pour atteindre l'objectif`,
     clientsNeeded: (n) => `≈ ${n} client${n > 1 ? "s" : ""} de plus au rythme actuel`,
@@ -205,6 +207,7 @@ const content = {
     joined: "Joined",
     analytics: "Analytics →",
     searchConsole: "Search Console →",
+    identityLookup: "Find a check-in →",
     goalLabel: "Monthly goal",
     remaining: (amount) => `${amount.toFixed(0)} € left to reach the goal`,
     clientsNeeded: (n) => `≈ ${n} more client${n > 1 ? "s" : ""} at the current rate`,
@@ -246,6 +249,7 @@ const content = {
     joined: "Alta",
     analytics: "Analytics →",
     searchConsole: "Search Console →",
+    identityLookup: "Buscar un check-in →",
     goalLabel: "Objetivo mensual",
     remaining: (amount) => `Faltan ${amount.toFixed(0)} € para llegar al objetivo`,
     clientsNeeded: (n) => `≈ ${n} cliente${n > 1 ? "s" : ""} más al ritmo actual`,
@@ -374,6 +378,12 @@ export default async function AdminPage() {
           >
             {t.searchConsole}
           </a>
+          <Link
+            href="/admin/identidad"
+            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+          >
+            {t.identityLookup}
+          </Link>
           <LogoutButton className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]" />
         </div>
       </div>

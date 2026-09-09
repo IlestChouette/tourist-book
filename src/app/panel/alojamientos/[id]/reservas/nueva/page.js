@@ -13,7 +13,8 @@ const content = {
     backToReservations: "← Retour aux réservations",
     reservations: "Réservations",
     title: "Nouvelle réservation",
-    guestName: "Nom de l'hôte",
+    guestFirstName: "Prénom de l'hôte",
+    guestLastName: "Nom de l'hôte",
     arrival: "Arrivée",
     departure: "Départ",
     creating: "Création…",
@@ -27,7 +28,8 @@ const content = {
     backToReservations: "← Back to bookings",
     reservations: "Bookings",
     title: "New booking",
-    guestName: "Guest name",
+    guestFirstName: "Guest first name",
+    guestLastName: "Guest last name",
     arrival: "Check-in",
     departure: "Check-out",
     creating: "Creating…",
@@ -41,7 +43,8 @@ const content = {
     backToReservations: "← Volver a las reservas",
     reservations: "Reservas",
     title: "Nueva reserva",
-    guestName: "Nombre del huésped",
+    guestFirstName: "Nombre del huésped",
+    guestLastName: "Apellido del huésped",
     arrival: "Llegada",
     departure: "Salida",
     creating: "Creando…",
@@ -55,7 +58,7 @@ export default function NuevaReservaPage({ params }) {
   const [locale] = useState(getClientLocale);
   const t = content[locale];
 
-  const [form, setForm] = useState({ guestName: "", arrivalDate: "", departureDate: "" });
+  const [form, setForm] = useState({ guestFirstName: "", guestLastName: "", arrivalDate: "", departureDate: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [link, setLink] = useState(null);
@@ -107,10 +110,16 @@ export default function NuevaReservaPage({ params }) {
       <Hero backHref={`/panel/alojamientos/${id}/reservas`} backLabel={t.reservations} eyebrow={t.checkin} title={t.title} />
       <section className="mx-auto max-w-2xl px-6 py-10">
         <form onSubmit={handleSubmit} className="grid gap-4">
-          <label className="grid gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.guestName}</span>
-            <input required value={form.guestName} onChange={update("guestName")} className="input" />
-          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <label className="grid gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.guestFirstName}</span>
+              <input required value={form.guestFirstName} onChange={update("guestFirstName")} className="input" />
+            </label>
+            <label className="grid gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.guestLastName}</span>
+              <input required value={form.guestLastName} onChange={update("guestLastName")} className="input" />
+            </label>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <label className="grid gap-1.5">
               <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.arrival}</span>

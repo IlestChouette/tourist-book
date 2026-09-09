@@ -46,7 +46,7 @@ const content = {
     s5Title: "5. Durée de conservation",
     s5DocLabel: "Pièce d'identité et selfie de l'hôte",
     s5DocBody:
-      ": stockés dans un espace privé non accessible publiquement, conservés uniquement pendant le séjour et le délai exigé par la réglementation locale d'enregistrement des voyageurs applicable au logement ; passé ce délai, ils sont supprimés définitivement.",
+      ": stockés dans un espace privé non accessible publiquement et conservés 6 mois après le départ de l'hôte, conformément à l'obligation légale de conservation de la fiche individuelle de police pour les voyageurs étrangers (article R.611-42 du CESEDA) ; passé ce délai, ils sont supprimés définitivement. Si l'hôtelier a besoin d'y accéder après le départ de l'hôte pour un motif légal, il doit nous en faire la demande via notre page de contact, en indiquant le nom de l'hôte et les dates du séjour, afin que nous puissions localiser l'enregistrement correspondant.",
     s5RestLabel: "Autres données de l'hôte",
     s5RestBody:
       "(nom, contact, dates) : conservées tant que le compte lié à la réservation reste actif, et supprimées peu après la date de départ sauf obligation légale de les conserver plus longtemps.",
@@ -117,7 +117,7 @@ const content = {
     s5Title: "5. Retention period",
     s5DocLabel: "Guest's ID document and selfie",
     s5DocBody:
-      ": stored in a private space not publicly accessible, kept only for the duration of the stay and the period required by the local traveler-registration regulation applicable to the property; after that period they are permanently deleted.",
+      ": stored in a private space not publicly accessible and kept for 6 months after the guest's departure, in line with the legal requirement to retain the individual police record for foreign travelers (Article R.611-42 of the CESEDA); after that period they are permanently deleted. If the host needs access to them after the guest's departure for a legal reason, they must request it through our contact page, providing the guest's name and stay dates so we can locate the corresponding record.",
     s5RestLabel: "Other guest data",
     s5RestBody:
       "(name, contact, dates): kept while the account linked to the booking remains active, and deleted shortly after the departure date unless there is a legal obligation to keep it longer.",
@@ -188,7 +188,7 @@ const content = {
     s5Title: "5. Plazo de conservación",
     s5DocLabel: "Documento de identidad y selfie del huésped",
     s5DocBody:
-      ": se almacenan en un espacio privado no accesible públicamente y se conservan únicamente durante la estancia y el plazo que exija la normativa local de registro de viajeros aplicable al alojamiento; transcurrido ese plazo se eliminan de forma definitiva.",
+      ": se almacenan en un espacio privado no accesible públicamente y se conservan 6 meses después de la salida del huésped, conforme a la obligación legal de conservar la ficha individual de policía para viajeros extranjeros (artículo R.611-42 del CESEDA); transcurrido ese plazo se eliminan de forma definitiva. Si el hotelero necesita acceder a ellos después de la salida del huésped por un motivo legal, debe solicitarlo a través de nuestra página de contacto, indicando el nombre del huésped y las fechas de la estancia, para que podamos localizar el registro correspondiente.",
     s5RestLabel: "Resto de datos del huésped",
     s5RestBody:
       "(nombre, contacto, fechas): se conservan mientras la cuenta ligada a la reserva permanezca activa, y se eliminan poco después de la fecha de salida salvo obligación legal de conservarlos más tiempo.",
