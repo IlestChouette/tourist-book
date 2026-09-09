@@ -102,7 +102,7 @@ const content = {
   fr: {
     metaTitle: "Tourist Book — Livret d'accueil numérique et check-in",
     metaDescription:
-      "Livret d'accueil numérique et check-in électronique pour hôtes Airbnb de la Côte d'Azur — wifi, horaires et recommandations en un lien, dès 7€/mois.",
+      "Livret d'accueil numérique et check-in électronique pour hôtes Airbnb de la Côte d'Azur — wifi, horaires, recommandations et traduction par IA, dès 7€/mois.",
     login: "Se connecter",
     createAccount: "Créer un compte →",
     eyebrow: "Pour les hôteliers et loueurs de la Côte d'Azur",
@@ -184,7 +184,7 @@ const content = {
   en: {
     metaTitle: "Tourist Book — Digital welcome book and check-in",
     metaDescription:
-      "Digital welcome book and electronic check-in for Airbnb hosts on the French Riviera — wifi, schedule and local tips in one link, from €7/month.",
+      "Digital welcome book and electronic check-in for Airbnb hosts on the French Riviera — wifi, schedule, local tips and AI translation, from €7/month.",
     login: "Log in",
     createAccount: "Create an account →",
     eyebrow: "For hosts and hoteliers on the French Riviera",
@@ -266,7 +266,7 @@ const content = {
   es: {
     metaTitle: "Tourist Book — Livret de acogida digital y check-in",
     metaDescription:
-      "Livret de bienvenida digital y check-in electrónico para anfitriones Airbnb en la Costa Azul — wifi, horarios y recomendaciones en un enlace, desde 7€/mes.",
+      "Livret de bienvenida digital y check-in electrónico para anfitriones Airbnb en la Costa Azul — wifi, horarios, recomendaciones y traducción IA, desde 7€/mes.",
     login: "Iniciar sesión",
     createAccount: "Crear cuenta →",
     eyebrow: "Para hoteleros y anfitriones de la Côte d'Azur",
