@@ -1,5 +1,19 @@
 import { Resend } from "resend";
 import { formatTransferWhatsAppMessage } from "./transferMessage";
+import { createAdminClient } from "./supabase/admin";
+
+// Journalise chaque tentative d'envoi (succès ou échec) pour que l'admin
+// puisse voir l'historique complet depuis /admin, sans devoir aller chercher
+// dans le dashboard Resend. Ne doit jamais faire échouer l'envoi lui-même :
+// une erreur d'écriture du log est juste logguée dans la console.
+async function logEmail({ recipient, subject, template, status, error }) {
+  try {
+    const admin = createAdminClient();
+    await admin.from("email_log").insert({ recipient, subject, template, status, error: error ?? null });
+  } catch (err) {
+    console.error("logEmail failed:", err);
+  }
+}
 
 // Notifie l'hôtelier par email dès qu'une demande de transfert arrive.
 // Tant que RESEND_API_KEY n'est pas configurée, cette fonction ne fait
@@ -36,10 +50,11 @@ export async function sendTransferRequestNotification({ hostEmail, propertyName,
     details: d,
   });
 
+  const subject = `Nouvelle demande de transfert — ${propertyName}`;
   const { error } = await resend.emails.send({
     from: "Tourist Book <notifications@tourist-book.com>",
     to: hostEmail,
-    subject: `Nouvelle demande de transfert — ${propertyName}`,
+    subject,
     text: `${lines.join("\n")}\n\n— Message prêt à copier pour WhatsApp —\n\n${whatsappMessage}`,
   });
 
@@ -47,9 +62,11 @@ export async function sendTransferRequestNotification({ hostEmail, propertyName,
   // renvoie { data: null, error } que le SDK laisserait passer silencieusement
   // si on ne le vérifie pas explicitement ici.
   if (error) {
+    await logEmail({ recipient: hostEmail, subject, template: "transfer_request_notification", status: "failed", error: error.message });
     throw new Error(`Resend API error: ${error.name} — ${error.message}`);
   }
 
+  await logEmail({ recipient: hostEmail, subject, template: "transfer_request_notification", status: "sent" });
   return { sent: true };
 }
 
@@ -72,17 +89,20 @@ export async function sendContactLeadNotification({ name, phone, email, properti
     `Logements gérés : ${propertiesCount ?? "-"}`,
   ];
 
+  const subject = `Nouveau contact — ${name}`;
   const { error } = await resend.emails.send({
     from: "Tourist Book <notifications@tourist-book.com>",
     to: CONTACT_NOTIFICATION_EMAIL,
-    subject: `Nouveau contact — ${name}`,
+    subject,
     text: lines.join("\n"),
   });
 
   if (error) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "contact_lead_notification", status: "failed", error: error.message });
     throw new Error(`Resend API error: ${error.name} — ${error.message}`);
   }
 
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "contact_lead_notification", status: "sent" });
   return { sent: true };
 }
 
@@ -102,17 +122,20 @@ export async function sendHostSignupNotification({ name, email, phone }) {
     `Téléphone : ${phone || "-"}`,
   ];
 
+  const subject = `Nouvelle inscription — ${name || email}`;
   const { error: sendError } = await resend.emails.send({
     from: "Tourist Book <notifications@tourist-book.com>",
     to: CONTACT_NOTIFICATION_EMAIL,
-    subject: `Nouvelle inscription — ${name || email}`,
+    subject,
     text: lines.join("\n"),
   });
 
   if (sendError) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "host_signup_notification", status: "failed", error: sendError.message });
     throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
   }
 
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "host_signup_notification", status: "sent" });
   return { sent: true };
 }
 
@@ -145,18 +168,21 @@ Une question, un doute ? Répondez directement à cet email, on est là pour vou
 À très vite,
 L'équipe Tourist Book`;
 
+  const subject = "Bienvenue sur Tourist Book — créez votre premier livret";
   const { error: sendError } = await resend.emails.send({
     from: "Tourist Book <notifications@tourist-book.com>",
     to: email,
     replyTo: CONTACT_NOTIFICATION_EMAIL,
-    subject: "Bienvenue sur Tourist Book — créez votre premier livret",
+    subject,
     text,
   });
 
   if (sendError) {
+    await logEmail({ recipient: email, subject, template: "no_property_reminder", status: "failed", error: sendError.message });
     throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
   }
 
+  await logEmail({ recipient: email, subject, template: "no_property_reminder", status: "sent" });
   return { sent: true };
 }
 
@@ -175,17 +201,20 @@ export async function sendReminderBatchNotification({ sentTo }) {
     ...sentTo.map((h) => `- ${h.name || "(sans nom)"} — ${h.email}`),
   ];
 
+  const subject = `Relance envoyée à ${sentTo.length} hôtelier${sentTo.length > 1 ? "s" : ""}`;
   const { error: sendError } = await resend.emails.send({
     from: "Tourist Book <notifications@tourist-book.com>",
     to: CONTACT_NOTIFICATION_EMAIL,
-    subject: `Relance envoyée à ${sentTo.length} hôtelier${sentTo.length > 1 ? "s" : ""}`,
+    subject,
     text: lines.join("\n"),
   });
 
   if (sendError) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "reminder_batch_notification", status: "failed", error: sendError.message });
     throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
   }
 
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "reminder_batch_notification", status: "sent" });
   return { sent: true };
 }
 
@@ -214,18 +243,21 @@ N'hésitez pas à nous écrire si vous avez la moindre question, on est là pour
 Merci encore, et à très vite,
 L'équipe Tourist Book`;
 
+  const subject = "Merci de faire partie de l'aventure Tourist Book";
   const { error: sendError } = await resend.emails.send({
     from: "Tourist Book <notifications@tourist-book.com>",
     to: email,
     replyTo: CONTACT_NOTIFICATION_EMAIL,
-    subject: "Merci de faire partie de l'aventure Tourist Book",
+    subject,
     text,
   });
 
   if (sendError) {
+    await logEmail({ recipient: email, subject, template: "listing_tips", status: "failed", error: sendError.message });
     throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
   }
 
+  await logEmail({ recipient: email, subject, template: "listing_tips", status: "sent" });
   return { sent: true };
 }
 
@@ -242,16 +274,19 @@ export async function sendListingTipsBatchNotification({ sentTo }) {
     ...sentTo.map((h) => `- ${h.name || "(sans nom)"} — ${h.email}`),
   ];
 
+  const subject = `Email de bienvenue envoyé à ${sentTo.length} hôtelier${sentTo.length > 1 ? "s" : ""}`;
   const { error: sendError } = await resend.emails.send({
     from: "Tourist Book <notifications@tourist-book.com>",
     to: CONTACT_NOTIFICATION_EMAIL,
-    subject: `Email de bienvenue envoyé à ${sentTo.length} hôtelier${sentTo.length > 1 ? "s" : ""}`,
+    subject,
     text: lines.join("\n"),
   });
 
   if (sendError) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "listing_tips_batch_notification", status: "failed", error: sendError.message });
     throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
   }
 
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "listing_tips_batch_notification", status: "sent" });
   return { sent: true };
 }

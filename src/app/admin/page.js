@@ -119,6 +119,16 @@ const content = {
     goalLabel: "Objectif mensuel",
     remaining: (amount) => `Il reste ${amount.toFixed(0)} € pour atteindre l'objectif`,
     clientsNeeded: (n) => `≈ ${n} client${n > 1 ? "s" : ""} de plus au rythme actuel`,
+    emailsSent: "Emails envoyés",
+    noEmails: "Aucun email envoyé.",
+    recipient: "Destinataire",
+    subject: "Sujet",
+    template: "Type",
+    sentAt: "Date",
+    emailStatusSent: "Envoyé",
+    emailStatusFailed: "Échec",
+    trialPipeline: (n, amount) =>
+      `${n} logement${n > 1 ? "s" : ""} en essai gratuit — ${amount.toFixed(2)} € de revenu potentiel une fois l'essai terminé`,
   },
   en: {
     summary: "Summary",
@@ -149,6 +159,16 @@ const content = {
     goalLabel: "Monthly goal",
     remaining: (amount) => `${amount.toFixed(0)} € left to reach the goal`,
     clientsNeeded: (n) => `≈ ${n} more client${n > 1 ? "s" : ""} at the current rate`,
+    emailsSent: "Emails sent",
+    noEmails: "No emails sent yet.",
+    recipient: "Recipient",
+    subject: "Subject",
+    template: "Type",
+    sentAt: "Date",
+    emailStatusSent: "Sent",
+    emailStatusFailed: "Failed",
+    trialPipeline: (n, amount) =>
+      `${n} propert${n > 1 ? "ies" : "y"} in free trial — €${amount.toFixed(2)} in potential revenue once the trial ends`,
   },
   es: {
     summary: "Resumen",
@@ -179,6 +199,16 @@ const content = {
     goalLabel: "Objetivo mensual",
     remaining: (amount) => `Faltan ${amount.toFixed(0)} € para llegar al objetivo`,
     clientsNeeded: (n) => `≈ ${n} cliente${n > 1 ? "s" : ""} más al ritmo actual`,
+    emailsSent: "Emails enviados",
+    noEmails: "Aún no se ha enviado ningún email.",
+    recipient: "Destinatario",
+    subject: "Asunto",
+    template: "Tipo",
+    sentAt: "Fecha",
+    emailStatusSent: "Enviado",
+    emailStatusFailed: "Fallido",
+    trialPipeline: (n, amount) =>
+      `${n} alojamiento${n > 1 ? "s" : ""} en prueba gratuita — ${amount.toFixed(2)} € de ingreso potencial cuando termine la prueba`,
   },
 };
 
@@ -199,7 +229,7 @@ export default async function AdminPage() {
 
   const admin = createAdminClient();
 
-  const [{ data: hosts }, { data: properties }, { data: requests }] = await Promise.all([
+  const [{ data: hosts }, { data: properties }, { data: requests }, { data: emailLog }] = await Promise.all([
     admin
       .from("hosts")
       .select("id, name, email, phone, created_at")
@@ -208,21 +238,35 @@ export default async function AdminPage() {
     admin
       .from("properties")
       .select(
-        "id, name, city, slug, host_id, plan, billing_cycle, subscription_status, stripe_subscription_id, created_at, hosts(name, email)"
+        "id, name, city, slug, host_id, plan, billing_cycle, subscription_status, stripe_subscription_id, created_at, hosts(name, email, is_admin)"
       )
       .order("created_at", { ascending: false }),
     admin
       .from("cancellation_requests")
       .select("id, reason, status, created_at, properties(name), hosts(name, email)")
       .order("created_at", { ascending: false }),
+    admin
+      .from("email_log")
+      .select("id, recipient, subject, template, status, error, created_at")
+      .order("created_at", { ascending: false })
+      .limit(50),
   ]);
 
-  const activeProperties = (properties ?? []).filter(
+  // Les alojamientos "exemple" appartiennent au compte admin (is_admin=true)
+  // et n'ont jamais de vrai abonnement Stripe — on les exclut des stats pour
+  // ne pas gonfler artificiellement le nombre de clients ou le MRR.
+  const realProperties = (properties ?? []).filter((p) => !p.hosts?.is_admin);
+  const activeProperties = realProperties.filter(
     (p) => p.plan && p.subscription_status && p.subscription_status !== "canceled"
   );
   // "trialing" ne rapporte encore rien : seul "active" compte pour le chiffre réel.
   const payingProperties = activeProperties.filter((p) => p.subscription_status === "active");
   const mrr = (await Promise.all(payingProperties.map(realMonthlyRevenue))).reduce((sum, v) => sum + v, 0);
+  // Pipeline des essais gratuits en cours : ne compte pas dans le MRR (Stripe
+  // ne facture rien pendant l'essai) mais on veut quand même voir que ces
+  // clients existent et ce qu'ils rapporteront une fois l'essai terminé.
+  const trialingProperties = activeProperties.filter((p) => p.subscription_status === "trialing");
+  const potentialMrr = trialingProperties.reduce((sum, p) => sum + monthlyRevenue(p.plan, p.billing_cycle), 0);
   const pendingRequests = (requests ?? []).filter((r) => r.status === "pendiente");
 
   const propertiesByHost = new Map();
@@ -302,6 +346,11 @@ export default async function AdminPage() {
             <p className="mt-1 text-xs text-ink/60">
               {t.remaining(goalRemaining)}
               {clientsNeeded && ` — ${t.clientsNeeded(clientsNeeded)}`}
+            </p>
+          )}
+          {trialingProperties.length > 0 && (
+            <p className="mt-2 text-xs font-bold text-terracotta-deep">
+              {t.trialPipeline(trialingProperties.length, potentialMrr)}
             </p>
           )}
         </div>
@@ -401,6 +450,48 @@ export default async function AdminPage() {
                   <td className="px-4 py-2 text-ink/70">{h.phone || "—"}</td>
                   <td className="px-4 py-2 text-ink/70">{(propertiesByHost.get(h.id) ?? []).join(", ") || t.noProperties}</td>
                   <td className="px-4 py-2 text-ink/70">{new Date(h.created_at).toLocaleDateString(dateLocale[locale])}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h2 className="mt-12 font-display italic text-2xl text-ink">{t.emailsSent}</h2>
+        <div className="mt-4 overflow-x-auto rounded border border-sand-dim">
+          <table className="w-full min-w-[720px] border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-sand-dim bg-sand-card text-left">
+                <th className="px-4 py-2 font-bold text-ink/70">{t.sentAt}</th>
+                <th className="px-4 py-2 font-bold text-ink/70">{t.recipient}</th>
+                <th className="px-4 py-2 font-bold text-ink/70">{t.subject}</th>
+                <th className="px-4 py-2 font-bold text-ink/70">{t.template}</th>
+                <th className="px-4 py-2 font-bold text-ink/70">{t.status}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(emailLog ?? []).length === 0 && (
+                <tr>
+                  <td className="px-4 py-3 text-ink/60" colSpan={5}>{t.noEmails}</td>
+                </tr>
+              )}
+              {(emailLog ?? []).map((e) => (
+                <tr key={e.id} className="border-b border-sand-dim last:border-0">
+                  <td className="px-4 py-2 whitespace-nowrap text-ink/70">
+                    {new Date(e.created_at).toLocaleString(dateLocale[locale])}
+                  </td>
+                  <td className="px-4 py-2 text-ink">{e.recipient}</td>
+                  <td className="px-4 py-2 text-ink/70">{e.subject}</td>
+                  <td className="px-4 py-2 text-ink/70">{e.template}</td>
+                  <td className="px-4 py-2">
+                    <span
+                      className={`rounded px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${
+                        e.status === "sent" ? "bg-sage text-ink" : "bg-terracotta text-ink"
+                      }`}
+                      title={e.error ?? undefined}
+                    >
+                      {e.status === "sent" ? t.emailStatusSent : t.emailStatusFailed}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
