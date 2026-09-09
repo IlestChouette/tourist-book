@@ -22,7 +22,7 @@ const content = {
       "(accès par code) : aucune donnée personnelle — l'accès se fait avec un code numérique partagé par l'hôtelier, sans inscription.",
     s2PremiumLabel: "De l'hôte, offre Premium",
     s2PremiumBody:
-      "(check-in électronique) : nom (indiqué par l'hôtelier lors de la création de la réservation), téléphone, email, nationalité, numéro de pièce d'identité ou passeport, une photo de ce document et une photo type selfie pour vérification, ainsi que les dates du séjour.",
+      "(check-in électronique) : nom (indiqué par l'hôtelier lors de la création de la réservation), téléphone, email, nationalité, numéro de pièce d'identité ou passeport, une photo de ce document, une photo type selfie pour vérification, une signature électronique, ainsi que les dates du séjour.",
     s2TechLabel: "Données techniques",
     s2TechBody: "cookies strictement nécessaires au maintien de la session et à l'accès au livret, et à la mémorisation de la langue choisie (voir section 8).",
     s3Title: "3. Finalité et base juridique",
@@ -44,7 +44,7 @@ const content = {
     s4Body2:
       "Ces prestataires peuvent héberger des données hors de l'Espace économique européen ; le cas échéant, le transfert repose sur les Clauses Contractuelles Types de la Commission européenne ou un autre mécanisme de transfert reconnu par le RGPD.",
     s5Title: "5. Durée de conservation",
-    s5DocLabel: "Pièce d'identité et selfie de l'hôte",
+    s5DocLabel: "Pièce d'identité, selfie et signature de l'hôte",
     s5DocBody:
       ": stockés dans un espace privé non accessible publiquement et conservés 6 mois après le départ de l'hôte, conformément à l'obligation légale de conservation de la fiche individuelle de police pour les voyageurs étrangers (article R.611-42 du CESEDA) ; passé ce délai, ils sont supprimés définitivement. Si l'hôtelier a besoin d'y accéder après le départ de l'hôte pour un motif légal, il doit nous en faire la demande via notre page de contact, en indiquant le nom de l'hôte et les dates du séjour, afin que nous puissions localiser l'enregistrement correspondant.",
     s5RestLabel: "Autres données de l'hôte",
@@ -93,7 +93,7 @@ const content = {
       "(code-based access): no personal data — access is done with a numeric code shared by the host, no sign-up required.",
     s2PremiumLabel: "From the guest, Premium plan",
     s2PremiumBody:
-      "(electronic check-in): name (entered by the host when creating the booking), phone, email, nationality, ID document or passport number, a photo of that document and a selfie-type photo for verification, and the stay dates.",
+      "(electronic check-in): name (entered by the host when creating the booking), phone, email, nationality, ID document or passport number, a photo of that document, a selfie-type photo for verification, an electronic signature, and the stay dates.",
     s2TechLabel: "Technical data",
     s2TechBody: "cookies strictly necessary to keep the session active, give access to the welcome book, and remember the chosen language (see section 8).",
     s3Title: "3. Purpose and legal basis",
@@ -115,7 +115,7 @@ const content = {
     s4Body2:
       "These providers may host data outside the European Economic Area; in that case, the transfer relies on the European Commission's Standard Contractual Clauses or another transfer mechanism recognized by the GDPR.",
     s5Title: "5. Retention period",
-    s5DocLabel: "Guest's ID document and selfie",
+    s5DocLabel: "Guest's ID document, selfie and signature",
     s5DocBody:
       ": stored in a private space not publicly accessible and kept for 6 months after the guest's departure, in line with the legal requirement to retain the individual police record for foreign travelers (Article R.611-42 of the CESEDA); after that period they are permanently deleted. If the host needs access to them after the guest's departure for a legal reason, they must request it through our contact page, providing the guest's name and stay dates so we can locate the corresponding record.",
     s5RestLabel: "Other guest data",
@@ -164,7 +164,7 @@ const content = {
       "(acceso por código): ningún dato personal — el acceso se hace con un código numérico compartido por el hotelero, sin registro.",
     s2PremiumLabel: "Del huésped, plan Premium",
     s2PremiumBody:
-      "(check-in electrónico): nombre (indicado por el hotelero al crear la reserva), teléfono, email, nacionalidad, número de documento de identidad o pasaporte, una fotografía de dicho documento y una fotografía tipo selfie para verificación, y las fechas de estancia.",
+      "(check-in electrónico): nombre (indicado por el hotelero al crear la reserva), teléfono, email, nacionalidad, número de documento de identidad o pasaporte, una fotografía de dicho documento, una fotografía tipo selfie para verificación, una firma electrónica, y las fechas de estancia.",
     s2TechLabel: "Datos técnicos",
     s2TechBody: "cookies estrictamente necesarias para mantener la sesión iniciada, el acceso al livret, y recordar el idioma elegido (ver sección 8).",
     s3Title: "3. Finalidad y base jurídica",
@@ -186,7 +186,7 @@ const content = {
     s4Body2:
       "Estos proveedores pueden alojar datos fuera del Espacio Económico Europeo; en ese caso, la transferencia se realiza sobre la base de las Cláusulas Contractuales Tipo de la Comisión Europea u otro mecanismo de transferencia reconocido por el RGPD.",
     s5Title: "5. Plazo de conservación",
-    s5DocLabel: "Documento de identidad y selfie del huésped",
+    s5DocLabel: "Documento de identidad, selfie y firma del huésped",
     s5DocBody:
       ": se almacenan en un espacio privado no accesible públicamente y se conservan 6 meses después de la salida del huésped, conforme a la obligación legal de conservar la ficha individual de policía para viajeros extranjeros (artículo R.611-42 del CESEDA); transcurrido ese plazo se eliminan de forma definitiva. Si el hotelero necesita acceder a ellos después de la salida del huésped por un motivo legal, debe solicitarlo a través de nuestra página de contacto, indicando el nombre del huésped y las fechas de la estancia, para que podamos localizar el registro correspondiente.",
     s5RestLabel: "Resto de datos del huésped",

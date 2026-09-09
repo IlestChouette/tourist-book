@@ -50,8 +50,9 @@ export async function POST(request, { params }) {
   const nationality = formData.get("nationality");
   const idDocument = formData.get("idDocument");
   const selfie = formData.get("selfie");
+  const signature = formData.get("signature");
 
-  if (!phone || !email || !documentNumber || !nationality || !idDocument || !selfie) {
+  if (!phone || !email || !documentNumber || !nationality || !idDocument || !selfie || !signature) {
     return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
   }
 
@@ -59,8 +60,9 @@ export async function POST(request, { params }) {
   const selfieExt = selfie.name.split(".").pop();
   const idPath = `${reservation.id}/documento.${idExt}`;
   const selfiePath = `${reservation.id}/selfie.${selfieExt}`;
+  const signaturePath = `${reservation.id}/firma.png`;
 
-  const [idUpload, selfieUpload] = await Promise.all([
+  const [idUpload, selfieUpload, signatureUpload] = await Promise.all([
     admin.storage.from("identity").upload(idPath, await idDocument.arrayBuffer(), {
       upsert: true,
       contentType: idDocument.type,
@@ -69,11 +71,15 @@ export async function POST(request, { params }) {
       upsert: true,
       contentType: selfie.type,
     }),
+    admin.storage.from("identity").upload(signaturePath, await signature.arrayBuffer(), {
+      upsert: true,
+      contentType: "image/png",
+    }),
   ]);
 
-  if (idUpload.error || selfieUpload.error) {
+  if (idUpload.error || selfieUpload.error || signatureUpload.error) {
     return NextResponse.json(
-      { error: idUpload.error?.message || selfieUpload.error?.message },
+      { error: idUpload.error?.message || selfieUpload.error?.message || signatureUpload.error?.message },
       { status: 500 }
     );
   }
@@ -96,6 +102,7 @@ export async function POST(request, { params }) {
       nationality,
       id_document_url: idPath,
       selfie_url: selfiePath,
+      signature_url: signaturePath,
       verification_status: "pendiente",
     },
     { onConflict: "reservation_id" }

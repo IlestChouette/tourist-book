@@ -20,6 +20,7 @@ const content = {
     revealing: "Génération…",
     idDocument: "Pièce d'identité",
     selfie: "Selfie",
+    signature: "Signature",
     statusLabel: { pendiente: "En attente", aprobado: "Approuvé", rechazado: "Refusé" },
   },
   en: {
@@ -37,6 +38,7 @@ const content = {
     revealing: "Generating…",
     idDocument: "ID document",
     selfie: "Selfie",
+    signature: "Signature",
     statusLabel: { pendiente: "Pending", aprobado: "Approved", rechazado: "Rejected" },
   },
   es: {
@@ -54,6 +56,7 @@ const content = {
     revealing: "Generando…",
     idDocument: "Documento de identidad",
     selfie: "Selfie",
+    signature: "Firma",
     statusLabel: { pendiente: "Pendiente", aprobado: "Aprobado", rechazado: "Rechazado" },
   },
 };
@@ -173,6 +176,18 @@ export default function IdentidadLookupPage() {
                       <img src={revealed[r.id].selfieUrl} alt="" className="mt-2 w-full rounded border border-sand-dim" />
                     )}
                   </div>
+                </div>
+              )}
+
+              {revealed[r.id]?.signatureUrl && (
+                <div className="mt-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.signature}</span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={revealed[r.id].signatureUrl}
+                    alt=""
+                    className="mt-2 w-full max-w-xs rounded border border-sand-dim bg-white"
+                  />
                 </div>
               )}
             </div>

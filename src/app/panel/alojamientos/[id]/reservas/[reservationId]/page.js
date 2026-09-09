@@ -21,6 +21,7 @@ const content = {
     statusLabel: { pendiente: "En attente", aprobado: "Approuvé", rechazado: "Refusé" },
     idDocument: "Pièce d'identité",
     selfie: "Selfie",
+    signature: "Signature",
     compareHint: "Comparez le document et le selfie : est-ce la même personne ? Approuvez ou refusez selon votre jugement.",
     approve: "Approuver",
     reject: "Refuser",
@@ -40,6 +41,7 @@ const content = {
     statusLabel: { pendiente: "Pending", aprobado: "Approved", rechazado: "Rejected" },
     idDocument: "ID document",
     selfie: "Selfie",
+    signature: "Signature",
     compareHint: "Compare the document and the selfie: is it the same person? Approve or reject based on your judgment.",
     approve: "Approve",
     reject: "Reject",
@@ -59,6 +61,7 @@ const content = {
     statusLabel: { pendiente: "Pendiente", aprobado: "Aprobado", rechazado: "Rechazado" },
     idDocument: "Documento de identidad",
     selfie: "Selfie",
+    signature: "Firma",
     compareHint: "Compara el documento y el selfie: ¿es la misma persona? Aprueba o rechaza según tu criterio.",
     approve: "Aprobar",
     reject: "Rechazar",
@@ -170,6 +173,14 @@ export default function ReservaDetallePage({ params }) {
                 )}
               </div>
             </div>
+
+            {ga.signatureUrl && (
+              <div className="mt-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.signature}</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={ga.signatureUrl} alt="" className="mt-2 w-full max-w-xs rounded border border-sand-dim bg-white" />
+              </div>
+            )}
 
             <p className="mt-4 text-sm text-ink/60">{t.compareHint}</p>
 

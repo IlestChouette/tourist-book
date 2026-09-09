@@ -1,8 +1,15 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import Hero from "@/components/Hero";
 import { resizeImage } from "@/lib/uploadMedia";
+
+// Récupère la signature dessinée sur le canvas sous forme de Blob PNG, ou
+// null si rien n'a été dessiné — évite d'envoyer un canvas vide comme signature.
+function getSignatureBlob(canvas, hasDrawn) {
+  if (!hasDrawn) return Promise.resolve(null);
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+}
 
 export default function CheckinPage({ params }) {
   const { token } = use(params);
@@ -15,6 +22,42 @@ export default function CheckinPage({ params }) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
+
+  const canvasRef = useRef(null);
+  const drawingRef = useRef(false);
+  const [hasSignature, setHasSignature] = useState(false);
+
+  function startDrawing(e) {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext("2d");
+    drawingRef.current = true;
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  }
+
+  function draw(e) {
+    if (!drawingRef.current) return;
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext("2d");
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#141413";
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+    setHasSignature(true);
+  }
+
+  function stopDrawing() {
+    drawingRef.current = false;
+  }
+
+  function clearSignature() {
+    const canvas = canvasRef.current;
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    setHasSignature(false);
+  }
 
   useEffect(() => {
     fetch(`/api/checkin/${token}`)
@@ -32,6 +75,10 @@ export default function CheckinPage({ params }) {
       setError("Ajoute ta pièce d'identité et un selfie pour continuer.");
       return;
     }
+    if (!hasSignature) {
+      setError("Signe dans le cadre prévu pour continuer.");
+      return;
+    }
     if (!consent) {
       setError("Tu dois autoriser l'envoi de tes documents pour continuer.");
       return;
@@ -41,9 +88,10 @@ export default function CheckinPage({ params }) {
 
     let data;
     try {
-      const [resizedDocument, resizedSelfie] = await Promise.all([
+      const [resizedDocument, resizedSelfie, signatureBlob] = await Promise.all([
         resizeImage(idDocument),
         resizeImage(selfie),
+        getSignatureBlob(canvasRef.current, hasSignature),
       ]);
 
       const formData = new FormData();
@@ -53,6 +101,7 @@ export default function CheckinPage({ params }) {
       formData.append("nationality", form.nationality);
       formData.append("idDocument", resizedDocument);
       formData.append("selfie", resizedSelfie);
+      formData.append("signature", signatureBlob, "signature.png");
 
       const res = await fetch(`/api/checkin/${token}`, { method: "POST", body: formData });
 
@@ -207,6 +256,30 @@ export default function CheckinPage({ params }) {
               tien.
             </span>
           </label>
+
+          <div className="grid gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Signature</span>
+            <canvas
+              ref={canvasRef}
+              width={500}
+              height={150}
+              onPointerDown={startDrawing}
+              onPointerMove={draw}
+              onPointerUp={stopDrawing}
+              onPointerLeave={stopDrawing}
+              className="w-full touch-none rounded border border-sand-dim bg-sand-card"
+            />
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-ink/60">Signe avec ton doigt ou ta souris dans le cadre ci-dessus.</span>
+              <button
+                type="button"
+                onClick={clearSignature}
+                className="text-xs font-bold text-aqua-deep underline underline-offset-2"
+              >
+                Effacer
+              </button>
+            </div>
+          </div>
 
           <label className="flex items-start gap-2 text-sm text-ink/80">
             <input

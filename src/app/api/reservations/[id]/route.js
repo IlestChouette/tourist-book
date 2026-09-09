@@ -32,13 +32,18 @@ export async function GET(request, { params }) {
 
   let idDocumentUrl = null;
   let selfieUrl = null;
+  let signatureUrl = null;
   if (guestAccount) {
-    const [idSigned, selfieSigned] = await Promise.all([
+    const [idSigned, selfieSigned, signatureSigned] = await Promise.all([
       admin.storage.from("identity").createSignedUrl(guestAccount.id_document_url, 120),
       admin.storage.from("identity").createSignedUrl(guestAccount.selfie_url, 120),
+      guestAccount.signature_url
+        ? admin.storage.from("identity").createSignedUrl(guestAccount.signature_url, 120)
+        : Promise.resolve({ data: null }),
     ]);
     idDocumentUrl = idSigned.data?.signedUrl ?? null;
     selfieUrl = selfieSigned.data?.signedUrl ?? null;
+    signatureUrl = signatureSigned.data?.signedUrl ?? null;
   }
 
   return NextResponse.json({
@@ -58,6 +63,7 @@ export async function GET(request, { params }) {
           verificationStatus: guestAccount.verification_status,
           idDocumentUrl,
           selfieUrl,
+          signatureUrl,
         }
       : null,
   });

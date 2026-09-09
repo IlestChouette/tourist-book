@@ -19,16 +19,19 @@ export async function GET(request, { params }) {
   const admin = createAdminClient();
   const { data: reservation } = await admin
     .from("reservations")
-    .select("id, guest_name, guest_accounts(id_document_url, selfie_url)")
+    .select("id, guest_name, guest_accounts(id_document_url, selfie_url, signature_url)")
     .eq("id", reservationId)
     .single();
 
   const ga = reservation?.guest_accounts;
   if (!reservation || !ga) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
 
-  const [idSigned, selfieSigned] = await Promise.all([
+  const [idSigned, selfieSigned, signatureSigned] = await Promise.all([
     admin.storage.from("identity").createSignedUrl(ga.id_document_url, 120),
     admin.storage.from("identity").createSignedUrl(ga.selfie_url, 120),
+    ga.signature_url
+      ? admin.storage.from("identity").createSignedUrl(ga.signature_url, 120)
+      : Promise.resolve({ data: null }),
   ]);
 
   await admin.from("identity_access_log").insert({
@@ -40,5 +43,6 @@ export async function GET(request, { params }) {
   return NextResponse.json({
     idDocumentUrl: idSigned.data?.signedUrl ?? null,
     selfieUrl: selfieSigned.data?.signedUrl ?? null,
+    signatureUrl: signatureSigned.data?.signedUrl ?? null,
   });
 }

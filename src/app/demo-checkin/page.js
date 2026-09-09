@@ -29,6 +29,8 @@ const content = {
     selfie: "Selfie",
     idDocumentPlaceholder: "Exemple de pièce d'identité",
     selfiePlaceholder: "Exemple de selfie",
+    signature: "Signature",
+    signaturePlaceholder: "Exemple de signature",
     compareHint: "Comparez le document et le selfie : est-ce la même personne ? Approuvez ou refusez selon votre jugement.",
     approve: "Approuver",
     reject: "Refuser",
@@ -50,6 +52,8 @@ const content = {
     selfie: "Selfie",
     idDocumentPlaceholder: "Example ID document",
     selfiePlaceholder: "Example selfie",
+    signature: "Signature",
+    signaturePlaceholder: "Example signature",
     compareHint: "Compare the document and the selfie: is it the same person? Approve or reject based on your judgment.",
     approve: "Approve",
     reject: "Reject",
@@ -71,6 +75,8 @@ const content = {
     selfie: "Selfie",
     idDocumentPlaceholder: "Ejemplo de documento de identidad",
     selfiePlaceholder: "Ejemplo de selfie",
+    signature: "Firma",
+    signaturePlaceholder: "Ejemplo de firma",
     compareHint: "Compara el documento y el selfie: ¿es la misma persona? Aprueba o rechaza según tu criterio.",
     approve: "Aprobar",
     reject: "Rechazar",
@@ -157,6 +163,16 @@ export default async function DemoCheckinPage() {
                   </svg>
                   {t.selfiePlaceholder}
                 </div>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.signature}</span>
+              <div className="mt-2 flex h-24 w-full max-w-xs flex-col items-center justify-center gap-1 rounded border border-dashed border-sand-dim bg-sand p-3 text-center text-sm text-ink/40">
+                <svg viewBox="0 0 64 24" width="64" height="24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 18c4-10 8-14 11-10s2 10 6 10 6-14 10-14 4 12 8 12 5-8 9-8 3 6 7 6 5-4 9-4" />
+                </svg>
+                {t.signaturePlaceholder}
               </div>
             </div>
 
