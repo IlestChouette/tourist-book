@@ -5,6 +5,7 @@ import { useState } from "react";
 const content = {
   fr: {
     sentMessage: "Ta demande de transfert a bien été reçue. L'hôte te confirmera l'organisation avant ton arrivée.",
+    sentMessageHost: "La demande de transfert a bien été enregistrée.",
     destination: "Destination",
     name: "Nom du voyageur",
     phone: "Téléphone",
@@ -27,6 +28,7 @@ const content = {
   },
   en: {
     sentMessage: "Your transfer request has been received. Your host will confirm the arrangements before you arrive.",
+    sentMessageHost: "The transfer request has been saved.",
     destination: "Destination",
     name: "Traveller's name",
     phone: "Phone",
@@ -49,6 +51,7 @@ const content = {
   },
   es: {
     sentMessage: "Tu solicitud de transfer fue recibida. Tu anfitrión te confirmará la organización antes de tu llegada.",
+    sentMessageHost: "La solicitud de transfer quedó registrada.",
     destination: "Destino",
     name: "Nombre del viajero",
     phone: "Teléfono",
@@ -92,7 +95,7 @@ function matchRate(rates, pickupKey, passengers, luggage) {
   return candidates.reduce((best, r) => (r.price < best.price ? r : best));
 }
 
-export default function TransfertForm({ slug, propertyName, propertyAddress, locale = "fr", rates = [] }) {
+export default function TransfertForm({ slug, propertyName, propertyAddress, locale = "fr", rates = [], hostMode = false }) {
   const t = content[locale];
   const pickupLabels = { airport: t.airport, train_station: t.trainStation, other: t.other };
   const [form, setForm] = useState({
@@ -149,7 +152,7 @@ export default function TransfertForm({ slug, propertyName, propertyAddress, loc
   if (sent) {
     return (
       <div className="rounded border border-sand-dim bg-sand-card p-5">
-        <p className="text-ink">{t.sentMessage}</p>
+        <p className="text-ink">{hostMode ? t.sentMessageHost : t.sentMessage}</p>
       </div>
     );
   }

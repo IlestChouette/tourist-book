@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getClientLocale } from "@/lib/i18n/clientLocale";
 
@@ -48,13 +49,15 @@ export default function AdminLoginForm() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center bg-[#223339] px-6 py-14">
-      <Image
-        src="/tourist book long.png"
-        alt="Tourist Book"
-        width={278}
-        height={106}
-        className="mb-6 h-20 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] sm:h-24"
-      />
+      <Link href="/" className="mb-6 inline-flex shrink-0">
+        <Image
+          src="/tourist book long.png"
+          alt="Tourist Book"
+          width={278}
+          height={106}
+          className="h-20 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] sm:h-24"
+        />
+      </Link>
       <div className="w-full max-w-sm rounded border border-sand-dim bg-sand-card p-6">
         <h1 className="font-display italic text-2xl text-ink">Admin</h1>
         <form onSubmit={handleSubmit} className="mt-5 grid gap-4">

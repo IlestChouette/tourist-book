@@ -332,3 +332,42 @@ L'équipe Tourist Book`;
   await logEmail({ recipient: email, subject, template: "guest_checkin_credentials", status: "sent" });
   return { sent: true };
 }
+
+// Reçu via la page indépendante de demande de transfert (sans logement lié —
+// pour un voyageur qui n'est pas hébergé via Tourist Book). Envoyé
+// uniquement à l'admin, il n'y a pas d'hôtelier concerné ici.
+export async function sendIndependentTransferRequest({ nom, telephone, date, heure, lieu, passagers, bagagesGrands, bagagesPetits, vol, remarques }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const resend = new Resend(apiKey);
+
+  const lines = [
+    "Nouvelle demande de transfert indépendante (sans logement Tourist Book)",
+    "",
+    `Voyageur : ${nom}`,
+    `Téléphone : ${telephone || "-"}`,
+    `Date : ${date || "-"} à ${heure || "-"}`,
+    `Lieu de prise en charge : ${lieu || "-"}`,
+    `Passagers : ${passagers || "-"}`,
+    vol ? `N° de vol : ${vol}` : null,
+    bagagesGrands || bagagesPetits ? `Bagages : ${bagagesGrands ?? 0} grand(s), ${bagagesPetits ?? 0} petit(s)` : null,
+    remarques ? `Remarques : ${remarques}` : null,
+  ].filter(Boolean);
+
+  const subject = `Nouvelle demande de transfert indépendante — ${nom}`;
+  const { error: sendError } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text: lines.join("\n"),
+  });
+
+  if (sendError) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "independent_transfer_request", status: "failed", error: sendError.message });
+    throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
+  }
+
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "independent_transfer_request", status: "sent" });
+  return { sent: true };
+}

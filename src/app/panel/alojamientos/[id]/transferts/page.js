@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import Hero from "@/components/Hero";
 import { getClientLocale } from "@/lib/i18n/clientLocale";
@@ -24,6 +25,7 @@ const content = {
     ratesTitle: "Tarifs de transfert",
     ratesHint: "Ces tarifs sont fixés par Tourist Book et affichés directement à vos voyageurs dans le formulaire de transfert. Pour les modifier, contactez-nous.",
     ratesEmpty: "Aucun tarif configuré pour l'instant — contactez-nous pour les mettre en place.",
+    newRequest: "+ Nouvelle demande",
   },
   en: {
     eyebrow: "Host panel",
@@ -42,6 +44,7 @@ const content = {
     ratesTitle: "Transfer rates",
     ratesHint: "These rates are set by Tourist Book and shown directly to your guests in the transfer form. Contact us to change them.",
     ratesEmpty: "No rate configured yet — contact us to set them up.",
+    newRequest: "+ New request",
   },
   es: {
     eyebrow: "Panel hotelero",
@@ -60,6 +63,7 @@ const content = {
     ratesTitle: "Tarifas de transfer",
     ratesHint: "Estas tarifas las fija Tourist Book y se muestran directamente a tus huéspedes en el formulario de transfer. Para modificarlas, contáctanos.",
     ratesEmpty: "Todavía no hay ninguna tarifa configurada — contáctanos para configurarlas.",
+    newRequest: "+ Nueva solicitud",
   },
 };
 
@@ -146,7 +150,15 @@ export default function TransfertsPage({ params }) {
           )}
         </div>
 
-        <h2 className="mt-8 font-display italic text-xl text-ink">{t.title}</h2>
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display italic text-xl text-ink">{t.title}</h2>
+          <Link
+            href={`/panel/alojamientos/${id}/transferts/nueva`}
+            className="rounded bg-aqua-deep px-4 py-2 text-sm font-bold text-sand-card transition-colors hover:bg-aqua-deep/90"
+          >
+            {t.newRequest}
+          </Link>
+        </div>
         {requests.length === 0 && <p className="mt-2 text-ink/60">{t.empty}</p>}
 
         <div className="grid gap-3">

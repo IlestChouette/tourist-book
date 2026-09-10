@@ -167,6 +167,7 @@ const content = {
     searchConsole: "Search Console →",
     identityLookup: "Retrouver un check-in →",
     transferRates: "Tarifs de transfert →",
+    independentTransfer: "Lien transfert indépendant →",
     goalLabel: "Objectif mensuel",
     remaining: (amount) => `Il reste ${amount.toFixed(0)} € pour atteindre l'objectif`,
     clientsNeeded: (n) => `≈ ${n} client${n > 1 ? "s" : ""} de plus au rythme actuel`,
@@ -210,6 +211,7 @@ const content = {
     searchConsole: "Search Console →",
     identityLookup: "Find a check-in →",
     transferRates: "Transfer rates →",
+    independentTransfer: "Independent transfer link →",
     goalLabel: "Monthly goal",
     remaining: (amount) => `${amount.toFixed(0)} € left to reach the goal`,
     clientsNeeded: (n) => `≈ ${n} more client${n > 1 ? "s" : ""} at the current rate`,
@@ -253,6 +255,7 @@ const content = {
     searchConsole: "Search Console →",
     identityLookup: "Buscar un check-in →",
     transferRates: "Tarifas de transfer →",
+    independentTransfer: "Enlace transfer independiente →",
     goalLabel: "Objetivo mensual",
     remaining: (amount) => `Faltan ${amount.toFixed(0)} € para llegar al objetivo`,
     clientsNeeded: (n) => `≈ ${n} cliente${n > 1 ? "s" : ""} más al ritmo actual`,
@@ -355,13 +358,15 @@ export default async function AdminPage() {
     <main className="flex-1 bg-sand">
       <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 bg-[#2f7d76] px-6 py-4">
         <div className="flex items-center gap-3">
-          <Image
-            src="/tourist book long.png"
-            alt="Tourist Book"
-            width={278}
-            height={106}
-            className="h-14 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] sm:h-20 md:h-24"
-          />
+          <Link href="/" className="inline-flex shrink-0">
+            <Image
+              src="/tourist book long.png"
+              alt="Tourist Book"
+              width={278}
+              height={106}
+              className="h-14 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] sm:h-20 md:h-24"
+            />
+          </Link>
           <span className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70">Admin</span>
         </div>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -392,6 +397,14 @@ export default async function AdminPage() {
             className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
           >
             {t.transferRates}
+          </Link>
+          <Link
+            href="/transfer-independiente"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+          >
+            {t.independentTransfer}
           </Link>
           <LogoutButton className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]" />
         </div>
