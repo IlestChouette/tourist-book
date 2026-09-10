@@ -25,6 +25,9 @@ const content = {
     nationality: "Nationalité :",
     status: "Statut :",
     statusLabel: { pendiente: "En attente", aprobado: "Approuvé", rechazado: "Refusé" },
+    houseRules: "Règlement intérieur :",
+    houseRulesAccepted: "Accepté",
+    houseRulesRejected: "Refusé",
     idDocument: "Pièce d'identité",
     selfie: "Selfie",
     idDocumentPlaceholder: "Exemple de pièce d'identité",
@@ -48,6 +51,9 @@ const content = {
     nationality: "Nationality:",
     status: "Status:",
     statusLabel: { pendiente: "Pending", aprobado: "Approved", rechazado: "Rejected" },
+    houseRules: "House rules:",
+    houseRulesAccepted: "Accepted",
+    houseRulesRejected: "Rejected",
     idDocument: "ID document",
     selfie: "Selfie",
     idDocumentPlaceholder: "Example ID document",
@@ -71,6 +77,9 @@ const content = {
     nationality: "Nacionalidad:",
     status: "Estado:",
     statusLabel: { pendiente: "Pendiente", aprobado: "Aprobado", rechazado: "Rechazado" },
+    houseRules: "Normas de la casa:",
+    houseRulesAccepted: "Aceptadas",
+    houseRulesRejected: "Rechazadas",
     idDocument: "Documento de identidad",
     selfie: "Selfie",
     idDocumentPlaceholder: "Ejemplo de documento de identidad",
@@ -98,7 +107,9 @@ export default async function DemoCheckinPage() {
 
   const { data: reservation } = await admin
     .from("reservations")
-    .select("guest_name, arrival_date, departure_date, guest_accounts(username, phone, email, document_number, nationality, verification_status)")
+    .select(
+      "guest_name, arrival_date, departure_date, guest_accounts(username, phone, email, document_number, nationality, verification_status, house_rules_accepted)"
+    )
     .eq("property_id", property.id)
     .eq("status", "check-in hecho")
     .order("created_at", { ascending: false })
@@ -138,6 +149,14 @@ export default async function DemoCheckinPage() {
                   {t.statusLabel[ga.verification_status] ?? ga.verification_status}
                 </span>
               </p>
+              {ga.house_rules_accepted !== null && (
+                <p className="mt-1 text-ink">
+                  {t.houseRules}{" "}
+                  <span className={`font-bold ${ga.house_rules_accepted ? "text-sage" : "text-terracotta-deep"}`}>
+                    {ga.house_rules_accepted ? t.houseRulesAccepted : t.houseRulesRejected}
+                  </span>
+                </p>
+              )}
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
