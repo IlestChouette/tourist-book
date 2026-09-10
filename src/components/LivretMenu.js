@@ -8,6 +8,7 @@ import CarteInteractive from "./CarteInteractive";
 
 const content = {
   fr: {
+    directions: "Itinéraire",
     wifi: "Wifi",
     horaires: "Horaires",
     schedule: (checkin, checkout) => `Arrivée ${checkin} · Départ ${checkout}`,
@@ -34,6 +35,7 @@ const content = {
     demoHint: "* Le bouton « Vue hôte (démo) » n'existe pas sur un vrai livret — il vous montre ce que verrait l'hôte à la réception de ce check-in.",
   },
   en: {
+    directions: "Directions",
     wifi: "Wifi",
     horaires: "Schedule",
     schedule: (checkin, checkout) => `Check-in ${checkin} · Check-out ${checkout}`,
@@ -60,6 +62,7 @@ const content = {
     demoHint: "* The \"Host view (demo)\" button doesn't exist on a real livret — it shows you what the host would see upon receiving this check-in.",
   },
   es: {
+    directions: "Cómo llegar",
     wifi: "Wifi",
     horaires: "Horarios",
     schedule: (checkin, checkout) => `Llegada ${checkin} · Salida ${checkout}`,
@@ -92,6 +95,7 @@ const content = {
 // à demander, sans jamais alourdir le vrai produit vu par les voyageurs.
 const tileHints = {
   fr: {
+    directions: "Vos indications pour arriver au logement, écrites une fois pour toutes.",
     wifi: "Le wifi que vous configurez apparaît ici, prêt à copier pour votre voyageur.",
     horaires: "Vos horaires d'arrivée et de départ, dans la langue du voyageur.",
     parking: "Vos indications de stationnement, écrites une fois pour toutes.",
@@ -105,6 +109,7 @@ const tileHints = {
     carnet: "Vos voyageurs laissent un message — un vrai livre d'or numérique.",
   },
   en: {
+    directions: "Your directions to reach the property, written once and shown to everyone.",
     wifi: "The wifi you set up appears here, ready to copy for your guest.",
     horaires: "Your check-in and check-out times, in your guest's own language.",
     parking: "Your parking instructions, written once and shown to everyone.",
@@ -118,6 +123,7 @@ const tileHints = {
     carnet: "Your guests leave a message — a real digital guestbook.",
   },
   es: {
+    directions: "Tus indicaciones para llegar al alojamiento, escritas una sola vez.",
     wifi: "El wifi que configuras aparece aquí, listo para copiar para tu huésped.",
     horaires: "Tus horarios de llegada y salida, en el idioma del huésped.",
     parking: "Tus indicaciones de aparcamiento, escritas una sola vez.",
@@ -140,6 +146,16 @@ const iconProps = {
   strokeLinecap: "round",
   strokeLinejoin: "round",
 };
+
+function RouteIcon() {
+  return (
+    <svg {...iconProps} className="h-full w-full">
+      <circle cx="6" cy="6" r="2.2" />
+      <circle cx="18" cy="18" r="2.2" />
+      <path d="M6 8.2V11a4 4 0 0 0 4 4h4a4 4 0 0 1 4 4v0.8" />
+    </svg>
+  );
+}
 
 function WifiIcon() {
   return (
@@ -347,6 +363,9 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
   const closeButtonRef = useRef(null);
 
   const infoItems = [
+    ...(property.directions
+      ? [{ key: "directions", label: t.directions, icon: <RouteIcon />, detail: property.directions }]
+      : []),
     ...(property.wifi_ssid && property.wifi_password
       ? [{ key: "wifi", label: t.wifi, icon: <WifiIcon />, detail: `${property.wifi_ssid} · ${property.wifi_password}` }]
       : []),

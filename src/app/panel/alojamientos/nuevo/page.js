@@ -42,6 +42,7 @@ export default function NuevoAlojamientoPage() {
     postal_code: "",
     address: "",
     address_details: "",
+    directions: "",
     wifi_ssid: "",
     wifi_password: "",
     checkin: "",
@@ -137,6 +138,7 @@ export default function NuevoAlojamientoPage() {
           postal_code: form.postal_code,
           address: form.address,
           address_details: form.address_details,
+          directions: form.directions,
           wifi_ssid: form.wifi_ssid,
           wifi_password: form.wifi_password,
           checkin: form.checkin,
@@ -214,6 +216,17 @@ export default function NuevoAlojamientoPage() {
               placeholder={t.addressDetailsPlaceholder}
               value={form.address_details}
               onChange={update("address_details")}
+              className="input"
+            />
+          </label>
+
+          <label className="grid gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.directions}</span>
+            <textarea
+              rows={3}
+              placeholder={t.directionsPlaceholder}
+              value={form.directions}
+              onChange={update("directions")}
               className="input"
             />
           </label>

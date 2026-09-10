@@ -45,6 +45,7 @@ export default function EditarAlojamientoPage({ params }) {
           postal_code: data.postal_code ?? "",
           address: data.address ?? "",
           address_details: data.address_details ?? "",
+          directions: data.directions ?? "",
           wifi_ssid: data.wifi_ssid ?? "",
           wifi_password: data.wifi_password ?? "",
           checkin: data.checkin ?? "",
@@ -151,6 +152,7 @@ export default function EditarAlojamientoPage({ params }) {
           postal_code: form.postal_code,
           address: form.address,
           address_details: form.address_details,
+          directions: form.directions,
           wifi_ssid: form.wifi_ssid,
           wifi_password: form.wifi_password,
           checkin: form.checkin,
@@ -200,6 +202,7 @@ export default function EditarAlojamientoPage({ params }) {
 
   // Ouvre chaque panneau facultatif par défaut si le logement a déjà des
   // données dedans — pour ne pas cacher au propriétaire ce qu'il a rempli.
+  const hasDirections = Boolean(form.directions);
   const hasWelcomeMessage = Boolean(form.description);
   const hasHouseRules = Boolean(form.house_rules);
   const hasWasteManagement = Boolean(form.waste_instructions || form.waste_video_url || existingWastePhoto);
@@ -257,6 +260,22 @@ export default function EditarAlojamientoPage({ params }) {
               className="input"
             />
           </label>
+
+          <details open={hasDirections} className="group rounded border border-sand-dim [&_summary::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-sand-card p-4 text-sm font-bold uppercase tracking-wider text-ink/70">
+              {t.directions}
+              <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="p-4">
+              <textarea
+                rows={3}
+                placeholder={t.directionsPlaceholder}
+                value={form.directions}
+                onChange={update("directions")}
+                className="input"
+              />
+            </div>
+          </details>
 
           <div className="grid grid-cols-2 gap-4">
             <label className="grid gap-1.5">
