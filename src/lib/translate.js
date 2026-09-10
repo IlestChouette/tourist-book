@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // techniques (wifi, contact, lockbox...) qui ne doivent jamais être traduits.
 const TRANSLATABLE_FIELDS = [
   "description",
+  "directions",
   "house_rules",
   "waste_instructions",
   "general_info",
