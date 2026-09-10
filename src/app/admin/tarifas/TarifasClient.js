@@ -14,7 +14,7 @@ export default function TarifasClient({ properties }) {
   const [propertyId, setPropertyId] = useState(properties[0]?.id ?? "");
   const [rates, setRates] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [newRate, setNewRate] = useState({ pickup_location: "airport", passengers: "4", price: "" });
+  const [newRate, setNewRate] = useState({ pickup_location: "airport", passengers: "4", luggage: "4", price: "" });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -45,6 +45,7 @@ export default function TarifasClient({ properties }) {
         property_id: propertyId,
         pickup_location: newRate.pickup_location,
         passengers: Number(newRate.passengers),
+        luggage: Number(newRate.luggage),
         price: Number(newRate.price),
       })
       .select()
@@ -52,7 +53,7 @@ export default function TarifasClient({ properties }) {
     setSaving(false);
     if (!error) {
       setRates((r) => [...r, data]);
-      setNewRate({ pickup_location: "airport", passengers: "4", price: "" });
+      setNewRate({ pickup_location: "airport", passengers: "4", luggage: "4", price: "" });
     }
   }
 
@@ -98,7 +99,9 @@ export default function TarifasClient({ properties }) {
                 >
                   <span className="text-ink">
                     {PICKUP_OPTIONS.find((o) => o.key === rate.pickup_location)?.label ?? rate.pickup_location} ·
-                    jusqu&apos;à {rate.passengers} passager(s) · <strong>{Number(rate.price).toFixed(2)} €</strong>
+                    jusqu&apos;à {rate.passengers} passager(s)
+                    {rate.luggage != null ? ` · jusqu'à ${rate.luggage} bagage(s)` : ""} ·{" "}
+                    <strong>{Number(rate.price).toFixed(2)} €</strong>
                   </span>
                   <button
                     type="button"
@@ -111,43 +114,64 @@ export default function TarifasClient({ properties }) {
               ))}
             </div>
 
-            <form onSubmit={addRate} className="mt-4 grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
-              <select
-                value={newRate.pickup_location}
-                onChange={(e) => setNewRate((f) => ({ ...f, pickup_location: e.target.value }))}
-                className="input"
-              >
-                {PICKUP_OPTIONS.map((o) => (
-                  <option key={o.key} value={o.key}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="number"
-                min="1"
-                placeholder="Jusqu'à X passagers"
-                value={newRate.passengers}
-                onChange={(e) => setNewRate((f) => ({ ...f, passengers: e.target.value }))}
-                className="input"
-              />
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="Prix (€)"
-                value={newRate.price}
-                onChange={(e) => setNewRate((f) => ({ ...f, price: e.target.value }))}
-                className="input"
-              />
+            <form onSubmit={addRate} className="mt-4 grid gap-3 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:items-end">
+              <label className="grid gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Lieu de prise en charge</span>
+                <select
+                  value={newRate.pickup_location}
+                  onChange={(e) => setNewRate((f) => ({ ...f, pickup_location: e.target.value }))}
+                  className="input"
+                >
+                  {PICKUP_OPTIONS.map((o) => (
+                    <option key={o.key} value={o.key}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Jusqu&apos;à X passagers</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={newRate.passengers}
+                  onChange={(e) => setNewRate((f) => ({ ...f, passengers: e.target.value }))}
+                  className="input"
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Jusqu&apos;à X bagages</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={newRate.luggage}
+                  onChange={(e) => setNewRate((f) => ({ ...f, luggage: e.target.value }))}
+                  className="input"
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Prix (€)</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={newRate.price}
+                  onChange={(e) => setNewRate((f) => ({ ...f, price: e.target.value }))}
+                  className="input"
+                />
+              </label>
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded bg-aqua-deep px-4 py-2 text-sm font-bold text-sand-card transition-colors hover:bg-aqua-deep/90 disabled:opacity-60"
+                className="rounded bg-aqua-deep px-4 py-2.5 text-sm font-bold text-sand-card transition-colors hover:bg-aqua-deep/90 disabled:opacity-60"
               >
                 Ajouter →
               </button>
             </form>
+            <p className="mt-2 text-xs text-ink/60">
+              Astuce : pensez véhicule, pas seulement passagers — une berline (4 places, ~3 bagages) et un van (8
+              places, ~8 bagages) n&apos;ont pas le même prix.
+            </p>
           </>
         )}
       </div>

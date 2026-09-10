@@ -14,6 +14,7 @@ const content = {
     airport: "Aéroport Nice Côte d'Azur",
     trainStation: "Gare de Nice-Ville",
     other: "Autre",
+    otherLocation: "Précisez le lieu",
     passengers: "Passagers",
     flightNumber: "N° de vol (optionnel)",
     bigBags: "Bagages grands",
@@ -22,7 +23,7 @@ const content = {
     sending: "Envoi…",
     submit: "Réserver →",
     priceLabel: "Tarif estimé",
-    priceUnavailable: "Tarif sur demande pour ce trajet — l'hôte vous confirmera le prix.",
+    priceUnavailable: "Prix non estimé pour ce trajet. Nous vous contacterons sous peu pour vous confirmer le prix.",
   },
   en: {
     sentMessage: "Your transfer request has been received. Your host will confirm the arrangements before you arrive.",
@@ -35,6 +36,7 @@ const content = {
     airport: "Nice Côte d'Azur Airport",
     trainStation: "Nice-Ville Train Station",
     other: "Other",
+    otherLocation: "Specify the location",
     passengers: "Passengers",
     flightNumber: "Flight number (optional)",
     bigBags: "Large bags",
@@ -43,7 +45,7 @@ const content = {
     sending: "Sending…",
     submit: "Book →",
     priceLabel: "Estimated price",
-    priceUnavailable: "Price on request for this route — the host will confirm it with you.",
+    priceUnavailable: "No estimated price for this route. We'll contact you shortly to confirm the price.",
   },
   es: {
     sentMessage: "Tu solicitud de transfer fue recibida. Tu anfitrión te confirmará la organización antes de tu llegada.",
@@ -56,6 +58,7 @@ const content = {
     airport: "Aeropuerto Niza Costa Azul",
     trainStation: "Estación Nice-Ville",
     other: "Otro",
+    otherLocation: "Especifica el lugar",
     passengers: "Pasajeros",
     flightNumber: "N.º de vuelo (opcional)",
     bigBags: "Maletas grandes",
@@ -64,7 +67,7 @@ const content = {
     sending: "Enviando…",
     submit: "Reservar →",
     priceLabel: "Precio estimado",
-    priceUnavailable: "Precio a consultar para este trayecto — el anfitrión te confirmará el precio.",
+    priceUnavailable: "Precio no estimado para este trayecto. Te contactaremos en unos instantes para confirmarte el precio.",
   },
 };
 
@@ -73,13 +76,20 @@ const content = {
 // lui, change selon la langue du voyageur.
 const PICKUP_KEYS = ["airport", "train_station", "other"];
 
-// Le tarif le plus proche (au-dessus) du nombre de passagers demandé — un
-// tarif "jusqu'à 4 passagers" doit aussi s'appliquer à 1, 2 ou 3 personnes.
-function matchRate(rates, pickupKey, passengers) {
+// Le prix dépend du véhicule, donc à la fois des passagers ET des bagages —
+// une berline peut suffire pour 4 passagers mais pas avec 6 grosses valises.
+// On garde les tarifs qui couvrent les deux besoins, puis le moins cher parmi
+// eux (le plus petit véhicule adapté, pas juste celui avec le moins de places).
+function matchRate(rates, pickupKey, passengers, luggage) {
   if (!rates?.length || pickupKey === "other") return null;
-  const candidates = rates.filter((r) => r.pickup_location === pickupKey && r.passengers >= passengers);
+  const candidates = rates.filter(
+    (r) =>
+      r.pickup_location === pickupKey &&
+      r.passengers >= passengers &&
+      (r.luggage == null || r.luggage >= luggage)
+  );
   if (!candidates.length) return null;
-  return candidates.reduce((best, r) => (r.passengers < best.passengers ? r : best));
+  return candidates.reduce((best, r) => (r.price < best.price ? r : best));
 }
 
 export default function TransfertForm({ slug, propertyName, propertyAddress, locale = "fr", rates = [] }) {
@@ -92,6 +102,7 @@ export default function TransfertForm({ slug, propertyName, propertyAddress, loc
     heure: "",
     lieu: t.airport,
     pickupKey: "airport",
+    lieuAutre: "",
     passagers: "1",
     bagagesGrands: "0",
     bagagesPetits: "0",
@@ -99,7 +110,8 @@ export default function TransfertForm({ slug, propertyName, propertyAddress, loc
     remarques: "",
   });
 
-  const matchedRate = matchRate(rates, form.pickupKey, Number(form.passagers) || 1);
+  const totalLuggage = (Number(form.bagagesGrands) || 0) + (Number(form.bagagesPetits) || 0);
+  const matchedRate = matchRate(rates, form.pickupKey, Number(form.passagers) || 1, totalLuggage);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -117,6 +129,7 @@ export default function TransfertForm({ slug, propertyName, propertyAddress, loc
       property: propertyName,
       destination: propertyAddress,
       ...form,
+      lieu: form.pickupKey === "other" ? form.lieuAutre : form.lieu,
       prixEstime: matchedRate ? Number(matchedRate.price) : null,
     };
     try {
@@ -191,12 +204,10 @@ export default function TransfertForm({ slug, propertyName, propertyAddress, loc
         </select>
       </Field>
 
-      {matchedRate ? (
-        <p className="text-sm text-ink">
-          {t.priceLabel}: <strong>{Number(matchedRate.price).toFixed(2)} €</strong>
-        </p>
-      ) : (
-        form.pickupKey !== "other" && <p className="text-xs text-ink/60">{t.priceUnavailable}</p>
+      {form.pickupKey === "other" && (
+        <Field label={t.otherLocation}>
+          <input required value={form.lieuAutre} onChange={update("lieuAutre")} className="input" />
+        </Field>
       )}
 
       <div className="grid grid-cols-2 gap-4">
@@ -228,6 +239,14 @@ export default function TransfertForm({ slug, propertyName, propertyAddress, loc
           />
         </Field>
       </div>
+
+      {matchedRate ? (
+        <p className="rounded border border-sand-dim bg-sand p-3 text-sm text-ink">
+          {t.priceLabel}: <strong>{Number(matchedRate.price).toFixed(2)} €</strong>
+        </p>
+      ) : (
+        <p className="rounded border border-sand-dim bg-sand p-3 text-xs text-ink/70">{t.priceUnavailable}</p>
+      )}
 
       <Field label={t.notes}>
         <textarea value={form.remarques} onChange={update("remarques")} rows={3} className="input" />
