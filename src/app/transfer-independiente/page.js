@@ -18,7 +18,7 @@ const content = {
     other: "Autre",
     otherLocation: "Précisez le lieu",
     passengers: "Passagers",
-    flightNumber: "N° de vol (optionnel)",
+    flightNumber: "N° de vol",
     bigBags: "Bagages grands",
     smallBags: "Bagages petits",
     notes: "Remarques (optionnel)",
@@ -40,7 +40,7 @@ const content = {
     other: "Other",
     otherLocation: "Specify the location",
     passengers: "Passengers",
-    flightNumber: "Flight number (optional)",
+    flightNumber: "Flight number",
     bigBags: "Large bags",
     smallBags: "Small bags",
     notes: "Notes (optional)",
@@ -62,7 +62,7 @@ const content = {
     other: "Otro",
     otherLocation: "Especifica el lugar",
     passengers: "Pasajeros",
-    flightNumber: "N.º de vuelo (opcional)",
+    flightNumber: "N.º de vuelo",
     bigBags: "Maletas grandes",
     smallBags: "Maletas pequeñas",
     notes: "Comentarios (opcional)",
@@ -189,7 +189,12 @@ export default function TransferIndependientePage() {
               <input type="number" min="1" value={form.passagers} onChange={update("passagers")} className="input" />
             </Field>
             <Field label={t.flightNumber}>
-              <input value={form.vol} onChange={update("vol")} className="input" />
+              <input
+                required={form.pickupKey === "airport"}
+                value={form.vol}
+                onChange={update("vol")}
+                className="input"
+              />
             </Field>
           </div>
 
