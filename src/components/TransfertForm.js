@@ -21,6 +21,8 @@ const content = {
     notes: "Remarques (optionnel)",
     sending: "Envoi…",
     submit: "Réserver →",
+    priceLabel: "Tarif estimé",
+    priceUnavailable: "Tarif sur demande pour ce trajet — l'hôte vous confirmera le prix.",
   },
   en: {
     sentMessage: "Your transfer request has been received. Your host will confirm the arrangements before you arrive.",
@@ -40,6 +42,8 @@ const content = {
     notes: "Notes (optional)",
     sending: "Sending…",
     submit: "Book →",
+    priceLabel: "Estimated price",
+    priceUnavailable: "Price on request for this route — the host will confirm it with you.",
   },
   es: {
     sentMessage: "Tu solicitud de transfer fue recibida. Tu anfitrión te confirmará la organización antes de tu llegada.",
@@ -59,23 +63,43 @@ const content = {
     notes: "Comentarios (opcional)",
     sending: "Enviando…",
     submit: "Reservar →",
+    priceLabel: "Precio estimado",
+    priceUnavailable: "Precio a consultar para este trayecto — el anfitrión te confirmará el precio.",
   },
 };
 
-export default function TransfertForm({ slug, propertyName, propertyAddress, locale = "fr" }) {
+// Clés stables (indépendantes de la langue) pour faire correspondre le lieu
+// choisi par le voyageur aux tarifs fixés par l'admin — le libellé affiché,
+// lui, change selon la langue du voyageur.
+const PICKUP_KEYS = ["airport", "train_station", "other"];
+
+// Le tarif le plus proche (au-dessus) du nombre de passagers demandé — un
+// tarif "jusqu'à 4 passagers" doit aussi s'appliquer à 1, 2 ou 3 personnes.
+function matchRate(rates, pickupKey, passengers) {
+  if (!rates?.length || pickupKey === "other") return null;
+  const candidates = rates.filter((r) => r.pickup_location === pickupKey && r.passengers >= passengers);
+  if (!candidates.length) return null;
+  return candidates.reduce((best, r) => (r.passengers < best.passengers ? r : best));
+}
+
+export default function TransfertForm({ slug, propertyName, propertyAddress, locale = "fr", rates = [] }) {
   const t = content[locale];
+  const pickupLabels = { airport: t.airport, train_station: t.trainStation, other: t.other };
   const [form, setForm] = useState({
     nom: "",
     telephone: "",
     date: "",
     heure: "",
     lieu: t.airport,
+    pickupKey: "airport",
     passagers: "1",
     bagagesGrands: "0",
     bagagesPetits: "0",
     vol: "",
     remarques: "",
   });
+
+  const matchedRate = matchRate(rates, form.pickupKey, Number(form.passagers) || 1);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -87,7 +111,14 @@ export default function TransfertForm({ slug, propertyName, propertyAddress, loc
     e.preventDefault();
     setSending(true);
 
-    const entry = { slug, type: "transfert", property: propertyName, destination: propertyAddress, ...form };
+    const entry = {
+      slug,
+      type: "transfert",
+      property: propertyName,
+      destination: propertyAddress,
+      ...form,
+      prixEstime: matchedRate ? Number(matchedRate.price) : null,
+    };
     try {
       await fetch("/api/requests", {
         method: "POST",
@@ -144,12 +175,29 @@ export default function TransfertForm({ slug, propertyName, propertyAddress, loc
       </div>
 
       <Field label={t.pickupLocation}>
-        <select value={form.lieu} onChange={update("lieu")} className="input">
-          <option>{t.airport}</option>
-          <option>{t.trainStation}</option>
-          <option>{t.other}</option>
+        <select
+          value={form.pickupKey}
+          onChange={(e) => {
+            const key = e.target.value;
+            setForm((f) => ({ ...f, pickupKey: key, lieu: pickupLabels[key] }));
+          }}
+          className="input"
+        >
+          {PICKUP_KEYS.map((key) => (
+            <option key={key} value={key}>
+              {pickupLabels[key]}
+            </option>
+          ))}
         </select>
       </Field>
+
+      {matchedRate ? (
+        <p className="text-sm text-ink">
+          {t.priceLabel}: <strong>{Number(matchedRate.price).toFixed(2)} €</strong>
+        </p>
+      ) : (
+        form.pickupKey !== "other" && <p className="text-xs text-ink/60">{t.priceUnavailable}</p>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <Field label={t.passengers}>

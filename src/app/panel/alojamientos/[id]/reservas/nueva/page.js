@@ -13,8 +13,8 @@ const content = {
     backToReservations: "← Retour aux réservations",
     reservations: "Réservations",
     title: "Nouvelle réservation",
-    guestFirstName: "Prénom de l'hôte",
-    guestLastName: "Nom de l'hôte",
+    guestName: "Nom du voyageur",
+    guestNameHint: "Le nom tel qu'il apparaît sur la réservation (Airbnb, Booking...) suffit — le voyageur précisera son nom exact, comme sur sa pièce d'identité, lors de son check-in.",
     arrival: "Arrivée",
     departure: "Départ",
     creating: "Création…",
@@ -28,8 +28,8 @@ const content = {
     backToReservations: "← Back to bookings",
     reservations: "Bookings",
     title: "New booking",
-    guestFirstName: "Guest first name",
-    guestLastName: "Guest last name",
+    guestName: "Guest name",
+    guestNameHint: "The name as it appears on the booking (Airbnb, Booking...) is enough — the guest will give their exact legal name, as on their ID, during check-in.",
     arrival: "Check-in",
     departure: "Check-out",
     creating: "Creating…",
@@ -43,8 +43,8 @@ const content = {
     backToReservations: "← Volver a las reservas",
     reservations: "Reservas",
     title: "Nueva reserva",
-    guestFirstName: "Nombre del huésped",
-    guestLastName: "Apellido del huésped",
+    guestName: "Nombre del viajero",
+    guestNameHint: "Basta con el nombre tal como aparece en la reserva (Airbnb, Booking...) — el viajero indicará su nombre exacto, como en su documento, al hacer el check-in.",
     arrival: "Llegada",
     departure: "Salida",
     creating: "Creando…",
@@ -58,7 +58,7 @@ export default function NuevaReservaPage({ params }) {
   const [locale] = useState(getClientLocale);
   const t = content[locale];
 
-  const [form, setForm] = useState({ guestFirstName: "", guestLastName: "", arrivalDate: "", departureDate: "" });
+  const [form, setForm] = useState({ guestName: "", arrivalDate: "", departureDate: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [link, setLink] = useState(null);
@@ -110,16 +110,11 @@ export default function NuevaReservaPage({ params }) {
       <Hero backHref={`/panel/alojamientos/${id}/reservas`} backLabel={t.reservations} eyebrow={t.checkin} title={t.title} />
       <section className="mx-auto max-w-2xl px-6 py-10">
         <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.guestFirstName}</span>
-              <input required value={form.guestFirstName} onChange={update("guestFirstName")} className="input" />
-            </label>
-            <label className="grid gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.guestLastName}</span>
-              <input required value={form.guestLastName} onChange={update("guestLastName")} className="input" />
-            </label>
-          </div>
+          <label className="grid gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.guestName}</span>
+            <input required value={form.guestName} onChange={update("guestName")} className="input" />
+            <span className="text-xs text-ink/60">{t.guestNameHint}</span>
+          </label>
           <div className="grid grid-cols-2 gap-4">
             <label className="grid gap-1.5">
               <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.arrival}</span>

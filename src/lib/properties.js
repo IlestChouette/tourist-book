@@ -6,7 +6,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export async function getPropertyBySlug(slug) {
   const admin = createAdminClient();
   const { data } = await admin.from("properties").select("*").eq("slug", slug).single();
-  return data;
+  if (!data) return data;
+
+  const { data: rates } = await admin
+    .from("transfer_rates")
+    .select("pickup_location, passengers, price")
+    .eq("property_id", data.id)
+    .order("passengers", { ascending: true });
+
+  return { ...data, transfer_rates: rates ?? [] };
 }
 
 // Un logement créé mais jamais souscrit (subscription_status: null) ou dont

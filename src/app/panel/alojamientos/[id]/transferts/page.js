@@ -21,15 +21,9 @@ const content = {
     notes: "Remarques",
     copy: "Copier le message",
     copied: "Copié !",
-    ratesTitle: "Tarifs (privé)",
-    ratesHint: "Visible uniquement par vous — jamais montré au voyageur ni au transporteur. Sert de mémo pour répondre vite.",
-    ratesEmpty: "Aucun tarif enregistré pour l'instant.",
-    pickupLocation: "Lieu de prise en charge",
-    pickupPlaceholder: "Ex : Aéroport Nice Côte d'Azur",
-    passengersLabel: "Passagers",
-    price: "Prix (€)",
-    addRate: "Ajouter →",
-    delete: "Supprimer",
+    ratesTitle: "Tarifs de transfert",
+    ratesHint: "Ces tarifs sont fixés par Tourist Book et affichés directement à vos voyageurs dans le formulaire de transfert. Pour les modifier, contactez-nous.",
+    ratesEmpty: "Aucun tarif configuré pour l'instant — contactez-nous pour les mettre en place.",
   },
   en: {
     eyebrow: "Host panel",
@@ -45,15 +39,9 @@ const content = {
     notes: "Notes",
     copy: "Copy message",
     copied: "Copied!",
-    ratesTitle: "Rates (private)",
-    ratesHint: "Only visible to you — never shown to the guest or the driver. A quick reference to answer fast.",
-    ratesEmpty: "No rate saved yet.",
-    pickupLocation: "Pickup location",
-    pickupPlaceholder: "E.g.: Nice Côte d'Azur Airport",
-    passengersLabel: "Passengers",
-    price: "Price (€)",
-    addRate: "Add →",
-    delete: "Delete",
+    ratesTitle: "Transfer rates",
+    ratesHint: "These rates are set by Tourist Book and shown directly to your guests in the transfer form. Contact us to change them.",
+    ratesEmpty: "No rate configured yet — contact us to set them up.",
   },
   es: {
     eyebrow: "Panel hotelero",
@@ -69,15 +57,9 @@ const content = {
     notes: "Comentarios",
     copy: "Copiar mensaje",
     copied: "¡Copiado!",
-    ratesTitle: "Tarifas (privado)",
-    ratesHint: "Solo lo ves tú — nunca se muestra al huésped ni al transportista. Sirve de referencia rápida para responder rápido.",
-    ratesEmpty: "Todavía no hay ninguna tarifa guardada.",
-    pickupLocation: "Lugar de recogida",
-    pickupPlaceholder: "Ej: Aeropuerto Niza Costa Azul",
-    passengersLabel: "Pasajeros",
-    price: "Precio (€)",
-    addRate: "Agregar →",
-    delete: "Eliminar",
+    ratesTitle: "Tarifas de transfer",
+    ratesHint: "Estas tarifas las fija Tourist Book y se muestran directamente a tus huéspedes en el formulario de transfer. Para modificarlas, contáctanos.",
+    ratesEmpty: "Todavía no hay ninguna tarifa configurada — contáctanos para configurarlas.",
   },
 };
 
@@ -91,8 +73,6 @@ export default function TransfertsPage({ params }) {
   const [rates, setRates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState(null);
-  const [newRate, setNewRate] = useState({ pickup_location: "", passengers: "1", price: "" });
-  const [savingRate, setSavingRate] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -114,34 +94,6 @@ export default function TransfertsPage({ params }) {
     }
     load();
   }, [id]);
-
-  async function addRate(e) {
-    e.preventDefault();
-    if (!newRate.pickup_location || !newRate.price) return;
-    setSavingRate(true);
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("transfer_rates")
-      .insert({
-        property_id: id,
-        pickup_location: newRate.pickup_location,
-        passengers: Number(newRate.passengers),
-        price: Number(newRate.price),
-      })
-      .select()
-      .single();
-    setSavingRate(false);
-    if (!error) {
-      setRates((r) => [...r, data]);
-      setNewRate({ pickup_location: "", passengers: "1", price: "" });
-    }
-  }
-
-  async function deleteRate(rateId) {
-    const supabase = createClient();
-    await supabase.from("transfer_rates").delete().eq("id", rateId);
-    setRates((r) => r.filter((rate) => rate.id !== rateId));
-  }
 
   async function copyMessage(r) {
     const message = formatTransferWhatsAppMessage({
@@ -188,50 +140,10 @@ export default function TransfertsPage({ params }) {
                   <span className="text-ink">
                     {rate.pickup_location} · {rate.passengers} {t.passengers} · <strong>{Number(rate.price).toFixed(2)} €</strong>
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => deleteRate(rate.id)}
-                    className="shrink-0 text-xs font-bold uppercase tracking-wide text-terracotta-deep hover:underline"
-                  >
-                    {t.delete}
-                  </button>
                 </div>
               ))}
             </div>
           )}
-
-          <form onSubmit={addRate} className="mt-4 grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
-            <input
-              placeholder={t.pickupPlaceholder}
-              value={newRate.pickup_location}
-              onChange={(e) => setNewRate((f) => ({ ...f, pickup_location: e.target.value }))}
-              className="input"
-            />
-            <input
-              type="number"
-              min="1"
-              placeholder={t.passengersLabel}
-              value={newRate.passengers}
-              onChange={(e) => setNewRate((f) => ({ ...f, passengers: e.target.value }))}
-              className="input"
-            />
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder={t.price}
-              value={newRate.price}
-              onChange={(e) => setNewRate((f) => ({ ...f, price: e.target.value }))}
-              className="input"
-            />
-            <button
-              type="submit"
-              disabled={savingRate}
-              className="rounded bg-aqua-deep px-4 py-2 text-sm font-bold text-sand-card transition-colors hover:bg-aqua-deep/90 disabled:opacity-60"
-            >
-              {t.addRate}
-            </button>
-          </form>
         </div>
 
         <h2 className="mt-8 font-display italic text-xl text-ink">{t.title}</h2>
@@ -254,6 +166,7 @@ export default function TransfertsPage({ params }) {
                 </div>
                 <p className="mt-2 text-ink/80">
                   {d.date} · {d.heure} · {d.lieu}
+                  {d.prixEstime ? ` · ${Number(d.prixEstime).toFixed(2)} €` : ""}
                 </p>
                 <p className="mt-1 text-sm text-ink/70">
                   {d.passagers} {t.passengers}

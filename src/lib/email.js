@@ -290,3 +290,45 @@ export async function sendListingTipsBatchNotification({ sentTo }) {
   await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "listing_tips_batch_notification", status: "sent" });
   return { sent: true };
 }
+
+// Envoyé au voyageur juste après qu'il ait terminé son check-in électronique —
+// lui donne le lien du livret et ses identifiants par écrit, pour ne pas les
+// perdre s'il ferme l'onglet avant de les noter.
+export async function sendGuestCheckinCredentials({ email, firstName, propertyName, propertySlug, username, password }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const resend = new Resend(apiKey);
+  const greeting = firstName?.trim() ? `Bonjour ${firstName.trim()},` : "Bonjour,";
+  const livretUrl = `https://tourist-book.com/logement/${propertySlug}`;
+
+  const text = `${greeting}
+
+Votre check-in pour "${propertyName}" est bien enregistré.
+
+Vous pouvez dès maintenant accéder au livret d'accueil de votre logement :
+${livretUrl}
+
+Vos identifiants (à conserver, ils vous permettront de vous reconnecter depuis n'importe quel appareil) :
+Identifiant : ${username}
+Mot de passe : ${password}
+
+Bon séjour,
+L'équipe Tourist Book`;
+
+  const subject = `Votre livret d'accueil — ${propertyName}`;
+  const { error: sendError } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: email,
+    subject,
+    text,
+  });
+
+  if (sendError) {
+    await logEmail({ recipient: email, subject, template: "guest_checkin_credentials", status: "failed", error: sendError.message });
+    throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
+  }
+
+  await logEmail({ recipient: email, subject, template: "guest_checkin_credentials", status: "sent" });
+  return { sent: true };
+}

@@ -12,8 +12,8 @@ export async function POST(request) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
-  const { propertyId, guestFirstName, guestLastName, arrivalDate, departureDate } = await request.json();
-  if (!propertyId || !guestFirstName || !guestLastName || !arrivalDate || !departureDate) {
+  const { propertyId, guestName, arrivalDate, departureDate } = await request.json();
+  if (!propertyId || !guestName || !arrivalDate || !departureDate) {
     return NextResponse.json({ error: "Données invalides" }, { status: 400 });
   }
 
@@ -40,9 +40,7 @@ export async function POST(request) {
     .from("reservations")
     .insert({
       property_id: propertyId,
-      guest_name: `${guestFirstName} ${guestLastName}`.trim(),
-      guest_first_name: guestFirstName,
-      guest_last_name: guestLastName,
+      guest_name: guestName,
       arrival_date: arrivalDate,
       departure_date: departureDate,
       token,

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { hashPassword, randomPassword } from "@/lib/password";
+import { sendGuestCheckinCredentials } from "@/lib/email";
 
 export async function GET(request, { params }) {
   const { token } = await params;
@@ -36,7 +37,7 @@ export async function POST(request, { params }) {
 
   const { data: reservation } = await admin
     .from("reservations")
-    .select("id, property_id, guest_name, properties(slug, house_rules)")
+    .select("id, property_id, guest_name, properties(slug, name, house_rules)")
     .eq("token", token)
     .single();
 
@@ -45,6 +46,8 @@ export async function POST(request, { params }) {
   }
 
   const formData = await request.formData();
+  const firstName = formData.get("firstName");
+  const lastName = formData.get("lastName");
   const phone = formData.get("phone");
   const email = formData.get("email");
   const documentNumber = formData.get("documentNumber");
@@ -54,7 +57,17 @@ export async function POST(request, { params }) {
   const signature = formData.get("signature");
   const houseRulesAcceptedRaw = formData.get("houseRulesAccepted");
 
-  if (!phone || !email || !documentNumber || !nationality || !idDocument || !selfie || !signature) {
+  if (
+    !firstName ||
+    !lastName ||
+    !phone ||
+    !email ||
+    !documentNumber ||
+    !nationality ||
+    !idDocument ||
+    !selfie ||
+    !signature
+  ) {
     return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
   }
 
@@ -94,7 +107,7 @@ export async function POST(request, { params }) {
     );
   }
 
-  const username = `${reservation.guest_name
+  const username = `${`${firstName} ${lastName}`
     .toLowerCase()
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
@@ -106,6 +119,8 @@ export async function POST(request, { params }) {
       reservation_id: reservation.id,
       username,
       password_hash: hashPassword(password),
+      first_name: firstName,
+      last_name: lastName,
       phone,
       email,
       document_number: documentNumber,
@@ -124,6 +139,21 @@ export async function POST(request, { params }) {
   }
 
   await admin.from("reservations").update({ status: "check-in hecho" }).eq("id", reservation.id);
+
+  try {
+    await sendGuestCheckinCredentials({
+      email,
+      firstName,
+      propertyName: reservation.properties?.name,
+      propertySlug: reservation.properties?.slug,
+      username,
+      password,
+    });
+  } catch (err) {
+    // Le check-in reste valide même si l'email échoue — les identifiants
+    // restent affichés à l'écran juste après.
+    console.error("sendGuestCheckinCredentials failed:", err);
+  }
 
   const response = NextResponse.json({ username, password, slug: reservation.properties?.slug });
   // Donne un accès immédiat au livret pendant que l'hôte vérifie les documents.

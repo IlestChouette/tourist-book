@@ -13,6 +13,7 @@ const content = {
     reservations: "Réservations",
     noCheckinYet: "L'hôte n'a pas encore effectué son check-in.",
     username: "Identifiant :",
+    legalName: "Nom déclaré au check-in :",
     phone: "Téléphone :",
     email: "Email :",
     documentNumber: "N° de passeport / carte d'identité :",
@@ -36,6 +37,7 @@ const content = {
     reservations: "Bookings",
     noCheckinYet: "The guest hasn't completed check-in yet.",
     username: "Username:",
+    legalName: "Name given at check-in:",
     phone: "Phone:",
     email: "Email:",
     documentNumber: "Passport / ID number:",
@@ -59,6 +61,7 @@ const content = {
     reservations: "Reservas",
     noCheckinYet: "El huésped todavía no ha completado el check-in.",
     username: "Usuario:",
+    legalName: "Nombre declarado en el check-in:",
     phone: "Teléfono:",
     email: "Email:",
     documentNumber: "N° de pasaporte / DNI:",
@@ -144,6 +147,11 @@ export default function ReservaDetallePage({ params }) {
           <>
             <div className="rounded border border-sand-dim bg-sand-card p-5">
               <p className="text-ink">{t.username} {ga.username}</p>
+              {(ga.firstName || ga.lastName) && (
+                <p className="mt-1 text-ink">
+                  {t.legalName} <strong>{[ga.firstName, ga.lastName].filter(Boolean).join(" ")}</strong>
+                </p>
+              )}
               <p className="mt-1 text-ink">{t.phone} {ga.phone}</p>
               <p className="mt-1 text-ink">{t.email} {ga.email}</p>
               <p className="mt-1 text-ink">{t.documentNumber} {ga.documentNumber}</p>

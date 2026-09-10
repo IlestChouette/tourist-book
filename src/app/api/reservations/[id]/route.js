@@ -56,6 +56,8 @@ export async function GET(request, { params }) {
     guestAccount: guestAccount
       ? {
           username: guestAccount.username,
+          firstName: guestAccount.first_name,
+          lastName: guestAccount.last_name,
           phone: guestAccount.phone,
           email: guestAccount.email,
           documentNumber: guestAccount.document_number,

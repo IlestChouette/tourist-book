@@ -9,6 +9,7 @@ export function formatTransferWhatsAppMessage({ propertyName, propertyAddress, n
     `Date : ${d.date || "-"} à ${d.heure || "-"}`,
     `Lieu de prise en charge : ${d.lieu || "-"}`,
     `Passagers : ${d.passagers || "-"}`,
+    ...(d.prixEstime ? [`Tarif affiché au voyageur : ${Number(d.prixEstime).toFixed(2)} €`] : []),
     `Voyageur : ${nom}`,
     `Téléphone : ${telephone || "-"}`,
     "",

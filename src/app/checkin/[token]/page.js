@@ -15,7 +15,7 @@ export default function CheckinPage({ params }) {
   const { token } = use(params);
   const [reservation, setReservation] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ phone: "", email: "", documentNumber: "", nationality: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", phone: "", email: "", documentNumber: "", nationality: "" });
   const [idDocument, setIdDocument] = useState(null);
   const [selfie, setSelfie] = useState(null);
   const [consent, setConsent] = useState(false);
@@ -100,6 +100,8 @@ export default function CheckinPage({ params }) {
       ]);
 
       const formData = new FormData();
+      formData.append("firstName", form.firstName);
+      formData.append("lastName", form.lastName);
       formData.append("phone", form.phone);
       formData.append("email", form.email);
       formData.append("documentNumber", form.documentNumber);
@@ -196,6 +198,27 @@ export default function CheckinPage({ params }) {
       />
       <section className="mx-auto max-w-2xl px-6 py-10">
         <form onSubmit={handleSubmit} className="grid gap-4">
+          <div className="grid grid-cols-2 gap-4">
+            <label className="grid gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Prénom</span>
+              <input
+                required
+                value={form.firstName}
+                onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
+                className="input"
+              />
+            </label>
+            <label className="grid gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Nom</span>
+              <input
+                required
+                value={form.lastName}
+                onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
+                className="input"
+              />
+            </label>
+          </div>
+          <span className="-mt-2 text-xs text-ink/60">Exactement comme sur ta pièce d&apos;identité.</span>
           <label className="grid gap-1.5">
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Téléphone</span>
             <input

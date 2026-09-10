@@ -630,6 +630,7 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
                       propertyName={property.name}
                       propertyAddress={fullAddress(property)}
                       locale={locale}
+                      rates={property.transfer_rates}
                     />
                   )}
                   {displayedItem.key === "tours" && (
