@@ -20,13 +20,24 @@ export async function POST(request) {
 
   const { data: account } = await admin
     .from("guest_accounts")
-    .select("password_hash, reservation_id, reservations!inner(property_id)")
+    .select("password_hash, reservation_id, reservations!inner(property_id, departure_date)")
     .eq("username", username)
     .eq("reservations.property_id", property.id)
     .single();
 
   if (!account || !verifyPassword(password, account.password_hash)) {
     return NextResponse.json({ error: "Identifiant ou mot de passe incorrect." }, { status: 401 });
+  }
+
+  // L'accès du huésped (plan Premium, check-in fait) expire le lendemain du
+  // départ — au-delà, ses identifiants ne doivent plus donner accès au livret.
+  const departureDate = account.reservations?.departure_date;
+  if (departureDate) {
+    const cutoff = new Date(departureDate);
+    cutoff.setDate(cutoff.getDate() + 2); // départ + 1 jour plein, avant minuit du surlendemain
+    if (new Date() >= cutoff) {
+      return NextResponse.json({ error: "Cet accès a expiré." }, { status: 410 });
+    }
   }
 
   const response = NextResponse.json({ ok: true });

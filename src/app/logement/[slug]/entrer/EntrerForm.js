@@ -21,6 +21,7 @@ const content = {
     errorUnavailable: "Ce livret n'est pas encore disponible — contacte ton hôte.",
     errorCode: "Code incorrect, réessaie.",
     errorLogin: "Identifiant ou mot de passe incorrect.",
+    errorExpired: "Cet accès a expiré. Contacte ton hôte si tu as besoin d'y accéder à nouveau.",
   },
   en: {
     eyebrow: "Welcome book",
@@ -39,6 +40,7 @@ const content = {
     errorUnavailable: "This welcome book isn't available yet — contact your host.",
     errorCode: "Incorrect code, try again.",
     errorLogin: "Incorrect username or password.",
+    errorExpired: "This access has expired. Contact your host if you need access again.",
   },
   es: {
     eyebrow: "Livret de bienvenida",
@@ -57,6 +59,7 @@ const content = {
     errorUnavailable: "Este livret todavía no está disponible — contacta a tu anfitrión.",
     errorCode: "Código incorrecto, intenta de nuevo.",
     errorLogin: "Usuario o contraseña incorrectos.",
+    errorExpired: "Este acceso caducó. Contacta a tu anfitrión si necesitas volver a entrar.",
   },
 };
 
@@ -129,7 +132,9 @@ export default function EntrerForm({ params, locale = "fr" }) {
       window.location.href = next;
     } else {
       setLoading(false);
-      setError(res.status === 403 ? t.errorUnavailable : t.errorLogin);
+      if (res.status === 403) setError(t.errorUnavailable);
+      else if (res.status === 410) setError(t.errorExpired);
+      else setError(t.errorLogin);
     }
   }
 
