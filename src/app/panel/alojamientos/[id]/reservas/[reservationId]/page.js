@@ -22,6 +22,9 @@ const content = {
     idDocument: "Pièce d'identité",
     selfie: "Selfie",
     signature: "Signature",
+    houseRules: "Règlement intérieur :",
+    houseRulesAccepted: "Accepté",
+    houseRulesRejected: "Refusé",
     compareHint: "Comparez le document et le selfie : est-ce la même personne ? Approuvez ou refusez selon votre jugement.",
     approve: "Approuver",
     reject: "Refuser",
@@ -42,6 +45,9 @@ const content = {
     idDocument: "ID document",
     selfie: "Selfie",
     signature: "Signature",
+    houseRules: "House rules:",
+    houseRulesAccepted: "Accepted",
+    houseRulesRejected: "Rejected",
     compareHint: "Compare the document and the selfie: is it the same person? Approve or reject based on your judgment.",
     approve: "Approve",
     reject: "Reject",
@@ -62,6 +68,9 @@ const content = {
     idDocument: "Documento de identidad",
     selfie: "Selfie",
     signature: "Firma",
+    houseRules: "Normas de la casa:",
+    houseRulesAccepted: "Aceptadas",
+    houseRulesRejected: "Rechazadas",
     compareHint: "Compara el documento y el selfie: ¿es la misma persona? Aprueba o rechaza según tu criterio.",
     approve: "Aprobar",
     reject: "Rechazar",
@@ -153,6 +162,14 @@ export default function ReservaDetallePage({ params }) {
                   {t.statusLabel[ga.verificationStatus] ?? ga.verificationStatus}
                 </span>
               </p>
+              {ga.houseRulesAccepted !== null && (
+                <p className="mt-1 text-ink">
+                  {t.houseRules}{" "}
+                  <span className={`font-bold ${ga.houseRulesAccepted ? "text-sage" : "text-terracotta-deep"}`}>
+                    {ga.houseRulesAccepted ? t.houseRulesAccepted : t.houseRulesRejected}
+                  </span>
+                </p>
+              )}
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">

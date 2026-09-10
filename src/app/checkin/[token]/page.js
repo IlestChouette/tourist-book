@@ -19,6 +19,7 @@ export default function CheckinPage({ params }) {
   const [idDocument, setIdDocument] = useState(null);
   const [selfie, setSelfie] = useState(null);
   const [consent, setConsent] = useState(false);
+  const [houseRulesAccepted, setHouseRulesAccepted] = useState(null);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -79,6 +80,10 @@ export default function CheckinPage({ params }) {
       setError("Signe dans le cadre prévu pour continuer.");
       return;
     }
+    if (reservation.houseRules && houseRulesAccepted === null) {
+      setError("Indique si tu acceptes le règlement intérieur pour continuer.");
+      return;
+    }
     if (!consent) {
       setError("Tu dois autoriser l'envoi de tes documents pour continuer.");
       return;
@@ -102,6 +107,9 @@ export default function CheckinPage({ params }) {
       formData.append("idDocument", resizedDocument);
       formData.append("selfie", resizedSelfie);
       formData.append("signature", signatureBlob, "signature.png");
+      if (reservation.houseRules) {
+        formData.append("houseRulesAccepted", houseRulesAccepted ? "true" : "false");
+      }
 
       const res = await fetch(`/api/checkin/${token}`, { method: "POST", body: formData });
 
@@ -280,6 +288,33 @@ export default function CheckinPage({ params }) {
               </button>
             </div>
           </div>
+
+          {reservation.houseRules && (
+            <div className="grid gap-3 rounded border border-sand-dim bg-sand-card p-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Règlement intérieur</span>
+              <p className="whitespace-pre-line text-sm text-ink/80">{reservation.houseRules}</p>
+              <div className="grid gap-2">
+                <label className="flex items-center gap-2 text-sm text-ink">
+                  <input
+                    type="radio"
+                    name="houseRulesAccepted"
+                    checked={houseRulesAccepted === true}
+                    onChange={() => setHouseRulesAccepted(true)}
+                  />
+                  J&apos;accepte ce règlement intérieur
+                </label>
+                <label className="flex items-center gap-2 text-sm text-ink">
+                  <input
+                    type="radio"
+                    name="houseRulesAccepted"
+                    checked={houseRulesAccepted === false}
+                    onChange={() => setHouseRulesAccepted(false)}
+                  />
+                  Je n&apos;accepte pas ce règlement intérieur
+                </label>
+              </div>
+            </div>
+          )}
 
           <label className="flex items-start gap-2 text-sm text-ink/80">
             <input

@@ -9,7 +9,7 @@ export async function GET(request, { params }) {
   const { data: reservation } = await admin
     .from("reservations")
     .select(
-      "id, guest_name, arrival_date, departure_date, status, property_id, properties(name, slug, host_id, hosts(logo_url))"
+      "id, guest_name, arrival_date, departure_date, status, property_id, properties(name, slug, host_id, house_rules, hosts(logo_url))"
     )
     .eq("token", token)
     .single();
@@ -26,6 +26,7 @@ export async function GET(request, { params }) {
     status: reservation.status,
     propertyName: reservation.properties?.name,
     propertySlug: reservation.properties?.slug,
+    houseRules: reservation.properties?.house_rules || null,
   });
 }
 
@@ -35,7 +36,7 @@ export async function POST(request, { params }) {
 
   const { data: reservation } = await admin
     .from("reservations")
-    .select("id, property_id, guest_name, properties(slug)")
+    .select("id, property_id, guest_name, properties(slug, house_rules)")
     .eq("token", token)
     .single();
 
@@ -51,10 +52,19 @@ export async function POST(request, { params }) {
   const idDocument = formData.get("idDocument");
   const selfie = formData.get("selfie");
   const signature = formData.get("signature");
+  const houseRulesAcceptedRaw = formData.get("houseRulesAccepted");
 
   if (!phone || !email || !documentNumber || !nationality || !idDocument || !selfie || !signature) {
     return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
   }
+
+  // Si le logement a des règles, le voyageur doit avoir choisi accepter/refuser
+  // explicitement — sinon (pas de règles définies) rien à accepter.
+  const hasHouseRules = Boolean(reservation.properties?.house_rules?.trim());
+  if (hasHouseRules && houseRulesAcceptedRaw !== "true" && houseRulesAcceptedRaw !== "false") {
+    return NextResponse.json({ error: "Merci d'indiquer si vous acceptez le règlement intérieur." }, { status: 400 });
+  }
+  const houseRulesAccepted = hasHouseRules ? houseRulesAcceptedRaw === "true" : null;
 
   const idExt = idDocument.name.split(".").pop();
   const selfieExt = selfie.name.split(".").pop();
@@ -103,6 +113,7 @@ export async function POST(request, { params }) {
       id_document_url: idPath,
       selfie_url: selfiePath,
       signature_url: signaturePath,
+      house_rules_accepted: houseRulesAccepted,
       verification_status: "pendiente",
     },
     { onConflict: "reservation_id" }

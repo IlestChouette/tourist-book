@@ -64,6 +64,7 @@ export async function GET(request, { params }) {
           idDocumentUrl,
           selfieUrl,
           signatureUrl,
+          houseRulesAccepted: guestAccount.house_rules_accepted,
         }
       : null,
   });
