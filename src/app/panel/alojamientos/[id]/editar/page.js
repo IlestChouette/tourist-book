@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { uploadMedia } from "@/lib/uploadMedia";
 import Hero from "@/components/Hero";
 import AccentColorButton from "@/components/AccentColorButton";
+import FormattableTextarea from "@/components/FormattableTextarea";
 import { getClientLocale } from "@/lib/i18n/clientLocale";
 import fieldsDict from "@/lib/i18n/dictionaries/propertyForm";
 
@@ -267,12 +268,12 @@ export default function EditarAlojamientoPage({ params }) {
               <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
             </summary>
             <div className="p-4">
-              <textarea
+              <FormattableTextarea
                 rows={3}
                 placeholder={t.directionsPlaceholder}
                 value={form.directions}
                 onChange={update("directions")}
-                className="input"
+                locale={locale}
               />
             </div>
           </details>
@@ -384,12 +385,12 @@ export default function EditarAlojamientoPage({ params }) {
               <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
             </summary>
             <div className="grid gap-1.5 p-4">
-              <textarea
+              <FormattableTextarea
                 rows={5}
                 placeholder={t.welcomeMessagePlaceholder}
                 value={form.description}
                 onChange={update("description")}
-                className="input"
+                locale={locale}
               />
               <span className="text-xs text-ink/50">{t.welcomeMessageHint}</span>
             </div>
@@ -401,12 +402,12 @@ export default function EditarAlojamientoPage({ params }) {
               <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
             </summary>
             <div className="p-4">
-              <textarea
+              <FormattableTextarea
                 rows={3}
                 placeholder={t.houseRulesPlaceholder}
                 value={form.house_rules}
                 onChange={update("house_rules")}
-                className="input"
+                locale={locale}
               />
             </div>
           </details>
@@ -419,12 +420,12 @@ export default function EditarAlojamientoPage({ params }) {
             <div className="grid gap-4 p-4">
               <label className="grid gap-1.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wasteInstructions}</span>
-                <textarea
+                <FormattableTextarea
                   rows={3}
                   placeholder={t.wasteInstructionsPlaceholder}
                   value={form.waste_instructions}
                   onChange={update("waste_instructions")}
-                  className="input"
+                  locale={locale}
                 />
               </label>
               <div>
@@ -489,12 +490,12 @@ export default function EditarAlojamientoPage({ params }) {
               <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
             </summary>
             <div className="p-4">
-              <textarea
+              <FormattableTextarea
                 rows={3}
                 placeholder={t.generalInfoPlaceholder}
                 value={form.general_info}
                 onChange={update("general_info")}
-                className="input"
+                locale={locale}
               />
             </div>
           </details>
@@ -505,12 +506,12 @@ export default function EditarAlojamientoPage({ params }) {
               <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
             </summary>
             <div className="p-4">
-              <textarea
+              <FormattableTextarea
                 rows={4}
                 placeholder={t.localRecommendationsPlaceholder}
                 value={form.local_recommendations}
                 onChange={update("local_recommendations")}
-                className="input"
+                locale={locale}
               />
             </div>
           </details>
@@ -523,12 +524,12 @@ export default function EditarAlojamientoPage({ params }) {
             <div className="grid gap-4 p-4">
               <label className="grid gap-1.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.keyInstructions}</span>
-                <textarea
+                <FormattableTextarea
                   rows={3}
                   placeholder={t.keyInstructionsPlaceholder}
                   value={form.key_instructions}
                   onChange={update("key_instructions")}
-                  className="input"
+                  locale={locale}
                 />
               </label>
               <label className="grid gap-1.5">

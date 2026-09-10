@@ -39,7 +39,7 @@ async function claudeTranslateBatch(fields, locale) {
     const message = await anthropic.messages.create({
       model: MODEL,
       max_tokens: 2048,
-      system: `You translate short pieces of text written by a short-term rental host for their guests, from French to ${targetLanguage}. Keep the warm, direct tone — don't make it more formal than the original. Reply with ONLY a JSON object using the exact same keys as the input, each value replaced by its translation. No explanation, no markdown code fences.`,
+      system: `You translate short pieces of text written by a short-term rental host for their guests, from French to ${targetLanguage}. Keep the warm, direct tone — don't make it more formal than the original. Some texts use lightweight formatting markers: **bold**, *italic*, and lines starting with "## " for a heading. Preserve these markers exactly (same "**", "*" and "## " characters) around the translated words — translate the text inside them, never the markers themselves, and never add markers that weren't in the original. Reply with ONLY a JSON object using the exact same keys as the input, each value replaced by its translation. No explanation, no markdown code fences.`,
       messages: [{ role: "user", content: JSON.stringify(fields) }],
     });
     // Claude respecte rarement à 100% la consigne "pas de markdown" — on

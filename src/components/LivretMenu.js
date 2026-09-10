@@ -5,6 +5,7 @@ import { fullAddress } from "@/lib/address";
 import TransfertForm from "./TransfertForm";
 import CarnetPanel from "./CarnetPanel";
 import CarteInteractive from "./CarteInteractive";
+import FormattedText from "./FormattedText";
 
 const content = {
   fr: {
@@ -546,7 +547,7 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
             <div className="mt-4">
               {!isNav && (
                 <>
-                  {displayedItem.detail && <p className="text-ink">{displayedItem.detail}</p>}
+                  <FormattedText text={displayedItem.detail} />
 
                   {displayedItem.key === "wifi" && property.wifi_password && (
                     <button
@@ -594,9 +595,7 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
                         <span className="text-xs font-bold uppercase tracking-wider text-ink/60">
                           {t.keyPickup}
                         </span>
-                        {property.key_instructions && (
-                          <p className="mt-2 text-ink">{property.key_instructions}</p>
-                        )}
+                        <FormattedText text={property.key_instructions} className="mt-2" />
                         {property.key_lockbox_code && (
                           <p className="mt-2 text-ink">
                             {t.accessCode}{" "}
