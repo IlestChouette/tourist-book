@@ -3,10 +3,19 @@
 import { useRef } from "react";
 
 const labels = {
-  fr: { bold: "Gras", italic: "Italique", heading: "Titre" },
-  en: { bold: "Bold", italic: "Italic", heading: "Title" },
-  es: { bold: "Negrilla", italic: "Cursiva", heading: "Título" },
+  fr: { bold: "Gras", italic: "Italique", heading: "Titre", words: (n) => `${n} mot${n > 1 ? "s" : ""}` },
+  en: { bold: "Bold", italic: "Italic", heading: "Title", words: (n) => `${n} word${n > 1 ? "s" : ""}` },
+  es: { bold: "Negrilla", italic: "Cursiva", heading: "Título", words: (n) => `${n} palabra${n > 1 ? "s" : ""}` },
 };
+
+// Purement indicatif — passé ce seuil, le compteur change de couleur pour
+// suggérer de répartir le texte dans les champs dédiés plutôt que de tout
+// mettre ici, sans jamais bloquer la saisie.
+const LONG_TEXT_THRESHOLD = 120;
+
+function countWords(text) {
+  return text.trim() ? text.trim().split(/\s+/).length : 0;
+}
 
 // Barre de mise en forme minimale au-dessus d'un textarea — pas d'éditeur
 // riche ni de dépendance externe : les boutons entourent la sélection avec
@@ -54,7 +63,7 @@ export default function FormattableTextarea({ value, onChange, placeholder, rows
   }
 
   return (
-    <div>
+    <div className="w-full">
       <div className="mb-1 flex gap-1">
         <button
           type="button"
@@ -90,8 +99,17 @@ export default function FormattableTextarea({ value, onChange, placeholder, rows
         placeholder={placeholder}
         value={value}
         onChange={(e) => fireChange(e.target.value)}
-        className={className}
+        className={`w-full ${className}`}
       />
+      {value && (
+        <span
+          className={`mt-1 block text-right text-xs ${
+            countWords(value) > LONG_TEXT_THRESHOLD ? "text-terracotta-deep" : "text-ink/40"
+          }`}
+        >
+          {t.words(countWords(value))}
+        </span>
+      )}
     </div>
   );
 }
