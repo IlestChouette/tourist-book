@@ -224,7 +224,7 @@ export default function NuevoAlojamientoPage() {
           <label className="grid gap-1.5">
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.directions}</span>
             <FormattableTextarea
-              rows={3}
+              rows={4}
               placeholder={t.directionsPlaceholder}
               value={form.directions}
               onChange={update("directions")}
@@ -344,7 +344,7 @@ export default function NuevoAlojamientoPage() {
             </summary>
             <div className="p-4">
               <FormattableTextarea
-                rows={3}
+                rows={4}
                 placeholder={t.houseRulesPlaceholder}
                 value={form.house_rules}
                 onChange={update("house_rules")}
@@ -362,7 +362,7 @@ export default function NuevoAlojamientoPage() {
               <label className="grid gap-1.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.wasteInstructions}</span>
                 <FormattableTextarea
-                  rows={3}
+                  rows={4}
                   placeholder={t.wasteInstructionsPlaceholder}
                   value={form.waste_instructions}
                   onChange={update("waste_instructions")}
@@ -417,7 +417,7 @@ export default function NuevoAlojamientoPage() {
             </summary>
             <div className="p-4">
               <FormattableTextarea
-                rows={3}
+                rows={4}
                 placeholder={t.generalInfoPlaceholder}
                 value={form.general_info}
                 onChange={update("general_info")}
@@ -451,7 +451,7 @@ export default function NuevoAlojamientoPage() {
               <label className="grid gap-1.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.keyInstructions}</span>
                 <FormattableTextarea
-                  rows={3}
+                  rows={4}
                   placeholder={t.keyInstructionsPlaceholder}
                   value={form.key_instructions}
                   onChange={update("key_instructions")}
