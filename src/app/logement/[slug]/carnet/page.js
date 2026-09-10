@@ -15,6 +15,7 @@ export default async function CarnetPage({ params }) {
         backLabel={property.name}
         title="Carnet de visite"
         subtitle="Les messages laissés par les voyageurs précédents — et le tien, si tu veux."
+        logo={property.hosts?.logo_url}
       />
 
       <section className="mx-auto max-w-2xl px-6 py-10">

@@ -23,7 +23,7 @@ function truncate(text, max) {
 // carrousel plein écran et fixe (comme styQR) qui défile tout seul entre
 // les photos du logement — il reste visible derrière le titre ET la grille
 // de tuiles, pas seulement dans un bandeau du haut.
-export default function LivretHero({ title, subtitle, description, photos = [], locale = "fr" }) {
+export default function LivretHero({ title, subtitle, description, photos = [], locale = "fr", logo = null }) {
   const t = content[locale];
   const [index, setIndex] = useState(0);
   const shortDescription = truncate(description, MAX_DESCRIPTION_LENGTH);
@@ -73,9 +73,22 @@ export default function LivretHero({ title, subtitle, description, photos = [], 
           className="fixed right-5 top-6 z-10 rounded-full bg-black/35 px-3 py-2 text-[#f7f1e4] backdrop-blur-sm [&_button]:text-[#f7f1e4]/60 [&_button:disabled]:text-[#f7f1e4] [&_button:hover]:text-[#f7f1e4] [&_span]:text-[#f7f1e4]/40 md:right-8 md:top-8"
         />
 
-        {mainPhoto && (
-          <div className="mb-5 h-28 w-28 shrink-0 overflow-hidden rounded-full border-4 border-[#f7f1e4] shadow-lg md:h-32 md:w-32">
-            <Image src={mainPhoto} alt="" width={128} height={128} className="h-full w-full object-cover" />
+        {(mainPhoto || logo) && (
+          <div className="relative mb-5 h-28 w-28 shrink-0 md:h-32 md:w-32">
+            {mainPhoto && (
+              <div className="h-full w-full overflow-hidden rounded-full border-4 border-[#f7f1e4] shadow-lg">
+                <Image src={mainPhoto} alt="" width={128} height={128} className="h-full w-full object-cover" />
+              </div>
+            )}
+            {logo && (
+              <div
+                className={`overflow-hidden rounded-full border-2 border-[#f7f1e4] bg-[#f7f1e4] shadow-md ${
+                  mainPhoto ? "absolute -bottom-1 -right-1 h-10 w-10 p-1 md:h-12 md:w-12" : "h-full w-full p-2"
+                }`}
+              >
+                <Image src={logo} alt="" width={64} height={64} className="h-full w-full object-contain" />
+              </div>
+            )}
           </div>
         )}
         <h1 className="font-display italic text-4xl text-[#f7f1e4] [text-shadow:0_2px_12px_rgba(0,0,0,0.55)] md:text-5xl">

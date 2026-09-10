@@ -16,6 +16,7 @@ export default async function TransfertPage({ params }) {
         backLabel={property.name}
         title="Réserver un transfert"
         subtitle="Remplis le formulaire, l'hôte organise ton transfert avec le partenaire."
+        logo={property.hosts?.logo_url}
       />
 
       <section className="mx-auto max-w-2xl px-6 py-10">

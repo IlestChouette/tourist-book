@@ -107,6 +107,7 @@ export default async function LivretPage({ params }) {
         description={description}
         photos={photos}
         locale={locale}
+        logo={property.hosts?.logo_url}
       />
 
       <section id="menu" className="mx-auto max-w-2xl px-6 py-8 md:max-w-5xl md:py-10">

@@ -15,6 +15,7 @@ export default async function CartePage({ params }) {
         backLabel={property.name}
         title="Carte locale"
         subtitle={`Autour de ${property.name}.`}
+        logo={property.hosts?.logo_url}
       />
 
       <section className="mx-auto max-w-2xl px-6 py-10">

@@ -14,6 +14,7 @@ export default async function ToursPage({ params }) {
         backLabel={property.name}
         title="Tours & activités"
         subtitle="Bientôt disponible."
+        logo={property.hosts?.logo_url}
       />
 
       <section className="mx-auto max-w-2xl px-6 py-10">

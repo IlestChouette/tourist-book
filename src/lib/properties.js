@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // protégées par le code d'accès (proxy.js), pas besoin de session hôtelier.
 export async function getPropertyBySlug(slug) {
   const admin = createAdminClient();
-  const { data } = await admin.from("properties").select("*").eq("slug", slug).single();
+  const { data } = await admin.from("properties").select("*, hosts(logo_url)").eq("slug", slug).single();
   if (!data) return data;
 
   const { data: rates } = await admin

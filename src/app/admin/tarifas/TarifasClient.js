@@ -16,6 +16,9 @@ export default function TarifasClient({ properties }) {
   const [loading, setLoading] = useState(false);
   const [newRate, setNewRate] = useState({ pickup_location: "airport", passengers: "4", luggage: "4", price: "" });
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editRate, setEditRate] = useState(null);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
     if (!propertyId) return;
@@ -63,6 +66,38 @@ export default function TarifasClient({ properties }) {
     setRates((r) => r.filter((rate) => rate.id !== rateId));
   }
 
+  function startEdit(rate) {
+    setEditingId(rate.id);
+    setEditRate({
+      pickup_location: rate.pickup_location,
+      passengers: String(rate.passengers),
+      luggage: rate.luggage != null ? String(rate.luggage) : "",
+      price: String(rate.price),
+    });
+  }
+
+  async function saveEdit(rateId) {
+    setSavingEdit(true);
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("transfer_rates")
+      .update({
+        pickup_location: editRate.pickup_location,
+        passengers: Number(editRate.passengers),
+        luggage: editRate.luggage === "" ? null : Number(editRate.luggage),
+        price: Number(editRate.price),
+      })
+      .eq("id", rateId)
+      .select()
+      .single();
+    setSavingEdit(false);
+    if (!error) {
+      setRates((r) => r.map((rate) => (rate.id === rateId ? data : rate)));
+      setEditingId(null);
+      setEditRate(null);
+    }
+  }
+
   return (
     <main className="flex-1 bg-sand">
       <div className="mx-auto max-w-3xl px-6 py-10">
@@ -92,26 +127,94 @@ export default function TarifasClient({ properties }) {
           <>
             <div className="mt-4 grid gap-2">
               {rates.length === 0 && <p className="text-sm text-ink/60">Aucun tarif configuré pour ce logement.</p>}
-              {rates.map((rate) => (
-                <div
-                  key={rate.id}
-                  className="flex items-center justify-between gap-2 rounded border border-sand-dim bg-sand-card p-2.5 text-sm"
-                >
-                  <span className="text-ink">
-                    {PICKUP_OPTIONS.find((o) => o.key === rate.pickup_location)?.label ?? rate.pickup_location} ·
-                    jusqu&apos;à {rate.passengers} passager(s)
-                    {rate.luggage != null ? ` · jusqu'à ${rate.luggage} bagage(s)` : ""} ·{" "}
-                    <strong>{Number(rate.price).toFixed(2)} €</strong>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => deleteRate(rate.id)}
-                    className="shrink-0 text-xs font-bold uppercase tracking-wide text-terracotta-deep hover:underline"
+              {rates.map((rate) =>
+                editingId === rate.id ? (
+                  <div
+                    key={rate.id}
+                    className="grid gap-2 rounded border border-aqua-deep bg-sand-card p-2.5 text-sm sm:grid-cols-[2fr_1fr_1fr_1fr_auto_auto] sm:items-center"
                   >
-                    Supprimer
-                  </button>
-                </div>
-              ))}
+                    <select
+                      value={editRate.pickup_location}
+                      onChange={(e) => setEditRate((f) => ({ ...f, pickup_location: e.target.value }))}
+                      className="input"
+                    >
+                      {PICKUP_OPTIONS.map((o) => (
+                        <option key={o.key} value={o.key}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      min="1"
+                      value={editRate.passengers}
+                      onChange={(e) => setEditRate((f) => ({ ...f, passengers: e.target.value }))}
+                      className="input"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      value={editRate.luggage}
+                      onChange={(e) => setEditRate((f) => ({ ...f, luggage: e.target.value }))}
+                      className="input"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={editRate.price}
+                      onChange={(e) => setEditRate((f) => ({ ...f, price: e.target.value }))}
+                      className="input"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => saveEdit(rate.id)}
+                      disabled={savingEdit}
+                      className="rounded bg-aqua-deep px-3 py-2 text-xs font-bold text-sand-card transition-colors hover:bg-aqua-deep/90 disabled:opacity-60"
+                    >
+                      Enregistrer
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingId(null);
+                        setEditRate(null);
+                      }}
+                      className="text-xs font-bold uppercase tracking-wide text-ink/60 hover:underline"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    key={rate.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded border border-sand-dim bg-sand-card p-2.5 text-sm"
+                  >
+                    <span className="text-ink">
+                      {PICKUP_OPTIONS.find((o) => o.key === rate.pickup_location)?.label ?? rate.pickup_location} ·
+                      jusqu&apos;à {rate.passengers} passager(s)
+                      {rate.luggage != null ? ` · jusqu'à ${rate.luggage} bagage(s)` : ""} ·{" "}
+                      <strong>{Number(rate.price).toFixed(2)} €</strong>
+                    </span>
+                    <div className="flex shrink-0 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => startEdit(rate)}
+                        className="text-xs font-bold uppercase tracking-wide text-aqua-deep hover:underline"
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteRate(rate.id)}
+                        className="text-xs font-bold uppercase tracking-wide text-terracotta-deep hover:underline"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  </div>
+                )
+              )}
             </div>
 
             <form onSubmit={addRate} className="mt-4 grid gap-3 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:items-end">
