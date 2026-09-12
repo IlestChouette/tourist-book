@@ -152,7 +152,7 @@ export default function AlojamientosPage() {
               <Link
                 key={p.id}
                 href={`/panel/alojamientos/${p.id}`}
-                className="flex items-center gap-4 rounded border border-sand-dim bg-sand-card p-4 transition-colors hover:border-aqua-deep"
+                className="relative flex items-center gap-4 rounded border border-sand-dim bg-sand-card p-4 pb-10 transition-colors hover:border-aqua-deep"
               >
                 {p.photos?.[0] ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -164,20 +164,6 @@ export default function AlojamientosPage() {
                   <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{p.city}</span>
                   <p className="font-display italic text-xl text-ink">{p.name}</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleDuplicate}
-                  data-id={p.id}
-                  disabled={duplicatingId === p.id}
-                  title={duplicatingId === p.id ? t.duplicating : t.duplicate}
-                  aria-label={duplicatingId === p.id ? t.duplicating : t.duplicate}
-                  className="shrink-0 rounded-full border border-sand-dim p-2 text-ink/50 transition-colors hover:border-aqua-deep hover:text-aqua-deep disabled:opacity-50"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                    <rect x="9" y="9" width="12" height="12" rx="2" />
-                    <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
-                  </svg>
-                </button>
                 <span
                   className={`shrink-0 rounded px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${
                     active ? "bg-sage text-ink" : "bg-terracotta text-ink"
@@ -185,6 +171,15 @@ export default function AlojamientosPage() {
                 >
                   {active ? (t.plan[p.plan] ?? p.plan) : t.noSubscription}
                 </span>
+                <button
+                  type="button"
+                  onClick={handleDuplicate}
+                  data-id={p.id}
+                  disabled={duplicatingId === p.id}
+                  className="absolute bottom-2 right-2 rounded border border-sand-dim px-2.5 py-1.5 text-xs font-bold text-ink/60 transition-colors hover:border-aqua-deep hover:text-aqua-deep disabled:opacity-50"
+                >
+                  {duplicatingId === p.id ? t.duplicating : t.duplicate}
+                </button>
               </Link>
             );
           })}
