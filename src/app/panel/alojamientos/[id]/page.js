@@ -7,20 +7,6 @@ import Hero from "@/components/Hero";
 import QrCodeButton from "@/components/QrCodeButton";
 import { getClientLocale } from "@/lib/i18n/clientLocale";
 
-function slugify(text) {
-  return text
-    .toString()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function randomCode() {
-  return String(Math.floor(1000 + Math.random() * 9000));
-}
-
 const content = {
   fr: {
     eyebrow: "Panel hôtelier",
@@ -33,10 +19,6 @@ const content = {
     noSubscription: "sans abonnement",
     viewLivret: "Voir le livret →",
     edit: "Modifier →",
-    duplicate: "Dupliquer",
-    duplicating: "Duplication…",
-    duplicateCopySuffix: "(copie)",
-    duplicateFailed: (msg) => `Impossible de dupliquer : ${msg}`,
     activate: "Activer l'abonnement →",
     reservations: "Réservations et check-in →",
     transferts: "Demandes de transfert →",
@@ -58,10 +40,6 @@ const content = {
     noSubscription: "no subscription",
     viewLivret: "View livret →",
     edit: "Edit →",
-    duplicate: "Duplicate",
-    duplicating: "Duplicating…",
-    duplicateCopySuffix: "(copy)",
-    duplicateFailed: (msg) => `Could not duplicate: ${msg}`,
     activate: "Activate subscription →",
     reservations: "Bookings and check-in →",
     transferts: "Transfer requests →",
@@ -83,10 +61,6 @@ const content = {
     noSubscription: "sin suscripción",
     viewLivret: "Ver livret →",
     edit: "Editar →",
-    duplicate: "Duplicar",
-    duplicating: "Duplicando…",
-    duplicateCopySuffix: "(copia)",
-    duplicateFailed: (msg) => `No se pudo duplicar: ${msg}`,
     activate: "Activar suscripción →",
     reservations: "Reservas y check-in →",
     transferts: "Solicitudes de transfer →",
@@ -106,8 +80,6 @@ export default function AlojamientoDetallePage({ params }) {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
-  const [duplicating, setDuplicating] = useState(false);
-  const [duplicateError, setDuplicateError] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -145,44 +117,6 @@ export default function AlojamientoDetallePage({ params }) {
       return;
     }
     window.location.href = "/panel/alojamientos";
-  }
-
-  async function handleDuplicate() {
-    setDuplicating(true);
-    setDuplicateError("");
-
-    const supabase = createClient();
-    const newName = `${property.name} ${t.duplicateCopySuffix}`;
-    const slug = `${slugify(newName)}-${Math.random().toString(36).slice(2, 6)}`;
-
-    // On repart de toutes les infos du logement d'origine, sauf tout ce qui
-    // est propre à cette fiche précise : identifiant, slug, code d'accès,
-    // et l'abonnement (une copie n'a pas hérité du paiement de l'originale).
-    const {
-      id: _id,
-      created_at: _createdAt,
-      slug: _slug,
-      access_code: _accessCode,
-      plan: _plan,
-      subscription_status: _subscriptionStatus,
-      stripe_subscription_id: _stripeSubscriptionId,
-      trial_ends_at: _trialEndsAt,
-      billing_cycle: _billingCycle,
-      ...rest
-    } = property;
-
-    const { data: inserted, error } = await supabase
-      .from("properties")
-      .insert({ ...rest, name: newName, slug, access_code: randomCode() })
-      .select("id")
-      .single();
-
-    if (error) {
-      setDuplicating(false);
-      setDuplicateError(t.duplicateFailed(error.message));
-      return;
-    }
-    window.location.href = `/panel/alojamientos/${inserted.id}/editar`;
   }
 
   if (loading) {
@@ -259,14 +193,6 @@ export default function AlojamientoDetallePage({ params }) {
           >
             {t.edit}
           </Link>
-          <button
-            type="button"
-            onClick={handleDuplicate}
-            disabled={duplicating}
-            className="inline-block rounded border border-aqua-deep px-5 py-3 font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card disabled:opacity-60"
-          >
-            {duplicating ? t.duplicating : t.duplicate}
-          </button>
           {!active && (
             <Link
               href={`/panel/alojamientos/${id}/suscribirse`}
@@ -308,7 +234,6 @@ export default function AlojamientoDetallePage({ params }) {
             {deleting ? t.deleting : t.delete}
           </button>
         </div>
-        {duplicateError && <p className="mt-3 text-sm text-terracotta-deep">{duplicateError}</p>}
       </section>
     </main>
   );
