@@ -166,6 +166,13 @@ export default function NuevoAlojamientoPage() {
         .single();
 
       if (insertError) throw insertError;
+
+      fetch("/api/property-created-notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hostEmail: user.email, propertyName: form.name, city: form.city }),
+      }).catch(() => {});
+
       window.location.href = `/panel/alojamientos/${inserted.id}/suscribirse`;
       return;
     } catch (err) {
@@ -423,6 +430,7 @@ export default function NuevoAlojamientoPage() {
                 onChange={update("general_info")}
                 locale={locale}
               />
+              <span className="mt-1.5 block text-xs text-ink/50">{t.generalInfoHint}</span>
             </div>
           </details>
 

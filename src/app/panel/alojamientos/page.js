@@ -125,6 +125,16 @@ export default function AlojamientosPage() {
       setDuplicateError(t.duplicateFailed(error.message));
       return;
     }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    fetch("/api/property-created-notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hostEmail: user?.email, propertyName: newName, city: property.city }),
+    }).catch(() => {});
+
     window.location.href = `/panel/alojamientos/${inserted.id}/editar`;
   }
 

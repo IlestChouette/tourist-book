@@ -139,6 +139,105 @@ export async function sendHostSignupNotification({ name, email, phone }) {
   return { sent: true };
 }
 
+// Notifie Fernando dès qu'un hôtelier crée un logement, pour savoir qui
+// avance dans le parcours sans devoir aller vérifier la page admin.
+export async function sendPropertyCreatedNotification({ hostName, hostEmail, propertyName, city }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const resend = new Resend(apiKey);
+
+  const lines = [
+    "Nouveau logement créé sur tourist-book.com",
+    "",
+    `Logement : ${propertyName}${city ? ` (${city})` : ""}`,
+    `Hôtelier : ${hostName || "-"} — ${hostEmail || "-"}`,
+  ];
+
+  const subject = `Nouveau logement — ${propertyName}`;
+  const { error: sendError } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text: lines.join("\n"),
+  });
+
+  if (sendError) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "property_created_notification", status: "failed", error: sendError.message });
+    throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
+  }
+
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "property_created_notification", status: "sent" });
+  return { sent: true };
+}
+
+// Notifie Fernando dès qu'un hôtelier termine un checkout Stripe (essai
+// gratuit ou paiement immédiat selon le cycle) pour un logement.
+export async function sendSubscriptionStartedNotification({ hostEmail, propertyName, plan, cycle, trialing }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const resend = new Resend(apiKey);
+
+  const lines = [
+    "Nouvel abonnement démarré sur tourist-book.com",
+    "",
+    `Logement : ${propertyName}`,
+    `Hôtelier : ${hostEmail || "-"}`,
+    `Offre : ${plan || "-"} · ${cycle || "-"}`,
+    trialing ? "Statut : essai gratuit en cours (pas encore facturé)" : "Statut : paiement immédiat",
+  ];
+
+  const subject = `Nouvel abonnement — ${propertyName}`;
+  const { error: sendError } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text: lines.join("\n"),
+  });
+
+  if (sendError) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "subscription_started_notification", status: "failed", error: sendError.message });
+    throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
+  }
+
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "subscription_started_notification", status: "sent" });
+  return { sent: true };
+}
+
+// Notifie Fernando quand l'essai gratuit d'un logement se termine et que
+// l'abonnement passe réellement en facturation active (premier vrai revenu).
+export async function sendSubscriptionActivatedNotification({ hostEmail, propertyName, plan, cycle }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const resend = new Resend(apiKey);
+
+  const lines = [
+    "Fin d'essai — abonnement maintenant actif et facturé",
+    "",
+    `Logement : ${propertyName}`,
+    `Hôtelier : ${hostEmail || "-"}`,
+    `Offre : ${plan || "-"} · ${cycle || "-"}`,
+  ];
+
+  const subject = `Abonnement actif — ${propertyName}`;
+  const { error: sendError } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text: lines.join("\n"),
+  });
+
+  if (sendError) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "subscription_activated_notification", status: "failed", error: sendError.message });
+    throw new Error(`Resend API error: ${sendError.name} — ${sendError.message}`);
+  }
+
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "subscription_activated_notification", status: "sent" });
+  return { sent: true };
+}
+
 // Relance automatique (une seule fois, cf. hosts.no_property_reminder_sent_at)
 // envoyée aux hôteliers inscrits depuis plus de 48h qui n'ont encore créé
 // aucun logement — pour qu'ils voient à quoi ressemble le livret avant

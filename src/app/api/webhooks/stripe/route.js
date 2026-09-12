@@ -1,5 +1,6 @@
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendSubscriptionStartedNotification, sendSubscriptionActivatedNotification } from "@/lib/email";
 
 // Depuis la version d'API Stripe utilisée ici, "current_period_end" n'est
 // plus sur l'abonnement lui-même mais sur chacune de ses lignes (items).
@@ -45,6 +46,23 @@ export async function POST(request) {
             current_period_end: periodEndOf(subscription),
           })
           .eq("id", propertyId);
+
+        try {
+          const { data: property } = await admin
+            .from("properties")
+            .select("name, hosts(email)")
+            .eq("id", propertyId)
+            .single();
+          await sendSubscriptionStartedNotification({
+            hostEmail: property?.hosts?.email,
+            propertyName: property?.name,
+            plan,
+            cycle,
+            trialing: subscription.status === "trialing",
+          });
+        } catch (err) {
+          console.error("sendSubscriptionStartedNotification failed:", err);
+        }
       }
       break;
     }
@@ -64,6 +82,28 @@ export async function POST(request) {
             current_period_end: periodEndOf(subscription),
           })
           .eq("id", propertyId);
+
+        // "L'essai se termine et devient un vrai abonnement facturé" ne
+        // concerne que la transition trialing -> active, pas les autres mises
+        // à jour (changement de carte, etc.) qui déclenchent aussi cet event.
+        const wasTrialing = event.data.previous_attributes?.status === "trialing";
+        if (wasTrialing && subscription.status === "active") {
+          try {
+            const { data: property } = await admin
+              .from("properties")
+              .select("name, plan, billing_cycle, hosts(email)")
+              .eq("id", propertyId)
+              .single();
+            await sendSubscriptionActivatedNotification({
+              hostEmail: property?.hosts?.email,
+              propertyName: property?.name,
+              plan: property?.plan,
+              cycle: property?.billing_cycle,
+            });
+          } catch (err) {
+            console.error("sendSubscriptionActivatedNotification failed:", err);
+          }
+        }
       }
       break;
     }
