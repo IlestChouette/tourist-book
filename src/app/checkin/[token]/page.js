@@ -2,10 +2,15 @@
 
 import { use, useEffect, useRef, useState } from "react";
 import Hero from "@/components/Hero";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 import FormattedText from "@/components/FormattedText";
 import { resizeImage } from "@/lib/uploadMedia";
 import { getClientLocale } from "@/lib/i18n/clientLocale";
+
+const LANGS = [
+  { code: "fr", label: "FR" },
+  { code: "en", label: "EN" },
+  { code: "es", label: "ES" },
+];
 
 // Récupère la signature dessinée sur le canvas sous forme de Blob PNG, ou
 // null si rien n'a été dessiné — évite d'envoyer un canvas vide comme signature.
@@ -148,8 +153,24 @@ const content = {
 
 export default function CheckinPage({ params }) {
   const { token } = use(params);
-  const [locale] = useState(getClientLocale);
+  const [locale, setLocale] = useState(getClientLocale);
   const t = content[locale];
+
+  // Change la langue tout de suite (état local, pas d'aller-retour serveur)
+  // plutôt que de passer par le cookie + Server Action utilisés ailleurs sur
+  // le site : cette page est entièrement cliente, donc rien ne la ferait se
+  // re-rendre avec la nouvelle langue avant un rechargement complet.
+  function chooseLocale(e) {
+    const code = e.currentTarget.dataset.locale;
+    if (code === locale) return;
+    try {
+      document.cookie = `locale=${code}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+    } catch {
+      // Cookies indisponibles (navigation privée stricte) : le changement reste
+      // effectif pour cette page, juste pas mémorisé pour la prochaine visite.
+    }
+    setLocale(code);
+  }
   const [reservation, setReservation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ firstName: "", lastName: "", phone: "", email: "", documentNumber: "", nationality: "" });
@@ -316,8 +337,21 @@ export default function CheckinPage({ params }) {
 
   return (
     <main className="flex-1">
-      <div className="fixed right-5 top-6 z-10 rounded-full bg-black/35 px-3 py-2 backdrop-blur-sm [&_button]:text-[#f7f1e4]/60 [&_button:disabled]:text-[#f7f1e4] [&_button:hover]:text-[#f7f1e4] [&_span]:text-[#f7f1e4]/40 md:right-8 md:top-8">
-        <LanguageSwitcher locale={locale} />
+      <div className="fixed right-5 top-6 z-10 flex items-center gap-1 rounded-full bg-black/35 px-3 py-2 text-xs font-bold uppercase tracking-widest backdrop-blur-sm md:right-8 md:top-8">
+        {LANGS.map((lang, i) => (
+          <div key={lang.code} className="flex items-center gap-1">
+            {i > 0 && <span className="text-[#f7f1e4]/40">·</span>}
+            <button
+              type="button"
+              onClick={chooseLocale}
+              data-locale={lang.code}
+              disabled={locale === lang.code}
+              className={locale === lang.code ? "text-[#f7f1e4]" : "text-[#f7f1e4]/60 hover:text-[#f7f1e4]"}
+            >
+              {lang.label}
+            </button>
+          </div>
+        ))}
       </div>
       <Hero
         eyebrow={reservation.propertyName}
