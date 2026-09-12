@@ -1,6 +1,13 @@
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+// Depuis la version d'API Stripe utilisée ici, "current_period_end" n'est
+// plus sur l'abonnement lui-même mais sur chacune de ses lignes (items).
+function periodEndOf(subscription) {
+  const end = subscription.items?.data?.[0]?.current_period_end;
+  return end ? new Date(end * 1000).toISOString() : null;
+}
+
 export async function POST(request) {
   const body = await request.text();
   const signature = request.headers.get("stripe-signature");
@@ -35,6 +42,7 @@ export async function POST(request) {
             trial_ends_at: subscription.trial_end
               ? new Date(subscription.trial_end * 1000).toISOString()
               : null,
+            current_period_end: periodEndOf(subscription),
           })
           .eq("id", propertyId);
       }
@@ -53,6 +61,7 @@ export async function POST(request) {
             trial_ends_at: subscription.trial_end
               ? new Date(subscription.trial_end * 1000).toISOString()
               : null,
+            current_period_end: periodEndOf(subscription),
           })
           .eq("id", propertyId);
       }

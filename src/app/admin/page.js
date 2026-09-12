@@ -158,6 +158,7 @@ const content = {
     noSubscription: "sans abonnement",
     viewLivret: "Livret",
     trialUntil: (date) => `En essai jusqu'au ${date}`,
+    renewsOn: (date) => `Renouvellement le ${date}`,
     name: "Nom",
     email: "Email",
     phone: "Téléphone",
@@ -203,6 +204,7 @@ const content = {
     noSubscription: "no subscription",
     viewLivret: "Livret",
     trialUntil: (date) => `Trialing until ${date}`,
+    renewsOn: (date) => `Renews on ${date}`,
     name: "Name",
     email: "Email",
     phone: "Phone",
@@ -248,6 +250,7 @@ const content = {
     noSubscription: "sin suscripción",
     viewLivret: "Livret",
     trialUntil: (date) => `En prueba hasta el ${date}`,
+    renewsOn: (date) => `Renovación el ${date}`,
     name: "Nombre",
     email: "Email",
     phone: "Teléfono",
@@ -301,7 +304,7 @@ export default async function AdminPage() {
     admin
       .from("properties")
       .select(
-        "id, name, city, slug, host_id, plan, billing_cycle, subscription_status, stripe_subscription_id, trial_ends_at, created_at, hosts(name, email, is_admin)"
+        "id, name, city, slug, host_id, plan, billing_cycle, subscription_status, stripe_subscription_id, trial_ends_at, current_period_end, created_at, hosts(name, email, is_admin)"
       )
       .order("created_at", { ascending: false }),
     admin
@@ -516,7 +519,9 @@ export default async function AdminPage() {
                   <td className="px-4 py-2 whitespace-nowrap text-ink/70">
                     {p.subscription_status === "trialing" && p.trial_ends_at
                       ? t.trialUntil(new Date(p.trial_ends_at).toLocaleDateString(dateLocale[locale]))
-                      : statusLabel[p.subscription_status] ?? p.subscription_status ?? t.noSubscription}
+                      : p.subscription_status === "active" && p.current_period_end
+                        ? t.renewsOn(new Date(p.current_period_end).toLocaleDateString(dateLocale[locale]))
+                        : statusLabel[p.subscription_status] ?? p.subscription_status ?? t.noSubscription}
                   </td>
                   <td className="px-4 py-2 whitespace-nowrap text-ink/70">
                     {new Date(p.created_at).toLocaleString(dateLocale[locale])}
