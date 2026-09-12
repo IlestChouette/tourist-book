@@ -156,7 +156,8 @@ const content = {
     status: "Statut",
     created: "Créé le",
     noSubscription: "sans abonnement",
-    viewLivret: "Voir le livret →",
+    viewLivret: "Livret",
+    trialUntil: (date) => `En essai jusqu'au ${date}`,
     name: "Nom",
     email: "Email",
     phone: "Téléphone",
@@ -200,7 +201,8 @@ const content = {
     status: "Status",
     created: "Created",
     noSubscription: "no subscription",
-    viewLivret: "View livret →",
+    viewLivret: "Livret",
+    trialUntil: (date) => `Trialing until ${date}`,
     name: "Name",
     email: "Email",
     phone: "Phone",
@@ -244,7 +246,8 @@ const content = {
     status: "Estado",
     created: "Creado el",
     noSubscription: "sin suscripción",
-    viewLivret: "Ver el livret →",
+    viewLivret: "Livret",
+    trialUntil: (date) => `En prueba hasta el ${date}`,
     name: "Nombre",
     email: "Email",
     phone: "Teléfono",
@@ -298,7 +301,7 @@ export default async function AdminPage() {
     admin
       .from("properties")
       .select(
-        "id, name, city, slug, host_id, plan, billing_cycle, subscription_status, stripe_subscription_id, created_at, hosts(name, email, is_admin)"
+        "id, name, city, slug, host_id, plan, billing_cycle, subscription_status, stripe_subscription_id, trial_ends_at, created_at, hosts(name, email, is_admin)"
       )
       .order("created_at", { ascending: false }),
     admin
@@ -510,7 +513,11 @@ export default async function AdminPage() {
                   <td className="px-4 py-2 text-ink/70">{p.hosts?.name} · {p.hosts?.email}</td>
                   <td className="px-4 py-2 text-ink/70">{p.plan ?? "—"}</td>
                   <td className="px-4 py-2 text-ink/70">{p.billing_cycle ?? "—"}</td>
-                  <td className="px-4 py-2 text-ink/70">{statusLabel[p.subscription_status] ?? p.subscription_status ?? t.noSubscription}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-ink/70">
+                    {p.subscription_status === "trialing" && p.trial_ends_at
+                      ? t.trialUntil(new Date(p.trial_ends_at).toLocaleDateString(dateLocale[locale]))
+                      : statusLabel[p.subscription_status] ?? p.subscription_status ?? t.noSubscription}
+                  </td>
                   <td className="px-4 py-2 whitespace-nowrap text-ink/70">
                     {new Date(p.created_at).toLocaleString(dateLocale[locale])}
                   </td>
@@ -519,7 +526,7 @@ export default async function AdminPage() {
                       href={`/logement/${p.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold text-aqua-deep hover:underline"
+                      className="inline-block whitespace-nowrap rounded border border-aqua-deep px-3 py-1 text-xs font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
                     >
                       {t.viewLivret}
                     </a>
