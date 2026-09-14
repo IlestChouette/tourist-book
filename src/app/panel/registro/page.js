@@ -143,7 +143,9 @@ export default function RegistroPage() {
       return;
     }
 
-    fetch("/api/host-signup-notify", {
+    // Attend la requête avant de naviguer : sans ça, window.location.href
+    // interrompt le fetch en plein envoi et la notification ne part jamais.
+    await fetch("/api/host-signup-notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: form.nombre, email: form.email, phone: form.phone }),

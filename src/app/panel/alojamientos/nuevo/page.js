@@ -167,7 +167,9 @@ export default function NuevoAlojamientoPage() {
 
       if (insertError) throw insertError;
 
-      fetch("/api/property-created-notify", {
+      // Attend la requête avant de naviguer : sans ça, window.location.href
+      // interrompt le fetch en plein envoi et la notification ne part jamais.
+      await fetch("/api/property-created-notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ hostEmail: user.email, propertyName: form.name, city: form.city }),
