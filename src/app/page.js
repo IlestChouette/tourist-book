@@ -548,7 +548,9 @@ export default async function Home() {
               <tbody>
                 {t.comparison.map((row) => (
                   <tr key={row.label} className="border-b border-sand-dim last:border-0">
-                    <td className="max-w-sm px-5 py-3 text-ink/80">{row.label}</td>
+                    <td className="px-5 py-3 text-ink/80">
+                      <span className="block max-w-sm">{row.label}</span>
+                    </td>
                     <td className="px-5 py-3 text-center">
                       <Check on={row.basico} />
                     </td>
@@ -584,7 +586,7 @@ export default async function Home() {
                 {item.q}
                 <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
               </summary>
-              <p className="mt-3 text-ink/70">{item.a}</p>
+              <p className="mt-3 max-w-prose text-ink/70">{item.a}</p>
             </details>
           ))}
         </div>
