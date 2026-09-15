@@ -456,7 +456,7 @@ export default async function Home() {
               {t.ctaSecondary}
             </a>
           </div>
-          <p className="mt-5 text-xs font-bold uppercase tracking-widest text-[#f7f1e4]/70">{t.priceNote}</p>
+          <p className="mt-5 text-xs font-bold tracking-wide text-[#f7f1e4]/70">{t.priceNote}</p>
           <p className="mx-auto mt-3 max-w-md text-sm text-[#f7f1e4]/80">✓ {t.legalBadge}</p>
         </div>
         <div className="stripe-band" />
@@ -548,7 +548,7 @@ export default async function Home() {
               <tbody>
                 {t.comparison.map((row) => (
                   <tr key={row.label} className="border-b border-sand-dim last:border-0">
-                    <td className="px-5 py-3 text-ink/80">{row.label}</td>
+                    <td className="max-w-sm px-5 py-3 text-ink/80">{row.label}</td>
                     <td className="px-5 py-3 text-center">
                       <Check on={row.basico} />
                     </td>
