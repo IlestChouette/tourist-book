@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { monthlyRevenue, PRICES } from "@/lib/pricing";
 import { stripe } from "@/lib/stripe";
 import LogoutButton from "@/components/LogoutButton";
+import EmailsSentTabs from "@/components/EmailsSentTabs";
 import { getLocale } from "@/lib/i18n/locale";
 
 // Vrai MRR calculé depuis Stripe plutôt que depuis le prix de liste local —
@@ -37,10 +38,15 @@ const dateLocale = { fr: "fr-FR", en: "en-GB", es: "es-ES" };
 // eux-mêmes d'abord (plus intéressants à suivre au quotidien), puis les
 // notifications internes. Tout template inconnu est ajouté à la fin.
 const EMAIL_TEMPLATE_ORDER = [
+  "host_signup_notification",
+  "property_created_notification",
+  "subscription_started_notification",
+  "subscription_activated_notification",
   "no_property_reminder",
   "listing_tips",
   "transfer_request_notification",
-  "host_signup_notification",
+  "independent_transfer_request",
+  "guest_checkin_credentials",
   "contact_lead_notification",
   "reminder_batch_notification",
   "listing_tips_batch_notification",
@@ -49,30 +55,45 @@ const EMAIL_TEMPLATE_ORDER = [
 
 const emailTemplateLabels = {
   fr: {
+    host_signup_notification: "Nouvelles inscriptions",
+    property_created_notification: "Nouveaux logements créés",
+    subscription_started_notification: "Nouveaux abonnements démarrés",
+    subscription_activated_notification: "Essais convertis en payant",
     no_property_reminder: "Relance — premier logement pas encore créé",
     listing_tips: "Conseils logement — hôtes déjà inscrits",
     transfer_request_notification: "Demandes de transfert",
-    host_signup_notification: "Nouvelles inscriptions",
+    independent_transfer_request: "Transfert indépendant (lien direct)",
+    guest_checkin_credentials: "Identifiants envoyés au voyageur",
     contact_lead_notification: "Contacts — formulaire landing page",
     reminder_batch_notification: "Résumé cron — relance premier logement",
     listing_tips_batch_notification: "Résumé cron — conseils logement",
     other: "Autres",
   },
   en: {
+    host_signup_notification: "New signups",
+    property_created_notification: "New properties created",
+    subscription_started_notification: "New subscriptions started",
+    subscription_activated_notification: "Trials converted to paid",
     no_property_reminder: "Reminder — first listing not created yet",
     listing_tips: "Listing tips — existing hosts",
     transfer_request_notification: "Transfer requests",
-    host_signup_notification: "New signups",
+    independent_transfer_request: "Independent transfer (direct link)",
+    guest_checkin_credentials: "Credentials sent to guest",
     contact_lead_notification: "Contacts — landing page form",
     reminder_batch_notification: "Cron summary — no-listing reminder",
     listing_tips_batch_notification: "Cron summary — listing tips",
     other: "Other",
   },
   es: {
+    host_signup_notification: "Nuevas inscripciones",
+    property_created_notification: "Nuevos alojamientos creados",
+    subscription_started_notification: "Nuevas suscripciones iniciadas",
+    subscription_activated_notification: "Pruebas convertidas en pago",
     no_property_reminder: "Recordatorio — primer alojamiento sin crear",
     listing_tips: "Consejos de alojamiento — hoteleros ya inscritos",
     transfer_request_notification: "Solicitudes de transporte",
-    host_signup_notification: "Nuevas inscripciones",
+    independent_transfer_request: "Transfer independiente (enlace directo)",
+    guest_checkin_credentials: "Credenciales enviadas al huésped",
     contact_lead_notification: "Contactos — formulario landing page",
     reminder_batch_notification: "Resumen cron — recordatorio primer alojamiento",
     listing_tips_batch_notification: "Resumen cron — consejos de alojamiento",
@@ -570,47 +591,17 @@ export default async function AdminPage() {
 
         <h2 className="mt-12 font-display italic text-2xl text-ink">{t.emailsSent}</h2>
         {(emailLog ?? []).length === 0 && <p className="mt-4 text-ink/60">{t.noEmails}</p>}
-        {orderedEmailTemplates.map((templateKey) => (
-          <div key={templateKey} className="mt-6">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-ink/60">
-              {emailTemplateLabels[locale]?.[templateKey] ?? templateKey}{" "}
-              <span className="text-ink/40">({emailsByTemplate.get(templateKey).length})</span>
-            </h3>
-            <div className="mt-2 overflow-x-auto rounded border border-sand-dim">
-              <table className="w-full min-w-[600px] border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-sand-dim bg-sand-card text-left">
-                    <th className="px-4 py-2 font-bold text-ink/70">{t.sentAt}</th>
-                    <th className="px-4 py-2 font-bold text-ink/70">{t.recipient}</th>
-                    <th className="px-4 py-2 font-bold text-ink/70">{t.subject}</th>
-                    <th className="px-4 py-2 font-bold text-ink/70">{t.status}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {emailsByTemplate.get(templateKey).map((e) => (
-                    <tr key={e.id} className="border-b border-sand-dim last:border-0">
-                      <td className="px-4 py-2 whitespace-nowrap text-ink/70">
-                        {new Date(e.created_at).toLocaleString(dateLocale[locale])}
-                      </td>
-                      <td className="px-4 py-2 text-ink">{e.recipient}</td>
-                      <td className="px-4 py-2 text-ink/70">{e.subject}</td>
-                      <td className="px-4 py-2">
-                        <span
-                          className={`rounded px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${
-                            e.status === "sent" ? "bg-sage text-ink" : "bg-terracotta text-ink"
-                          }`}
-                          title={e.error ?? undefined}
-                        >
-                          {e.status === "sent" ? t.emailStatusSent : t.emailStatusFailed}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ))}
+        {(emailLog ?? []).length > 0 && (
+          <EmailsSentTabs
+            groups={orderedEmailTemplates.map((templateKey) => ({
+              key: templateKey,
+              label: emailTemplateLabels[locale]?.[templateKey] ?? templateKey,
+              emails: emailsByTemplate.get(templateKey),
+            }))}
+            dateLocale={dateLocale[locale]}
+            t={t}
+          />
+        )}
       </section>
     </main>
   );
