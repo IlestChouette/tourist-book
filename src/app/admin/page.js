@@ -599,7 +599,14 @@ export default async function AdminPage() {
               emails: emailsByTemplate.get(templateKey),
             }))}
             dateLocale={dateLocale[locale]}
-            t={t}
+            t={{
+              sentAt: t.sentAt,
+              recipient: t.recipient,
+              subject: t.subject,
+              status: t.status,
+              emailStatusSent: t.emailStatusSent,
+              emailStatusFailed: t.emailStatusFailed,
+            }}
           />
         )}
       </section>
