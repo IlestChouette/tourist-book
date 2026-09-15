@@ -456,7 +456,7 @@ export default async function Home() {
               {t.ctaSecondary}
             </a>
           </div>
-          <p className="mt-5 text-xs font-bold tracking-wide text-[#f7f1e4]/70">{t.priceNote}</p>
+          <p className="mx-auto mt-5 max-w-sm text-xs font-bold tracking-wide text-[#f7f1e4]/70">{t.priceNote}</p>
           <p className="mx-auto mt-3 max-w-md text-sm text-[#f7f1e4]/80">✓ {t.legalBadge}</p>
         </div>
         <div className="stripe-band" />
@@ -562,7 +562,7 @@ export default async function Home() {
               </tbody>
             </table>
           </div>
-          <p className="mx-auto mt-5 max-w-2xl text-center text-xs text-ink/50">{t.pricingNote}</p>
+          <p className="mx-auto mt-5 max-w-md text-center text-xs text-ink/50">{t.pricingNote}</p>
         </div>
       </section>
 
