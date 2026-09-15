@@ -194,6 +194,13 @@ const content = {
     goalLabel: "Objectif mensuel",
     remaining: (amount) => `Il reste ${amount.toFixed(0)} € pour atteindre l'objectif`,
     clientsNeeded: (n) => `≈ ${n} client${n > 1 ? "s" : ""} de plus au rythme actuel`,
+    transfersTitle: "Comptabilité des transferts",
+    noTransfers: "Aucune demande de transfert.",
+    month: "Mois",
+    transferCount: "Demandes",
+    totalBilled: "Total facturé",
+    commission: "Commission estimée (≈20%)",
+    noPriceNote: (n) => `${n} sans prix enregistré (avant l'ajout du calcul automatique)`,
     emailsSent: "Emails envoyés",
     noEmails: "Aucun email envoyé.",
     recipient: "Destinataire",
@@ -240,6 +247,13 @@ const content = {
     goalLabel: "Monthly goal",
     remaining: (amount) => `${amount.toFixed(0)} € left to reach the goal`,
     clientsNeeded: (n) => `≈ ${n} more client${n > 1 ? "s" : ""} at the current rate`,
+    transfersTitle: "Transfer accounting",
+    noTransfers: "No transfer requests yet.",
+    month: "Month",
+    transferCount: "Requests",
+    totalBilled: "Total billed",
+    commission: "Estimated commission (≈20%)",
+    noPriceNote: (n) => `${n} with no price recorded (before automatic pricing was added)`,
     emailsSent: "Emails sent",
     noEmails: "No emails sent yet.",
     recipient: "Recipient",
@@ -286,6 +300,13 @@ const content = {
     goalLabel: "Objetivo mensual",
     remaining: (amount) => `Faltan ${amount.toFixed(0)} € para llegar al objetivo`,
     clientsNeeded: (n) => `≈ ${n} cliente${n > 1 ? "s" : ""} más al ritmo actual`,
+    transfersTitle: "Contabilidad de transfers",
+    noTransfers: "Aún no hay solicitudes de transfer.",
+    month: "Mes",
+    transferCount: "Solicitudes",
+    totalBilled: "Total facturado",
+    commission: "Comisión estimada (≈20%)",
+    noPriceNote: (n) => `${n} sin precio registrado (antes de agregar el cálculo automático)`,
     emailsSent: "Emails enviados",
     noEmails: "Aún no se ha enviado ningún email.",
     recipient: "Destinatario",
@@ -316,7 +337,7 @@ export default async function AdminPage() {
 
   const admin = createAdminClient();
 
-  const [{ data: hosts }, { data: properties }, { data: requests }, { data: emailLog }] = await Promise.all([
+  const [{ data: hosts }, { data: properties }, { data: requests }, { data: emailLog }, { data: transfers }] = await Promise.all([
     admin
       .from("hosts")
       .select("id, name, email, phone, created_at")
@@ -337,6 +358,11 @@ export default async function AdminPage() {
       .select("id, recipient, subject, template, status, error, created_at")
       .order("created_at", { ascending: false })
       .limit(50),
+    admin
+      .from("requests")
+      .select("id, created_at, details, properties(name)")
+      .eq("type", "transfert")
+      .order("created_at", { ascending: false }),
   ]);
 
   // Les alojamientos "exemple" appartiennent au compte admin (is_admin=true)
@@ -355,6 +381,29 @@ export default async function AdminPage() {
   const trialingProperties = activeProperties.filter((p) => p.subscription_status === "trialing");
   const potentialMrr = trialingProperties.reduce((sum, p) => sum + monthlyRevenue(p.plan, p.billing_cycle), 0);
   const pendingRequests = (requests ?? []).filter((r) => r.status === "pendiente");
+
+  // Comptabilité des transferts par mois : nombre de demandes, total facturé
+  // aux voyageurs et commission estimée (le prix affiché est net x1,2 — donc
+  // la commission est le prix moins prix/1,2, soit environ 1/6 du prix). Les
+  // demandes d'avant l'ajout du calcul de prix n'ont pas de "prixEstime" :
+  // comptées, mais exclues du total et de la commission.
+  const transfersByMonth = new Map();
+  for (const req of transfers ?? []) {
+    const monthKey = req.created_at.slice(0, 7);
+    if (!transfersByMonth.has(monthKey)) {
+      transfersByMonth.set(monthKey, { count: 0, withPrice: 0, total: 0 });
+    }
+    const bucket = transfersByMonth.get(monthKey);
+    bucket.count += 1;
+    const price = Number(req.details?.prixEstime);
+    if (Number.isFinite(price)) {
+      bucket.withPrice += 1;
+      bucket.total += price;
+    }
+  }
+  const transferMonths = [...transfersByMonth.entries()]
+    .sort(([a], [b]) => (a < b ? 1 : -1))
+    .map(([month, bucket]) => ({ month, ...bucket, commission: bucket.total / 6 }));
 
   // Regroupe le journal d'emails par type plutôt qu'une seule liste
   // chronologique — plus facile de suivre un fil (ex. toutes les relances
@@ -588,6 +637,41 @@ export default async function AdminPage() {
             </tbody>
           </table>
         </div>
+
+        <h2 className="mt-12 font-display italic text-2xl text-ink">{t.transfersTitle}</h2>
+        {transferMonths.length === 0 && <p className="mt-4 text-ink/60">{t.noTransfers}</p>}
+        {transferMonths.length > 0 && (
+          <div className="mt-4 overflow-x-auto rounded border border-sand-dim">
+            <table className="w-full min-w-[500px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-sand-dim bg-sand-card text-left">
+                  <th className="px-4 py-2 font-bold text-ink/70">{t.month}</th>
+                  <th className="px-4 py-2 font-bold text-ink/70">{t.transferCount}</th>
+                  <th className="px-4 py-2 font-bold text-ink/70">{t.totalBilled}</th>
+                  <th className="px-4 py-2 font-bold text-ink/70">{t.commission}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transferMonths.map((m) => {
+                  const withoutPrice = m.count - m.withPrice;
+                  return (
+                    <tr key={m.month} className="border-b border-sand-dim last:border-0">
+                      <td className="px-4 py-2 text-ink">{m.month}</td>
+                      <td className="px-4 py-2 text-ink/70">
+                        {m.count}
+                        {withoutPrice > 0 && (
+                          <span className="ml-2 text-xs text-ink/40">({t.noPriceNote(withoutPrice)})</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-ink/70">{m.total.toFixed(2)} €</td>
+                      <td className="px-4 py-2 text-ink/70">{m.commission.toFixed(2)} €</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         <h2 className="mt-12 font-display italic text-2xl text-ink">{t.emailsSent}</h2>
         {(emailLog ?? []).length === 0 && <p className="mt-4 text-ink/60">{t.noEmails}</p>}
