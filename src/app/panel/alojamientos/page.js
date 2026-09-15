@@ -5,20 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import Hero from "@/components/Hero";
 import { getClientLocale } from "@/lib/i18n/clientLocale";
-
-function slugify(text) {
-  return text
-    .toString()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function randomCode() {
-  return String(Math.floor(1000 + Math.random() * 9000));
-}
+import { slugify, randomCode } from "@/lib/slug";
 
 const content = {
   fr: {

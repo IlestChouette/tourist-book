@@ -8,20 +8,7 @@ import AccentColorButton from "@/components/AccentColorButton";
 import FormattableTextarea from "@/components/FormattableTextarea";
 import { getClientLocale } from "@/lib/i18n/clientLocale";
 import fieldsDict from "@/lib/i18n/dictionaries/propertyForm";
-
-function slugify(text) {
-  return text
-    .toString()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function randomCode() {
-  return String(Math.floor(1000 + Math.random() * 9000));
-}
+import { slugify, randomCode } from "@/lib/slug";
 
 const MAX_PHOTOS = 5;
 const MAX_KEY_PHOTOS = 4;
