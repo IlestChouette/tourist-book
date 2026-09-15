@@ -201,6 +201,12 @@ const content = {
     totalBilled: "Total facturé",
     commission: "Commission estimée (≈20%)",
     noPriceNote: (n) => `${n} sans prix enregistré (avant l'ajout du calcul automatique)`,
+    transferDetailTitle: "Détail des transferts",
+    traveler: "Voyageur",
+    route: "Trajet",
+    priceLabel: "Prix payé",
+    netDriver: "Net conducteur (estimé)",
+    noPrice: "—",
     emailsSent: "Emails envoyés",
     noEmails: "Aucun email envoyé.",
     recipient: "Destinataire",
@@ -254,6 +260,12 @@ const content = {
     totalBilled: "Total billed",
     commission: "Estimated commission (≈20%)",
     noPriceNote: (n) => `${n} with no price recorded (before automatic pricing was added)`,
+    transferDetailTitle: "Transfer detail",
+    traveler: "Traveler",
+    route: "Route",
+    priceLabel: "Price paid",
+    netDriver: "Net for driver (estimated)",
+    noPrice: "—",
     emailsSent: "Emails sent",
     noEmails: "No emails sent yet.",
     recipient: "Recipient",
@@ -307,6 +319,12 @@ const content = {
     totalBilled: "Total facturado",
     commission: "Comisión estimada (≈20%)",
     noPriceNote: (n) => `${n} sin precio registrado (antes de agregar el cálculo automático)`,
+    transferDetailTitle: "Detalle de transfers",
+    traveler: "Viajero",
+    route: "Trayecto",
+    priceLabel: "Precio pagado",
+    netDriver: "Neto conductor (estimado)",
+    noPrice: "—",
     emailsSent: "Emails enviados",
     noEmails: "Aún no se ha enviado ningún email.",
     recipient: "Destinatario",
@@ -360,7 +378,7 @@ export default async function AdminPage() {
       .limit(50),
     admin
       .from("requests")
-      .select("id, created_at, details, properties(name)")
+      .select("id, created_at, nom, telephone, details, properties(name)")
       .eq("type", "transfert")
       .order("created_at", { ascending: false }),
   ]);
@@ -404,6 +422,24 @@ export default async function AdminPage() {
   const transferMonths = [...transfersByMonth.entries()]
     .sort(([a], [b]) => (a < b ? 1 : -1))
     .map(([month, bucket]) => ({ month, ...bucket, commission: bucket.total / 6 }));
+
+  // Détail par transfert : le prix net du conducteur n'est jamais enregistré
+  // (seul le prix final majoré l'est) — on le déduit du prix affiché en
+  // inversant la majoration de 20%, comme pour la commission ci-dessus.
+  const transferDetails = (transfers ?? []).map((req) => {
+    const price = Number(req.details?.prixEstime);
+    const hasPrice = Number.isFinite(price);
+    return {
+      id: req.id,
+      date: req.created_at,
+      traveler: req.nom,
+      propertyName: req.properties?.name,
+      from: req.details?.lieu || "-",
+      to: req.details?.destination || "-",
+      price: hasPrice ? price : null,
+      net: hasPrice ? price / 1.2 : null,
+    };
+  });
 
   // Regroupe le journal d'emails par type plutôt qu'une seule liste
   // chronologique — plus facile de suivre un fil (ex. toutes les relances
@@ -671,6 +707,48 @@ export default async function AdminPage() {
               </tbody>
             </table>
           </div>
+        )}
+
+        {transferDetails.length > 0 && (
+          <>
+            <h3 className="mt-8 font-display italic text-xl text-ink">{t.transferDetailTitle}</h3>
+            <div className="mt-4 overflow-x-auto rounded border border-sand-dim">
+              <table className="w-full min-w-[700px] border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-sand-dim bg-sand-card text-left">
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.sentAt}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.traveler}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.property}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.route}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.priceLabel}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.netDriver}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transferDetails.map((d) => (
+                    <tr key={d.id} className="border-b border-sand-dim last:border-0">
+                      <td className="px-4 py-2 text-ink">
+                        {new Date(d.date).toLocaleDateString(dateLocale[locale])}
+                      </td>
+                      <td className="px-4 py-2 text-ink/70">{d.traveler}</td>
+                      <td className="px-4 py-2 text-ink/70">{d.propertyName}</td>
+                      <td className="px-4 py-2 text-ink/70">
+                        <span className="block max-w-xs">
+                          {d.from} → {d.to}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-ink/70">
+                        {d.price != null ? `${d.price.toFixed(2)} €` : t.noPrice}
+                      </td>
+                      <td className="px-4 py-2 text-ink/70">
+                        {d.net != null ? `${d.net.toFixed(2)} €` : t.noPrice}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         <h2 className="mt-12 font-display italic text-2xl text-ink">{t.emailsSent}</h2>
