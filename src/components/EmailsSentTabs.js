@@ -13,24 +13,24 @@ export default function EmailsSentTabs({ groups, dateLocale, t }) {
 
   return (
     <div className="mt-6">
-      <div className="flex flex-wrap gap-2 border-b border-sand-dim pb-3">
+      <div className="flex gap-1 overflow-x-auto">
         {groups.map((g) => (
           <button
             key={g.key}
             type="button"
             onClick={() => setActiveKey(g.key)}
-            className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${
+            className={`relative shrink-0 whitespace-nowrap rounded-t-lg border px-4 py-2 text-xs font-bold transition-colors ${
               g.key === active.key
-                ? "bg-aqua-deep text-sand-card"
-                : "bg-sand-card text-ink/60 hover:text-ink"
+                ? "-mb-px border-sand-dim border-b-sand-card bg-sand-card text-ink"
+                : "border-transparent bg-sand text-ink/50 hover:text-ink/80"
             }`}
           >
-            {g.label} <span className={g.key === active.key ? "text-sand-card/70" : "text-ink/40"}>({g.emails.length})</span>
+            {g.label} <span className={g.key === active.key ? "text-ink/40" : "text-ink/30"}>({g.emails.length})</span>
           </button>
         ))}
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded border border-sand-dim">
+      <div className="overflow-x-auto rounded-b-lg rounded-tr-lg border border-sand-dim bg-sand-card">
         <table className="w-full min-w-[600px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-sand-dim bg-sand-card text-left">
