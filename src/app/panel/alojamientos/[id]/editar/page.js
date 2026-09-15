@@ -178,6 +178,15 @@ export default function EditarAlojamientoPage({ params }) {
         .eq("id", id);
 
       if (updateError) throw updateError;
+
+      // Réapplique le tarif de transfert de la ville (idempotent si elle n'a
+      // pas changé) au cas où l'hôtelier vient de la corriger.
+      await fetch("/api/properties/apply-transfer-rates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId: id, city: form.city }),
+      }).catch(() => {});
+
       window.location.href = `/panel/alojamientos/${id}`;
     } catch (err) {
       setError(err.message);

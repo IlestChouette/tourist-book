@@ -124,6 +124,12 @@ export default function AlojamientosPage() {
       body: JSON.stringify({ hostEmail: user?.email, propertyName: newName, city: property.city }),
     }).catch(() => {});
 
+    await fetch("/api/properties/apply-transfer-rates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ propertyId: inserted.id, city: property.city, force: true }),
+    }).catch(() => {});
+
     window.location.href = `/panel/alojamientos/${inserted.id}/editar`;
   }
 
