@@ -26,23 +26,10 @@ export async function sendTransferRequestNotification({ hostEmail, propertyName,
   const resend = new Resend(apiKey);
   const d = request.details || {};
 
-  const lines = [
-    `Nouvelle demande de transfert pour ${propertyName}`,
-    propertyAddress ? `Adresse : ${propertyAddress}` : null,
-    "",
-    `Voyageur : ${request.nom}`,
-    `Téléphone : ${request.telephone || "-"}`,
-    `Date : ${d.date || "-"} à ${d.heure || "-"}`,
-    `Lieu de prise en charge : ${d.lieu || "-"}`,
-    `Passagers : ${d.passagers || "-"}`,
-    d.vol ? `N° de vol : ${d.vol}` : null,
-    d.bagagesGrands || d.bagagesPetits
-      ? `Bagages : ${d.bagagesGrands ?? 0} grand(s), ${d.bagagesPetits ?? 0} petit(s)`
-      : null,
-    d.remarques ? `Remarques : ${d.remarques}` : null,
-  ].filter(Boolean);
-
-  const whatsappMessage = formatTransferWhatsAppMessage({
+  // Un seul message, celui déjà prêt à transférer tel quel au transporteur
+  // (WhatsApp ou copier-coller) — inutile de le répéter deux fois avec des
+  // infos qui se chevauchent.
+  const message = formatTransferWhatsAppMessage({
     propertyName,
     propertyAddress,
     nom: request.nom,
@@ -55,7 +42,7 @@ export async function sendTransferRequestNotification({ hostEmail, propertyName,
     from: "Tourist Book <notifications@tourist-book.com>",
     to: hostEmail,
     subject,
-    text: `${lines.join("\n")}\n\n— Message prêt à copier pour WhatsApp —\n\n${whatsappMessage}`,
+    text: message,
   });
 
   // resend.emails.send() ne lève pas d'exception en cas d'erreur API — elle

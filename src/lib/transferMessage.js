@@ -9,9 +9,14 @@ export function formatTransferWhatsAppMessage({ propertyName, propertyAddress, n
     `Date : ${d.date || "-"} à ${d.heure || "-"}`,
     `Lieu de prise en charge : ${d.lieu || "-"}`,
     `Passagers : ${d.passagers || "-"}`,
+    ...(d.vol ? [`N° de vol : ${d.vol}`] : []),
+    ...(d.bagagesGrands || d.bagagesPetits
+      ? [`Bagages : ${d.bagagesGrands ?? 0} grand(s), ${d.bagagesPetits ?? 0} petit(s)`]
+      : []),
     ...(d.prixEstime ? [`Tarif affiché au voyageur : ${Number(d.prixEstime).toFixed(2)} €`] : []),
     `Voyageur : ${nom}`,
     `Téléphone : ${telephone || "-"}`,
+    ...(d.remarques ? [`Remarques : ${d.remarques}`] : []),
     "",
     "Merci de confirmer la disponibilité et le tarif.",
   ].join("\n");
