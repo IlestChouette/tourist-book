@@ -562,7 +562,7 @@ export default async function Home() {
               </tbody>
             </table>
           </div>
-          <p className="mt-5 text-center text-xs text-ink/50">{t.pricingNote}</p>
+          <p className="mx-auto mt-5 max-w-2xl text-center text-xs text-ink/50">{t.pricingNote}</p>
         </div>
       </section>
 
