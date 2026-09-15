@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import Hero from "@/components/Hero";
 import QrCodeButton from "@/components/QrCodeButton";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 
 const content = {
   fr: {
@@ -75,7 +75,7 @@ const content = {
 
 export default function AlojamientoDetallePage({ params }) {
   const { id } = use(params);
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);

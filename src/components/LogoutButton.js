@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 import navDict from "@/lib/i18n/dictionaries/nav";
 
 export default function LogoutButton({ className }) {
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
 
   async function handleLogout() {
     const supabase = createClient();

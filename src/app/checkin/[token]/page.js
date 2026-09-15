@@ -153,8 +153,19 @@ const content = {
 
 export default function CheckinPage({ params }) {
   const { token } = use(params);
-  const [locale, setLocale] = useState(getClientLocale);
+  const [locale, setLocale] = useState("fr");
   const t = content[locale];
+
+  // Démarre sur "fr" (même valeur que le rendu serveur) puis corrige vers la
+  // vraie langue juste après le montage, pour éviter un mismatch
+  // d'hydratation React — voir useClientLocale() dans clientLocale.js, dont
+  // cette page ne peut pas se servir directement puisqu'elle a besoin de son
+  // propre setLocale pour le changement instantané ci-dessous.
+  useEffect(() => {
+    const real = getClientLocale();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocale((current) => (real === current ? current : real));
+  }, []);
 
   // Change la langue tout de suite (état local, pas d'aller-retour serveur)
   // plutôt que de passer par le cookie + Server Action utilisés ailleurs sur

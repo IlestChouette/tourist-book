@@ -6,7 +6,7 @@ import { uploadMedia } from "@/lib/uploadMedia";
 import Hero from "@/components/Hero";
 import AccentColorButton from "@/components/AccentColorButton";
 import FormattableTextarea from "@/components/FormattableTextarea";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 import fieldsDict from "@/lib/i18n/dictionaries/propertyForm";
 import { slugify, randomCode } from "@/lib/slug";
 
@@ -20,7 +20,7 @@ const pageContent = {
 };
 
 export default function NuevoAlojamientoPage() {
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = fieldsDict[locale];
   const p = pageContent[locale];
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { uploadMedia } from "@/lib/uploadMedia";
 import Hero from "@/components/Hero";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 
 const content = {
   fr: {
@@ -49,7 +49,7 @@ const content = {
 };
 
 export default function PerfilPage() {
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
 
   const [userId, setUserId] = useState(null);

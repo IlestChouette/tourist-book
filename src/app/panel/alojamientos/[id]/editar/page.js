@@ -6,7 +6,7 @@ import { uploadMedia } from "@/lib/uploadMedia";
 import Hero from "@/components/Hero";
 import AccentColorButton from "@/components/AccentColorButton";
 import FormattableTextarea from "@/components/FormattableTextarea";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 import fieldsDict from "@/lib/i18n/dictionaries/propertyForm";
 
 const MAX_PHOTOS = 5;
@@ -20,7 +20,7 @@ const pageContent = {
 
 export default function EditarAlojamientoPage({ params }) {
   const { id } = use(params);
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = fieldsDict[locale];
   const p = pageContent[locale];
 
@@ -497,6 +497,7 @@ export default function EditarAlojamientoPage({ params }) {
                 onChange={update("general_info")}
                 locale={locale}
               />
+              <span className="mt-1.5 block text-xs text-ink/50">{t.generalInfoHint}</span>
             </div>
           </details>
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import Hero from "@/components/Hero";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 import { slugify, randomCode } from "@/lib/slug";
 
 const content = {
@@ -50,7 +50,7 @@ const content = {
 };
 
 export default function AlojamientosPage() {
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Hero from "@/components/Hero";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 
 const content = {
   fr: {
@@ -127,7 +127,7 @@ const content = {
 
 export default function SuscribirsePropiedadPage({ params }) {
   const { id } = use(params);
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
 
   const [property, setProperty] = useState(null);
