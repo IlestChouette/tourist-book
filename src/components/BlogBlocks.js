@@ -79,6 +79,19 @@ export function ChatExample({ exchanges }) {
   );
 }
 
+export function StatRow({ items }) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-3">
+      {items.map((s) => (
+        <div key={s.label} className="rounded-xl border border-sand-dim bg-sand-card p-5 text-center">
+          <div className="font-display italic text-3xl text-terracotta-deep">{s.value}</div>
+          <div className="mt-2 text-xs font-bold uppercase tracking-wider text-ink/60">{s.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function Quote({ text }) {
   return (
     <p className="border-l-4 border-terracotta pl-5 font-display italic text-2xl text-ink">
@@ -110,6 +123,7 @@ const blockComponents = {
   steps: StepFlow,
   compare: CompareBlock,
   chat: ChatExample,
+  stats: StatRow,
   quote: Quote,
   text: TextBlock,
   note: Note,

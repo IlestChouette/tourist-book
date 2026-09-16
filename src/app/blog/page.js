@@ -32,9 +32,13 @@ export default function BlogIndexPage() {
         )}
 
         {rest.length > 0 && (
-          <div className="mt-10 grid gap-10 sm:grid-cols-2 sm:divide-x sm:divide-sand-dim lg:grid-cols-3">
+          <div className="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
             {rest.map((post) => (
-              <Link key={post.slug} href={`/blog/${post.slug}`} className="group sm:pl-10 sm:first:pl-0">
+              <Link
+                key={post.slug}
+                href={`/blog/${post.slug}`}
+                className="group border-t-2 border-ink pt-5"
+              >
                 <p className="text-xs font-bold uppercase tracking-widest text-ink/50">
                   {dateFormatter.format(new Date(post.publishedAt))}
                 </p>

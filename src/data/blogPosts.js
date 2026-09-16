@@ -198,6 +198,221 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: "loi-le-meur-2026-meubles-tourisme-cote-azur",
+    title: "Loi Le Meur 2026 : ce que les hôtes de la Côte d'Azur doivent faire avant le 20 mai",
+    metaDescription:
+      "La loi Le Meur généralise la déclaration en mairie et le numéro d'enregistrement à 13 caractères pour tous les meublés de tourisme avant le 20 mai 2026. Ce qui change, avec les échéances et les sanctions.",
+    excerpt: "Déclaration en mairie, numéro à 13 caractères, DPE : ce qui devient obligatoire pour tous les meublés de tourisme avant le 20 mai 2026.",
+    publishedAt: "2026-09-17",
+    blocks: [
+      {
+        type: "lead",
+        text: "La loi n° 2024-1039 du 19 novembre 2024, dite loi Le Meur, resserre les obligations administratives des meublés de tourisme partout en France — résidence principale comme secondaire, sans exception de commune. Voici ce qui doit être en ordre avant le 20 mai 2026.",
+      },
+      {
+        type: "stats",
+        items: [
+          { value: "20 mai 2026", label: "Date limite du numéro d'enregistrement" },
+          { value: "13", label: "Caractères dans le numéro (via Declaloc)" },
+          { value: "20 000 €", label: "Amende maximale en cas de manquement" },
+        ],
+      },
+      {
+        type: "icons",
+        items: [
+          {
+            icon: ShieldIcon,
+            title: "Déclaration en mairie",
+            text: "Obligatoire dans toutes les communes sans exception, pour une résidence principale comme secondaire.",
+          },
+          {
+            icon: BookIcon,
+            title: "Numéro d'enregistrement affiché",
+            text: "Un numéro à 13 caractères, obtenu via le téléservice Declaloc, à ajouter sur chaque annonce.",
+          },
+          {
+            icon: ChatIcon,
+            title: "Copropriété informée",
+            text: "Tout copropriétaire déclarant son bien comme meublé de tourisme doit désormais en informer le syndic.",
+          },
+        ],
+      },
+      {
+        type: "steps",
+        items: [
+          {
+            n: "1",
+            title: "Déclarer en mairie",
+            text: "Le formulaire ou téléservice dépend de votre commune — à vérifier directement auprès d'elle.",
+          },
+          {
+            n: "2",
+            title: "Obtenir le numéro Declaloc",
+            text: "13 caractères à afficher sur toutes vos annonces avant le 20 mai 2026.",
+          },
+          {
+            n: "3",
+            title: "Vérifier le DPE",
+            text: "Un logement classé F ou G peut déjà être soumis à des restrictions locales en 2026.",
+          },
+        ],
+      },
+      {
+        type: "note",
+        text: "Sources : loi n° 2024-1039 du 19 novembre 2024, Declaloc, presse spécialisée (Lodgify, AGN Avocats, Epsilium, LMNP.ai). Cet article donne un aperçu général — vérifiez les modalités exactes applicables à votre commune.",
+      },
+    ],
+  },
+  {
+    slug: "aeroport-nice-tourisme-2025-chiffres-hotes-airbnb",
+    title: "15,23 millions de passagers à Nice en 2025 : ce que ça change pour les hôtes Airbnb",
+    metaDescription:
+      "L'aéroport Nice Côte d'Azur a dépassé les 15 millions de passagers en 2025, 2e aéroport de France après Paris. Ce que ce volume de voyageurs implique concrètement pour l'accueil.",
+    excerpt: "2e aéroport de France, 12 millions de séjours touristiques : ce que le volume de voyageurs sur la Côte d'Azur implique pour l'accueil.",
+    publishedAt: "2026-09-17",
+    blocks: [
+      {
+        type: "lead",
+        text: "En 2025, l'aéroport Nice Côte d'Azur a franchi les 15 millions de passagers pour la première fois — le 2e aéroport de France après Paris. Un volume qui change la donne pour l'accueil des voyageurs sur toute la Côte d'Azur.",
+      },
+      {
+        type: "stats",
+        items: [
+          { value: "15,23 M", label: "Passagers à l'aéroport de Nice en 2025" },
+          { value: "+4,7 %", label: "Croissance du trafic international en un an" },
+          { value: "12 M+", label: "Séjours touristiques sur la Côte d'Azur en 2025" },
+        ],
+      },
+      {
+        type: "icons",
+        items: [
+          {
+            icon: CompassIcon,
+            title: "Une demande forte, toute l'année",
+            text: "Le 2e aéroport de France n'est pas qu'un pic estival — les arrivées se répartissent sur une bonne partie de l'année.",
+          },
+          {
+            icon: CarIcon,
+            title: "Le transfert, une vraie question",
+            text: "Avec autant de vols, l'information d'arrivée (horaires, transfert) compte double pour un voyageur qui débarque dans une ville inconnue.",
+          },
+          {
+            icon: WifiIcon,
+            title: "L'accueil comme différenciateur",
+            text: "Avec autant de logements disponibles, la qualité de l'accueil fait la différence entre deux annonces similaires.",
+          },
+        ],
+      },
+      {
+        type: "quote",
+        text: "Un marché qui reçoit 15 millions de voyageurs par an ne pardonne pas un accueil improvisé.",
+      },
+      {
+        type: "note",
+        text: "Sources : Aéroport Nice Côte d'Azur (bilan 2025, via Air Journal) ; Observatoire du Tourisme de la Côte d'Azur.",
+      },
+    ],
+  },
+  {
+    slug: "voyageurs-etrangers-cote-azur-traduction-livret-accueil",
+    title: "Plus de la moitié des voyageurs sont étrangers sur la Côte d'Azur : pourquoi la traduction n'est plus un luxe",
+    metaDescription:
+      "Plus de 50 % des touristes sur la Côte d'Azur sont étrangers en 2025, jusqu'à 58 % l'été. Pourquoi un livret d'accueil traduit automatiquement devient indispensable, pas accessoire.",
+    excerpt: "Jusqu'à 58 % de clientèle étrangère l'été sur la Côte d'Azur — la langue n'est plus un détail, c'est la moitié de vos voyageurs.",
+    publishedAt: "2026-09-17",
+    blocks: [
+      {
+        type: "lead",
+        text: "Plus de la moitié des touristes qui séjournent sur la Côte d'Azur en 2025 viennent de l'étranger — jusqu'à 58 % en plein été dans l'hôtellerie marchande. La langue n'est plus un détail secondaire du livret d'accueil, c'est la moitié de vos voyageurs.",
+      },
+      {
+        type: "stats",
+        items: [
+          { value: "50 %+", label: "Voyageurs étrangers sur la Côte d'Azur en 2025" },
+          { value: "58 %", label: "Part de clientèle étrangère en août" },
+          { value: "15 %+", label: "Nuitées internationales venant des États-Unis, 1er marché étranger" },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Qui sont ces voyageurs ?",
+        paragraphs: [
+          "Les États-Unis sont devenus le premier marché étranger de la Côte d'Azur, avec plus de 15 % des nuitées internationales. Suivent le Royaume-Uni et l'Irlande (15,5 % des séjours étrangers), l'Italie (15,8 %, portée par la proximité géographique), l'Allemagne et les pays scandinaves.",
+        ],
+      },
+      {
+        type: "icons",
+        items: [
+          {
+            icon: ChatIcon,
+            title: "Traduit automatiquement",
+            text: "Le livret Tourist Book s'affiche en français, anglais et espagnol, sans travail supplémentaire pour l'hôte.",
+          },
+          {
+            icon: CompassIcon,
+            title: "Vos recommandations, comprises par tous",
+            text: "Une recommandation locale ne sert à rien si le voyageur ne la comprend pas.",
+          },
+          {
+            icon: ShieldIcon,
+            title: "Honnête sur ses limites",
+            text: "L'italien, l'allemand et le scandinave ne sont pas encore couverts, même s'ils représentent une bonne partie des voyageurs de la région.",
+          },
+        ],
+      },
+      {
+        type: "note",
+        text: "Sources : Observatoire du Tourisme de la Côte d'Azur, bilan touristique 2025 ; Destination Côte d'Azur France.",
+      },
+    ],
+  },
+  {
+    slug: "taxe-sejour-numero-enregistrement-mentions-obligatoires-2026",
+    title: "Taxe de séjour et numéro d'enregistrement : les mentions obligatoires à afficher en 2026",
+    metaDescription:
+      "Montant de la taxe de séjour, numéro d'enregistrement à 13 caractères : ce que la loi impose d'afficher aux voyageurs en 2026, et ce qu'Airbnb gère ou non à votre place.",
+    excerpt: "Deux mentions doivent légalement être visibles par vos voyageurs — voici ce que ça implique concrètement en 2026.",
+    publishedAt: "2026-09-17",
+    blocks: [
+      {
+        type: "lead",
+        text: "Deux mentions doivent légalement être visibles par vos voyageurs : le montant de la taxe de séjour, et le numéro d'enregistrement de votre logement. Voici ce que ça implique concrètement en 2026.",
+      },
+      {
+        type: "stats",
+        items: [
+          { value: "0,20 € – 4,90 €", label: "Barème 2026 de la taxe de séjour, par adulte et par nuit" },
+          { value: "13", label: "Caractères du numéro d'enregistrement (Declaloc)" },
+          { value: "150 €", label: "Amende par infraction en cas d'absence d'affichage" },
+        ],
+      },
+      {
+        type: "icons",
+        items: [
+          {
+            icon: BookIcon,
+            title: "Le montant, pas juste le principe",
+            text: "Le voyageur doit savoir combien il paie exactement, pas seulement qu'une taxe de séjour existe.",
+          },
+          {
+            icon: ShieldIcon,
+            title: "Le numéro, sur chaque annonce",
+            text: "Généralisé à toutes les communes avant le 20 mai 2026, quelle que soit la taille de la ville.",
+          },
+          {
+            icon: ChatIcon,
+            title: "Une responsabilité qui reste la vôtre",
+            text: "Airbnb collecte et reverse la taxe dans plus de 29 000 communes françaises, mais la déclaration en mairie et le numéro d'enregistrement restent à la charge de l'hôte.",
+          },
+        ],
+      },
+      {
+        type: "note",
+        text: "Sources : barème 2026 indexé sur l'inflation INSEE, article L.2333-34 du Code général des collectivités territoriales, Declaloc. Cet article donne un aperçu général et ne remplace pas un avis juridique — vérifiez votre situation auprès de votre mairie.",
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
