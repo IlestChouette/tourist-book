@@ -18,6 +18,14 @@ const content = {
         ],
       },
       {
+        title: "Guides locaux",
+        links: [
+          { href: "/livret-accueil-nice", label: "Nice" },
+          { href: "/livret-accueil-cannes", label: "Cannes" },
+          { href: "/livret-accueil-antibes", label: "Antibes" },
+        ],
+      },
+      {
         title: "Compte",
         links: [
           { href: "/panel/registro", label: "Créer un compte" },
@@ -47,6 +55,14 @@ const content = {
           { href: "/", label: "Home" },
           { href: "/#planes", label: "Plans & pricing" },
           { href: "/#como-funciona", label: "How it works" },
+        ],
+      },
+      {
+        title: "Local guides",
+        links: [
+          { href: "/livret-accueil-nice", label: "Nice" },
+          { href: "/livret-accueil-cannes", label: "Cannes" },
+          { href: "/livret-accueil-antibes", label: "Antibes" },
         ],
       },
       {
@@ -82,6 +98,14 @@ const content = {
         ],
       },
       {
+        title: "Guías locales",
+        links: [
+          { href: "/livret-accueil-nice", label: "Nice" },
+          { href: "/livret-accueil-cannes", label: "Cannes" },
+          { href: "/livret-accueil-antibes", label: "Antibes" },
+        ],
+      },
+      {
         title: "Cuenta",
         links: [
           { href: "/panel/registro", label: "Crear cuenta" },
@@ -114,7 +138,7 @@ export default async function MapaDelSitioPage() {
     <main className="flex-1">
       <Hero eyebrow={t.eyebrow} title={t.title} />
       <section className="mx-auto max-w-2xl px-6 py-10">
-        <div className="grid gap-8 sm:grid-cols-3">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {t.sections.map((section) => (
             <div key={section.title}>
               <span className="text-xs font-bold uppercase tracking-widest text-ink/50">{section.title}</span>

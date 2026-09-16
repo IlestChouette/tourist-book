@@ -10,7 +10,7 @@ export default async function Footer() {
   return (
     <footer className="relative border-t border-sand-dim bg-sand">
       <div className="mx-auto max-w-5xl px-6 py-14">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-5">
           <div className="col-span-2 sm:col-span-1">
             <span className="font-display italic text-lg text-ink">Tourist Book</span>
             <p className="mt-2 text-sm text-ink/60">{t.tagline}</p>
@@ -24,6 +24,15 @@ export default async function Footer() {
             <ul className="mt-3 grid gap-2 text-sm">
               <li><Link href="/#planes" className="text-ink/70 hover:text-ink">{t.plans}</Link></li>
               <li><Link href="/#como-funciona" className="text-ink/70 hover:text-ink">{t.howItWorks}</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-ink/50">{t.localGuides}</span>
+            <ul className="mt-3 grid gap-2 text-sm">
+              <li><Link href="/livret-accueil-nice" className="text-ink/70 hover:text-ink">Nice</Link></li>
+              <li><Link href="/livret-accueil-cannes" className="text-ink/70 hover:text-ink">Cannes</Link></li>
+              <li><Link href="/livret-accueil-antibes" className="text-ink/70 hover:text-ink">Antibes</Link></li>
             </ul>
           </div>
 
