@@ -12,8 +12,6 @@ const routes = [
   { path: "/privacidad", priority: 0.3, changeFrequency: "yearly" },
   { path: "/aviso-legal", priority: 0.3, changeFrequency: "yearly" },
   { path: "/mapa-del-sitio", priority: 0.2, changeFrequency: "monthly" },
-  { path: "/panel/login", priority: 0.5, changeFrequency: "yearly" },
-  { path: "/panel/registro", priority: 0.6, changeFrequency: "yearly" },
 ];
 
 export default function sitemap() {
