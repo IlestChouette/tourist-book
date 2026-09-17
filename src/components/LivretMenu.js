@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import QRCode from "qrcode";
 import { fullAddress } from "@/lib/address";
 import TransfertForm from "./TransfertForm";
 import CarnetPanel from "./CarnetPanel";
@@ -25,6 +26,9 @@ const content = {
     close: "Fermer",
     copyPassword: "Copier le mot de passe",
     copied: "Copié !",
+    showWifiQr: "Afficher le QR code",
+    generatingQr: "Génération…",
+    scanToConnect: "Scannez avec un autre appareil pour vous connecter automatiquement.",
     whatsapp: "Écrire sur WhatsApp",
     trashPhotoAlt: "Emplacement des poubelles",
     keyPickup: "Récupération des clés",
@@ -52,6 +56,9 @@ const content = {
     close: "Close",
     copyPassword: "Copy password",
     copied: "Copied!",
+    showWifiQr: "Show QR code",
+    generatingQr: "Generating…",
+    scanToConnect: "Scan with another device to connect automatically.",
     whatsapp: "Message on WhatsApp",
     trashPhotoAlt: "Trash location",
     keyPickup: "Key pickup",
@@ -79,6 +86,9 @@ const content = {
     close: "Cerrar",
     copyPassword: "Copiar contraseña",
     copied: "¡Copiado!",
+    showWifiQr: "Mostrar código QR",
+    generatingQr: "Generando…",
+    scanToConnect: "Escanéalo con otro dispositivo para conectarte automáticamente.",
     whatsapp: "Escribir por WhatsApp",
     trashPhotoAlt: "Ubicación de la basura",
     keyPickup: "Recogida de llaves",
@@ -293,6 +303,17 @@ function CopyIcon() {
   );
 }
 
+function QrIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinejoin="round" className="h-4 w-4">
+      <rect x="3.5" y="3.5" width="6" height="6" rx="1" />
+      <rect x="14.5" y="3.5" width="6" height="6" rx="1" />
+      <rect x="3.5" y="14.5" width="6" height="6" rx="1" />
+      <path d="M14.5 14.5h3v3h-3zM20.5 14.5v3M17.5 20.5h3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 // Choisit un nombre de colonnes (4 à 6) qui remplit la dernière rangée le
 // mieux possible pour N tuiles, plutôt qu'un nombre fixe qui laisse parfois
 // une rangée finale à moitié vide (ex. 10 tuiles sur 6 colonnes → 6 puis 4).
@@ -361,6 +382,8 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
   const [displayedItem, setDisplayedItem] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [wifiQr, setWifiQr] = useState(null);
+  const [generatingQr, setGeneratingQr] = useState(false);
   const closeButtonRef = useRef(null);
 
   const infoItems = [
@@ -425,6 +448,27 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
   function close() {
     setActive(null);
     setCopied(false);
+    setWifiQr(null);
+  }
+
+  // Format standard "WIFI:" reconnu par les appareils de la caméra native
+  // (iOS et Android) — scanner ce QR propose directement "Rejoindre le
+  // réseau", sans que le voyageur tape le mot de passe. Les caractères
+  // spéciaux du format doivent être échappés d'un antislash.
+  function escapeWifiField(value) {
+    return String(value).replace(/([\\;,:"])/g, "\\$1");
+  }
+
+  async function generateWifiQr() {
+    setGeneratingQr(true);
+    const payload = `WIFI:T:WPA;S:${escapeWifiField(property.wifi_ssid)};P:${escapeWifiField(property.wifi_password)};;`;
+    const url = await QRCode.toDataURL(payload, {
+      width: 480,
+      margin: 2,
+      color: { dark: "#223339", light: "#f7f1e4" },
+    });
+    setWifiQr(url);
+    setGeneratingQr(false);
   }
 
   useEffect(() => {
@@ -550,14 +594,35 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
                   <FormattedText text={displayedItem.detail} />
 
                   {displayedItem.key === "wifi" && property.wifi_password && (
-                    <button
-                      type="button"
-                      onClick={copyWifiPassword}
-                      className="mt-3 inline-flex items-center gap-2 rounded border border-aqua-deep px-4 py-2 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
-                    >
-                      <CopyIcon />
-                      {copied ? t.copied : t.copyPassword}
-                    </button>
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={copyWifiPassword}
+                        className="inline-flex items-center gap-2 rounded border border-aqua-deep px-4 py-2 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
+                      >
+                        <CopyIcon />
+                        {copied ? t.copied : t.copyPassword}
+                      </button>
+                      {!wifiQr && (
+                        <button
+                          type="button"
+                          onClick={generateWifiQr}
+                          disabled={generatingQr}
+                          className="inline-flex items-center gap-2 rounded border border-aqua-deep px-4 py-2 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card disabled:opacity-60"
+                        >
+                          <QrIcon />
+                          {generatingQr ? t.generatingQr : t.showWifiQr}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {displayedItem.key === "wifi" && wifiQr && (
+                    <div className="mt-4 text-center">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={wifiQr} alt="QR code wifi" className="mx-auto h-40 w-40" />
+                      <p className="mt-2 text-xs text-ink/60">{t.scanToConnect}</p>
+                    </div>
                   )}
 
                   {displayedItem.key === "contact" && whatsapp && (
