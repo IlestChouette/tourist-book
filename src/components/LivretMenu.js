@@ -38,6 +38,8 @@ const content = {
     toursComingSoon: "La réservation de tours et d'activités arrive bientôt — le partenaire est en cours de configuration.",
     demoHostView: "Vue hôte (démo)",
     demoHint: "* Le bouton « Vue hôte (démo) » n'existe pas sur un vrai livret — il vous montre ce que verrait l'hôte à la réception de ce check-in.",
+    today: "Aujourd'hui",
+    tomorrow: "Demain",
   },
   en: {
     directions: "Directions",
@@ -68,6 +70,8 @@ const content = {
     toursComingSoon: "Tour and activity booking is coming soon — the partner is being set up.",
     demoHostView: "Host view (demo)",
     demoHint: "* The \"Host view (demo)\" button doesn't exist on a real livret — it shows you what the host would see upon receiving this check-in.",
+    today: "Today",
+    tomorrow: "Tomorrow",
   },
   es: {
     directions: "Cómo llegar",
@@ -98,6 +102,8 @@ const content = {
     toursComingSoon: "La reserva de tours y actividades llega pronto — el socio está en proceso de configuración.",
     demoHostView: "Vista del hotelero (demo)",
     demoHint: "* El botón «Vista del hotelero (demo)» no existe en un livret real — te muestra lo que vería el hotelero al recibir este check-in.",
+    today: "Hoy",
+    tomorrow: "Mañana",
   },
 };
 
@@ -314,6 +320,82 @@ function QrIcon() {
   );
 }
 
+const weatherIconProps = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" };
+
+function SunIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <circle cx="12" cy="12" r="4.5" />
+      <path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8" />
+    </svg>
+  );
+}
+
+function CloudySunIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <path d="M9 8.5a4 4 0 0 1 7.6 1.8" />
+      <circle cx="9" cy="8" r="0.2" />
+      <path d="M6.5 20a3.8 3.8 0 0 1-1-7.5 4.5 4.5 0 0 1 8.7-1.2A4 4 0 0 1 17 19H6.5z" />
+      <path d="M9 3.5v1.3M4.6 5.6l1 1M13.5 4.7l-.9 1.1" />
+    </svg>
+  );
+}
+
+function CloudyIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <path d="M6.5 19.5a3.8 3.8 0 0 1-1-7.5 4.5 4.5 0 0 1 8.7-1.2 4 4 0 0 1 1.8 7.7 4 4 0 0 1-1 .5H6.5z" />
+    </svg>
+  );
+}
+
+function RainIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <path d="M6.5 16a3.8 3.8 0 0 1-1-7.5 4.5 4.5 0 0 1 8.7-1.2A4 4 0 0 1 15 15H6.5z" />
+      <path d="M8 18.5l-1 2.5M12 18.5l-1 2.5M16 18.5l-1 2.5" />
+    </svg>
+  );
+}
+
+function StormIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <path d="M6.5 14.5a3.8 3.8 0 0 1-1-7.5 4.5 4.5 0 0 1 8.7-1.2 4 4 0 0 1 1.8 7.7 4 4 0 0 1-1 .5H6.5z" />
+      <path d="M12.5 15.5l-2.5 4h2.5l-1.5 3.5" />
+    </svg>
+  );
+}
+
+function SnowIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <path d="M6.5 14.5a3.8 3.8 0 0 1-1-7.5 4.5 4.5 0 0 1 8.7-1.2 4 4 0 0 1 1.8 7.7 4 4 0 0 1-1 .5H6.5z" />
+      <path d="M8 18v4M6.3 19l3.4 2M9.7 19l-3.4 2M15 18v4M13.3 19l3.4 2M16.7 19l-3.4 2" />
+    </svg>
+  );
+}
+
+function FogIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <path d="M6 9.5a4.5 4.5 0 0 1 8.7-1.5" />
+      <path d="M4 13.5h16M3 17h18M6 20.5h12" />
+    </svg>
+  );
+}
+
+const WEATHER_ICONS = {
+  clear: SunIcon,
+  "cloudy-sun": CloudySunIcon,
+  cloudy: CloudyIcon,
+  rain: RainIcon,
+  storm: StormIcon,
+  snow: SnowIcon,
+  fog: FogIcon,
+};
+
 // Choisit un nombre de colonnes (4 à 6) qui remplit la dernière rangée le
 // mieux possible pour N tuiles, plutôt qu'un nombre fixe qui laisse parfois
 // une rangée finale à moitié vide (ex. 10 tuiles sur 6 colonnes → 6 puis 4).
@@ -375,7 +457,7 @@ function VideoEmbed({ url, title }) {
   );
 }
 
-export default function LivretMenu({ property, slug, locale = "fr", isDemo = false }) {
+export default function LivretMenu({ property, slug, locale = "fr", isDemo = false, weather = null }) {
   const t = content[locale];
   const hints = tileHints[locale];
   const [active, setActive] = useState(null);
@@ -513,6 +595,30 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
 
   return (
     <div>
+      {weather && weather.length > 0 && (
+        <div className="mb-5 grid grid-cols-2 gap-3">
+          {weather.slice(0, 2).map((day, i) => {
+            const Icon = WEATHER_ICONS[day.condition] || CloudyIcon;
+            return (
+              <div
+                key={day.date}
+                className="flex items-center gap-3 rounded-2xl border border-sand-dim bg-sand-card px-4 py-3 md:rounded-xl"
+              >
+                <span className="shrink-0 text-[var(--host-accent-deep)]">
+                  <Icon />
+                </span>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-ink/50">{i === 0 ? t.today : t.tomorrow}</p>
+                  <p className="text-sm font-bold text-ink">
+                    {day.max}° <span className="font-normal text-ink/50">/ {day.min}°</span>
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       <div
         className="grid grid-cols-2 gap-4 sm:gap-3 tile-grid-wide"
         style={{ "--tile-cols": cols }}

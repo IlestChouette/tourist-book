@@ -12,7 +12,7 @@ const CITY_RATES = {
   antibes: { small: 100, large: 135 },
 };
 
-function normalizeCity(city) {
+export function normalizeCity(city) {
   return (city || "")
     .toString()
     .normalize("NFD")
