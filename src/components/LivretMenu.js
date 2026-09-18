@@ -40,6 +40,23 @@ const content = {
     demoHint: "* Le bouton « Vue hôte (démo) » n'existe pas sur un vrai livret — il vous montre ce que verrait l'hôte à la réception de ce check-in.",
     today: "Aujourd'hui",
     tomorrow: "Demain",
+    conditionLabels: {
+      clear: "Ensoleillé",
+      "cloudy-sun": "Éclaircies",
+      cloudy: "Nuageux",
+      rain: "Pluvieux",
+      storm: "Orageux",
+      snow: "Neige",
+      fog: "Brumeux",
+    },
+    outfitTip(condition, max) {
+      if (condition === "rain" || condition === "storm") return "Prends un parapluie, il pleut.";
+      if (condition === "snow") return "Sors ton manteau le plus chaud.";
+      if (max >= 26) return "Short et t-shirt, journée d'été.";
+      if (max >= 20) return "T-shirt dans la journée, un pull pour le soir.";
+      if (max >= 14) return "Un pull léger fera l'affaire.";
+      return "Prévois une veste chaude.";
+    },
   },
   en: {
     directions: "Directions",
@@ -72,6 +89,23 @@ const content = {
     demoHint: "* The \"Host view (demo)\" button doesn't exist on a real livret — it shows you what the host would see upon receiving this check-in.",
     today: "Today",
     tomorrow: "Tomorrow",
+    conditionLabels: {
+      clear: "Sunny",
+      "cloudy-sun": "Partly cloudy",
+      cloudy: "Cloudy",
+      rain: "Rainy",
+      storm: "Stormy",
+      snow: "Snowy",
+      fog: "Foggy",
+    },
+    outfitTip(condition, max) {
+      if (condition === "rain" || condition === "storm") return "Bring an umbrella, it's raining.";
+      if (condition === "snow") return "Grab your warmest coat.";
+      if (max >= 26) return "Shorts and a t-shirt, summer day.";
+      if (max >= 20) return "T-shirt by day, a light jumper for the evening.";
+      if (max >= 14) return "A light jumper will do.";
+      return "Plan for a warm jacket.";
+    },
   },
   es: {
     directions: "Cómo llegar",
@@ -104,6 +138,23 @@ const content = {
     demoHint: "* El botón «Vista del hotelero (demo)» no existe en un livret real — te muestra lo que vería el hotelero al recibir este check-in.",
     today: "Hoy",
     tomorrow: "Mañana",
+    conditionLabels: {
+      clear: "Soleado",
+      "cloudy-sun": "Parcialmente nublado",
+      cloudy: "Nublado",
+      rain: "Lluvioso",
+      storm: "Tormentoso",
+      snow: "Nieve",
+      fog: "Con niebla",
+    },
+    outfitTip(condition, max) {
+      if (condition === "rain" || condition === "storm") return "Lleva paraguas, va a llover.";
+      if (condition === "snow") return "Saca tu abrigo más grueso.";
+      if (max >= 26) return "Short y camiseta, día de verano.";
+      if (max >= 20) return "Camiseta de día, un suéter ligero para la noche.";
+      if (max >= 14) return "Con un suéter ligero va bien.";
+      return "Lleva una chaqueta abrigada.";
+    },
   },
 };
 
@@ -596,26 +647,32 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
   return (
     <div>
       {weather && weather.length > 0 && (
-        <div className="mb-5 grid grid-cols-2 gap-3">
-          {weather.slice(0, 2).map((day, i) => {
-            const Icon = WEATHER_ICONS[day.condition] || CloudyIcon;
-            return (
-              <div
-                key={day.date}
-                className="flex items-center gap-3 rounded-2xl border border-sand-dim bg-sand-card px-4 py-3 md:rounded-xl"
-              >
-                <span className="shrink-0 text-[var(--host-accent-deep)]">
-                  <Icon />
-                </span>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-ink/50">{i === 0 ? t.today : t.tomorrow}</p>
-                  <p className="text-sm font-bold text-ink">
-                    {day.max}° <span className="font-normal text-ink/50">/ {day.min}°</span>
-                  </p>
+        <div className="mb-5">
+          <div className="grid grid-cols-2 gap-3">
+            {weather.slice(0, 2).map((day, i) => {
+              const Icon = WEATHER_ICONS[day.condition] || CloudyIcon;
+              return (
+                <div
+                  key={day.date}
+                  className="flex items-center gap-3 rounded-2xl border border-sand-dim bg-sand-card px-4 py-3 md:rounded-xl"
+                >
+                  <span className="shrink-0 text-[var(--host-accent-deep)]">
+                    <Icon />
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wide text-ink/50">{i === 0 ? t.today : t.tomorrow}</p>
+                    <p className="text-sm font-bold text-ink">
+                      {day.max}° <span className="font-normal text-ink/50">/ {day.min}°</span>
+                    </p>
+                    <p className="text-xs text-ink/60">{t.conditionLabels[day.condition] || t.conditionLabels.cloudy}</p>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+          <p className="mt-3 rounded-2xl border border-sand-dim bg-sand-card px-4 py-2.5 text-center font-display italic text-sm text-ink/80 md:rounded-xl">
+            {t.outfitTip(weather[0].condition, weather[0].max)}
+          </p>
         </div>
       )}
 
