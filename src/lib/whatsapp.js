@@ -1,10 +1,11 @@
 const GRAPH_API_VERSION = "v25.0";
 
-// Envoie automatiquement chaque demande de transfert par WhatsApp aux
-// partenaires transport, via l'API WhatsApp Business (Meta Cloud API), depuis
-// le numéro Il est chouette en mode "coexistence" (le même numéro reste
-// utilisable dans l'app WhatsApp Business). Un message initié par
-// l'entreprise doit passer par un modèle ("template") approuvé par Meta.
+// Envoie automatiquement chaque demande de transfert par WhatsApp (API
+// WhatsApp Business, Meta Cloud API) à Fernando, qui la relaie au groupe des
+// transporteurs. L'envoi part d'un numéro dédié à l'API, pas du numéro Il est
+// chouette : l'enregistrer sur l'API le déconnecterait de l'app WhatsApp
+// Business. Un message initié par l'entreprise doit passer par un modèle
+// ("template") approuvé par Meta.
 // Modèle à soumettre (catégorie Utilité, langue fr, nom
 // "nouvelle_demande_transfert") — l'ordre des {{n}} doit rester celui de
 // `params` plus bas :
