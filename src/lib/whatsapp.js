@@ -1,4 +1,4 @@
-const GRAPH_API_VERSION = "v21.0";
+const GRAPH_API_VERSION = "v25.0";
 
 // Envoie automatiquement chaque demande de transfert par WhatsApp aux
 // partenaires transport, via l'API WhatsApp Business (Meta Cloud API), depuis
