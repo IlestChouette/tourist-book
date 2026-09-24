@@ -20,6 +20,11 @@ const GRAPH_API_VERSION = "v21.0";
 //   Tarif : {{10}}
 //   Remarques : {{11}}
 //
+//   Merci de confirmer la prise en charge.
+//
+// (Meta refuse un modèle qui commence ou finit par une variable, d'où la
+// dernière ligne fixe.)
+//
 // WHATSAPP_TRANSPORT_NUMBERS : numéros destinataires au format international
 // sans "+", séparés par des virgules (ex. "33612345678,33698765432").
 // Tant que les variables ne sont pas configurées, la fonction ne fait rien :
