@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fullAddress } from "@/lib/address";
-import { sendTransferRequestWhatsApp } from "@/lib/whatsapp";
+import { sendTransferWhatsApp } from "@/lib/whatsapp";
 import { sendTransferRequestNotification } from "@/lib/email";
 
 export async function GET(request) {
@@ -80,13 +80,18 @@ export async function POST(request) {
 
   if (type === "transfert") {
     try {
-      const result = await sendTransferRequestWhatsApp({ ...inserted, propertyName: property.name });
+      const result = await sendTransferWhatsApp({
+        propertyLabel: `${property.name} — ${fullAddress(property)}`,
+        nom: inserted.nom,
+        telephone: inserted.telephone,
+        details: inserted.details,
+      });
       if (result.sent) {
         await admin.from("requests").update({ whatsapp_sent: true }).eq("id", inserted.id);
       }
     } catch (err) {
       // Envoi WhatsApp best-effort : la demande est déjà enregistrée même si ça échoue.
-      console.error("sendTransferRequestWhatsApp failed:", err);
+      console.error("sendTransferWhatsApp failed:", err);
     }
 
     try {
