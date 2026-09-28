@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import TransferPricingEditor from "./TransferPricingEditor";
 
 const PICKUP_OPTIONS = [
   { key: "airport", label: "Aéroport Nice Côte d'Azur" },
@@ -10,7 +11,7 @@ const PICKUP_OPTIONS = [
   { key: "other", label: "Autre" },
 ];
 
-export default function TarifasClient({ properties }) {
+export default function TarifasClient({ properties, pricing }) {
   const [propertyId, setPropertyId] = useState(properties[0]?.id ?? "");
   const [rates, setRates] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -110,7 +111,14 @@ export default function TarifasClient({ properties }) {
           en lecture seule, sans pouvoir les modifier.
         </p>
 
-        <label className="mt-6 grid gap-1.5">
+        <TransferPricingEditor initial={pricing} />
+
+        <h2 className="mt-10 font-display italic text-2xl text-ink">Tarifs par logement</h2>
+        <p className="mt-1 text-sm text-ink/70">
+          Pour ajuster un logement précis, ou ajouter un tarif gare / autre lieu.
+        </p>
+
+        <label className="mt-4 grid gap-1.5">
           <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Logement</span>
           <select value={propertyId} onChange={(e) => setPropertyId(e.target.value)} className="input">
             {properties.map((p) => (
