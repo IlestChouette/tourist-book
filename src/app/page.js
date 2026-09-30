@@ -297,7 +297,6 @@ export async function generateMetadata() {
 export default async function Home() {
   const locale = await getLocale();
   const t = content[locale];
-  const dateLocale = { fr: "fr-FR", en: "en-GB", es: "es-ES" }[locale];
 
   const jsonLd = {
     "@context": "https://schema.org",

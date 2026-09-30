@@ -38,6 +38,7 @@ const dict = {
     photoOptional: "Photo (facultatif)",
     generalInfo: "Informations générales (facultatif)",
     generalInfoPlaceholder: "Ex : instructions de la climatisation, où sont les serviettes supplémentaires, comment marche la cafetière...",
+    generalInfoHint: "Pour tout ce qui n'a pas déjà sa propre section — les poubelles, les clés et les règles ont chacune leur champ un peu plus haut, inutile de les répéter ici.",
     localRecommendations: "Recommandations locales (facultatif)",
     localRecommendationsPlaceholder:
       "Vos vraies adresses : restaurants, plages, visites, toilettes publiques... L'assistant du livret s'en sert pour répondre aux hôtes. Ex : \"Le Bistrot du Port, petit resto de poisson à 5 min à pied, plutôt cher mais excellent. La plage de la Réserve est la plus tranquille du coin.\"",
@@ -89,6 +90,7 @@ const dict = {
     photoOptional: "Photo (optional)",
     generalInfo: "General information (optional)",
     generalInfoPlaceholder: "E.g.: air conditioning instructions, where the extra towels are, how the coffee maker works...",
+    generalInfoHint: "For anything that doesn't already have its own section — trash, keys and house rules each have their own field above, no need to repeat them here.",
     localRecommendations: "Local recommendations (optional)",
     localRecommendationsPlaceholder:
       "Your real picks: restaurants, beaches, sights, public restrooms... The livret's assistant uses this to answer guests. E.g.: \"Le Bistrot du Port, small seafood place 5 min walk, pricier but excellent. La Réserve beach is the quietest around.\"",
@@ -140,6 +142,7 @@ const dict = {
     photoOptional: "Foto (opcional)",
     generalInfo: "Información general (opcional)",
     generalInfoPlaceholder: "Ej: instrucciones del aire acondicionado, dónde están las toallas extra, cómo funciona la cafetera...",
+    generalInfoHint: "Para todo lo que no tenga ya su propia sección — la basura, las llaves y las normas de la casa tienen su propio campo más arriba, no hace falta repetirlas aquí.",
     localRecommendations: "Recomendaciones locales (opcional)",
     localRecommendationsPlaceholder:
       "Tus lugares reales: restaurantes, playas, sitios para visitar, baños públicos... El asistente del livret usa esto para responder a los huéspedes. Ej: \"Le Bistrot du Port, restaurante de pescado a 5 min caminando, algo caro pero excelente. La playa La Réserve es la más tranquila de la zona.\"",
