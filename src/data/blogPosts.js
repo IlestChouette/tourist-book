@@ -413,6 +413,107 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: "location-linge-airbnb-alpes-maritimes-draps-serviettes",
+    title: "Draps et serviettes en location courte durée : acheter ou louer son linge dans les Alpes-Maritimes ?",
+    metaDescription:
+      "Acheter son linge ou le louer ? Avantages, limites et questions à poser, avec des prestataires de location de linge dans les Alpes-Maritimes (Nice, Cannes, Antibes, Menton, Grasse).",
+    excerpt: "Beaucoup d'hôtes achètent leurs draps sans savoir que des entreprises les louent, lavés et repassés — voici comment choisir.",
+    publishedAt: "2026-09-30",
+    blocks: [
+      {
+        type: "lead",
+        text: "Une location courte durée, c'est des draps et des serviettes à laver, sécher, repasser et remettre en place à chaque départ. La plupart des hôtes achètent leur linge et s'en occupent eux-mêmes ; beaucoup ignorent que des entreprises le louent, propre et repassé, livré avant chaque arrivée.",
+      },
+      {
+        type: "compare",
+        left: {
+          title: "Acheter et laver soi-même",
+          items: [
+            "Un investissement de départ, puis un stock à renouveler quand il s'use",
+            "Machines, séchage et repassage à chaque rotation",
+            "Un jeu de rechange à prévoir pour les arrivées le jour même",
+            "Du temps (ou une femme de ménage) qui passe dans la lessive",
+          ],
+        },
+        right: {
+          title: "Louer le linge à un prestataire",
+          items: [
+            "Un coût en plus à chaque séjour, mais pas de stock à acheter",
+            "Linge lavé, repassé et livré selon votre planning",
+            "Le prestataire remplace le linge usé, pas vous",
+            "Un rendu constant : des draps et serviettes toujours impeccables",
+          ],
+        },
+      },
+      {
+        type: "text",
+        heading: "Quand la location devient intéressante",
+        paragraphs: [
+          "Plus vous enchaînez de séjours courts, plus le linge pèse dans votre temps. Avec plusieurs logements, les arrivées et les départs le même jour, ou une saison très chargée, la lessive et le repassage deviennent le vrai goulot d'étranglement — et c'est là qu'un prestataire se justifie.",
+          "C'est un coût de plus : à vous de le comparer, tarifs en main, avec ce que vous coûtent vos propres machines, l'électricité, le temps de repassage et le renouvellement du stock.",
+        ],
+      },
+      {
+        type: "icons",
+        items: [
+          {
+            icon: ShieldIcon,
+            title: "Quelle qualité de linge ?",
+            text: "Demandez le grammage et la matière des draps et serviettes, et si vous pouvez voir un échantillon avant de vous engager.",
+          },
+          {
+            icon: CarIcon,
+            title: "Livraison et reprise",
+            text: "Jours et créneaux de passage, délai en cas de rotation le jour même, livraison dans l'appartement ou à une adresse relais.",
+          },
+          {
+            icon: BookIcon,
+            title: "Comment c'est facturé ?",
+            text: "Au kit de lit, à la pièce ou à l'abonnement ? Un dépôt de garantie ? Un minimum de kits ? Demandez tout par écrit.",
+          },
+          {
+            icon: ChatIcon,
+            title: "Que se passe-t-il en cas de tache ?",
+            text: "Linge taché, abîmé ou perdu : qui paie, et à partir de quand ? C'est la ligne que personne ne lit avant le premier problème.",
+          },
+          {
+            icon: CompassIcon,
+            title: "Votre zone est-elle couverte ?",
+            text: "Nice n'est pas Menton : vérifiez que la livraison couvre bien votre commune, y compris en haute saison.",
+          },
+          {
+            icon: WifiIcon,
+            title: "Accepte-t-il les locations meublées ?",
+            text: "Certains prestataires travaillent surtout pour l'hôtellerie et la restauration : confirmez qu'ils prennent de petits volumes.",
+          },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quelques prestataires dans les Alpes-Maritimes",
+        paragraphs: [
+          "White and Clean (whiteandclean.fr) : nettoyage professionnel et location de linge haut de gamme — draps, housses, taies et serviettes, lavés, repassés et livrés selon le planning des voyageurs. Zones annoncées : Nice, Cannes, Antibes, Monaco, Menton et Grasse.",
+          "Fée Mon Linge (feemonlinge.fr) : blanchisserie, pressing et location de linge à Cannes (La Bocca), avec service de collecte et livraison.",
+          "Blanc Signature (blancsignature.fr) : linge hôtelier livré et installé dans des villas et appartements de la Côte d'Azur.",
+          "Crystal Blanc (Grasse) : location et entretien de linge pour les professionnels de l'hôtellerie et de la restauration — à contacter pour savoir s'ils travaillent avec les locations meublées.",
+          "KEYS Conciergerie (keys-conciergerie.fr) : gère le linge complet (collecte, lavage, repassage, livraison, mise en place) à Nice, Antibes, Cannes et aux alentours, mais dans le cadre de sa conciergerie — ce n'est pas un service de location seule.",
+        ],
+      },
+      {
+        type: "steps",
+        items: [
+          { n: "1", title: "Comptez vos rotations", text: "Nombre de séjours par mois, nombre de lits : c'est la base de tout devis." },
+          { n: "2", title: "Demandez 2 ou 3 devis", text: "Même volume, même période, mêmes questions — sinon les prix ne se comparent pas." },
+          { n: "3", title: "Testez sur un logement", text: "Un mois sur un seul appartement, avant de tout confier." },
+        ],
+      },
+      {
+        type: "note",
+        text: "Prestataires cités d'après leurs sites publics à la date de publication, à titre d'information et sans partenariat avec Tourist Book. Tarifs, zones et conditions changent : vérifiez directement auprès de chaque entreprise.",
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
