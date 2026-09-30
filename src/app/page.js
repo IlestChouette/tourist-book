@@ -517,19 +517,24 @@ export default async function Home() {
           ))}
         </div>
         <div className="mt-8 text-center">
-          <ContactButton locale={locale} />
+          <ContactButton locale={locale} variant="solid" />
         </div>
       </section>
 
       <section className="bg-aqua-deep py-16 text-center">
         <h2 className="font-display italic text-3xl text-[#f7f1e4]">{t.finalCtaTitle}</h2>
-        <Link
-          href="/panel/registro"
-          className="mt-6 inline-block rounded bg-terracotta px-7 py-3.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
-        >
-          {t.ctaPrimary}
-        </Link>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-4 px-6">
+          <Link
+            href="/panel/registro"
+            className="inline-block rounded bg-terracotta px-7 py-3.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
+          >
+            {t.ctaPrimary}
+          </Link>
+          <ContactButton locale={locale} variant="dark" />
+        </div>
       </section>
+
+      <ContactButton locale={locale} variant="floating" />
     </main>
   );
 }

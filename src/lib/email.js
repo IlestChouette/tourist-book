@@ -61,7 +61,7 @@ const CONTACT_NOTIFICATION_EMAIL = "allo@ilestchouette.fr";
 
 // Notifie Fernando dès qu'un futur client remplit le formulaire de contact
 // de la landing page.
-export async function sendContactLeadNotification({ name, phone, email, propertiesCount }) {
+export async function sendContactLeadNotification({ name, phone, email, propertiesCount, message }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return { sent: false, reason: "not_configured" };
 
@@ -74,6 +74,7 @@ export async function sendContactLeadNotification({ name, phone, email, properti
     `Téléphone : ${phone}`,
     `Email : ${email}`,
     `Logements gérés : ${propertiesCount ?? "-"}`,
+    ...(message ? ["", "Message :", message] : []),
   ];
 
   const subject = `Nouveau contact — ${name}`;
