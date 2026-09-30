@@ -72,3 +72,12 @@ export function BookIcon() {
     </svg>
   );
 }
+
+export function MailIcon() {
+  return (
+    <svg {...iconProps} width="22" height="22">
+      <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+      <path d="M4 7.5l8 6 8-6" />
+    </svg>
+  );
+}

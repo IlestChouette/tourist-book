@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Hero from "@/components/Hero";
 import { useClientLocale } from "@/lib/i18n/clientLocale";
+import { authErrorMessage } from "@/lib/authErrors";
 
 const content = {
   fr: {
@@ -16,6 +17,10 @@ const content = {
     submitting: "Connexion…",
     submit: "Entrer →",
     error: "Email ou mot de passe incorrect.",
+    confirmError:
+      "Ce lien de confirmation a déjà été utilisé ou a expiré. Si votre compte est déjà activé, connectez-vous ci-dessous.",
+    resend: "Renvoyer l'email de confirmation",
+    resent: "Email de confirmation renvoyé. Vérifiez aussi vos spams.",
     noAccount: "Vous n'avez pas encore de compte ?",
     register: "Inscrivez-vous",
   },
@@ -27,6 +32,10 @@ const content = {
     submitting: "Logging in…",
     submit: "Log in →",
     error: "Incorrect email or password.",
+    confirmError:
+      "This confirmation link has already been used or has expired. If your account is already active, log in below.",
+    resend: "Resend the confirmation email",
+    resent: "Confirmation email resent. Check your spam folder too.",
     noAccount: "Don't have an account yet?",
     register: "Sign up",
   },
@@ -38,6 +47,10 @@ const content = {
     submitting: "Entrando…",
     submit: "Entrar →",
     error: "Email o contraseña incorrectos.",
+    confirmError:
+      "Este enlace de confirmación ya se usó o ha caducado. Si tu cuenta ya está activa, inicia sesión abajo.",
+    resend: "Reenviar el email de confirmación",
+    resent: "Email de confirmación reenviado. Revisa también el spam.",
     noAccount: "¿Todavía no tienes cuenta?",
     register: "Regístrate",
   },
@@ -52,6 +65,9 @@ export default function LoginForm() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [needsConfirm, setNeedsConfirm] = useState(false);
+  const [resent, setResent] = useState(false);
+  const confirmError = searchParams.get("confirm") === "error";
 
   function update(field) {
     return (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -70,17 +86,35 @@ export default function LoginForm() {
 
     if (signInError) {
       setSending(false);
-      setError(t.error);
+      setNeedsConfirm(signInError.code === "email_not_confirmed");
+      setError(authErrorMessage(signInError, locale));
       return;
     }
 
     window.location.href = next;
   }
 
+  async function resendConfirmation() {
+    const supabase = createClient();
+    const { error: resendErr } = await supabase.auth.resend({
+      type: "signup",
+      email: form.email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/confirm` },
+    });
+    if (resendErr) {
+      setError(authErrorMessage(resendErr, locale));
+      return;
+    }
+    setResent(true);
+  }
+
   return (
     <main className="flex-1">
       <Hero backHref="/" backLabel={t.home} eyebrow="Tourist Book" title={t.title} />
       <section className="mx-auto max-w-sm px-6 py-10">
+        {confirmError && (
+          <p className="mb-5 rounded border border-sand-dim bg-sand-card p-3 text-sm text-ink/80">{t.confirmError}</p>
+        )}
         <form onSubmit={handleSubmit} className="grid gap-4">
           <label className="grid gap-1.5">
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.email}</span>
@@ -104,6 +138,16 @@ export default function LoginForm() {
             {sending ? t.submitting : t.submit}
           </button>
           {error && <p className="text-sm text-terracotta-deep">{error}</p>}
+          {needsConfirm && !resent && (
+            <button
+              type="button"
+              onClick={resendConfirmation}
+              className="justify-self-start text-sm font-bold text-aqua-deep underline-offset-4 hover:underline"
+            >
+              {t.resend}
+            </button>
+          )}
+          {resent && <p className="text-sm text-aqua-deep">{t.resent}</p>}
         </form>
         <p className="mt-4 text-sm text-ink/70">
           {t.noAccount}{" "}
