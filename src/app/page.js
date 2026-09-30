@@ -3,7 +3,6 @@ import Image from "next/image";
 import ContactButton from "@/components/ContactButton";
 import PricingCards from "@/components/PricingCards";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import GuestbookPreview from "@/components/GuestbookPreview";
 import { getLocale } from "@/lib/i18n/locale";
 import { WifiIcon, CompassIcon, CarIcon, ChatIcon, ShieldIcon, LogoIcon, BookIcon } from "@/components/icons";
 
@@ -47,11 +46,6 @@ const content = {
     afterText:
       "Un seul lien, mis à jour à l'instant, en trois langues, à vos couleurs — et le check-in fait avant même l'arrivée de vos hôtes.",
     featuresTitle: "Tout ce dont votre hôte a besoin",
-    guestbookTitle: "Un livre d'or pour chaque logement",
-    guestbookText:
-      "Vos voyageurs laissent un message depuis le livret, sans rien installer ni créer de compte. Les messages restent dans le livret : les voyageurs suivants les retrouvent.",
-    guestbookLabel: "Livre d'or",
-    guestbookCaption: "Exemple tiré du livret de démonstration.",
     phoneAlt: "Aperçu du livret d'accueil Tourist Book affiché sur un téléphone",
     demoLink: "Essayer le livret de démonstration →",
     features: [
@@ -139,11 +133,6 @@ const content = {
     afterText:
       "One single link, updated instantly, in three languages, with your branding — and check-in done before your guests even arrive.",
     featuresTitle: "Everything your guest needs",
-    guestbookTitle: "A guestbook for every property",
-    guestbookText:
-      "Your guests leave a message from the livret, with nothing to install and no account to create. The messages stay in the livret, so the next guests can read them.",
-    guestbookLabel: "Guestbook",
-    guestbookCaption: "Example from the demo livret.",
     phoneAlt: "Preview of a Tourist Book digital welcome book shown on a phone",
     demoLink: "Try the demo livret →",
     features: [
@@ -231,11 +220,6 @@ const content = {
     afterText:
       "Un único enlace, actualizado al instante, en tres idiomas, con tu logo — y el check-in hecho antes de que lleguen tus huéspedes.",
     featuresTitle: "Todo lo que necesita tu huésped",
-    guestbookTitle: "Un libro de oro para cada alojamiento",
-    guestbookText:
-      "Tus huéspedes dejan un mensaje desde el livret, sin instalar nada ni crear una cuenta. Los mensajes se quedan en el livret y los siguientes huéspedes pueden leerlos.",
-    guestbookLabel: "Libro de oro",
-    guestbookCaption: "Ejemplo del livret de demostración.",
     phoneAlt: "Vista previa del livret de acogida de Tourist Book en un teléfono",
     demoLink: "Probar el livret de demostración →",
     features: [
@@ -483,17 +467,6 @@ export default async function Home() {
                 </div>
               </div>
             ))}
-          </div>
-
-          <div className="mt-20 grid items-center gap-10 md:grid-cols-2">
-            <div>
-              <h3 className="font-display italic text-3xl text-ink">{t.guestbookTitle}</h3>
-              <p className="mt-3 max-w-md text-ink/70">{t.guestbookText}</p>
-            </div>
-            <div>
-              <GuestbookPreview label={t.guestbookLabel} dateLocale={dateLocale} />
-              <p className="mt-2 text-center text-xs text-ink/50">{t.guestbookCaption}</p>
-            </div>
           </div>
         </div>
       </section>
