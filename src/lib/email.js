@@ -533,3 +533,40 @@ export async function sendPasswordResetEmail({ to, link, locale = "fr" }) {
   await logEmail({ recipient: to, subject: copy.subject, template: "password_reset", status: "sent" });
   return { sent: true };
 }
+
+export async function sendProfilePhoneRequestEmail({ to, name }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const subject = "Ajoutez votre numéro de téléphone à votre compte Tourist Book";
+  const hello = name && !name.includes("@") ? `Bonjour ${name},` : "Bonjour,";
+  const text = [
+    hello,
+    "",
+    "Votre compte Tourist Book est bien actif et votre adresse email est confirmée.",
+    "",
+    "Pour que nous puissions vous aider à créer votre premier livret d'accueil (ou vous joindre en cas de besoin), ajoutez votre numéro de téléphone dans votre profil, en 10 secondes :",
+    "",
+    "https://tourist-book.com/panel/perfil",
+    "",
+    "Si vous avez des questions, n'hésitez pas à nous écrire : répondez simplement à cet email.",
+    "",
+    "À très vite,",
+    "Fernando — Tourist Book",
+  ].join("\n");
+
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: "Fernando de Tourist Book <notifications@tourist-book.com>",
+    to,
+    replyTo: CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text,
+  });
+  if (error) {
+    await logEmail({ recipient: to, subject, template: "profile_phone_request", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+  await logEmail({ recipient: to, subject, template: "profile_phone_request", status: "sent" });
+  return { sent: true };
+}

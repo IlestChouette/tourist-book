@@ -16,9 +16,11 @@ const content = {
     logo: "Logo",
     noLogo: "Pas de logo",
     name: "Nom",
+    phone: "Téléphone",
+    phoneHint: "Pour que nous puissions vous joindre (aide à la mise en route, urgences).",
     save: "Enregistrer",
     logoUpdated: "Logo mis à jour.",
-    nameSaved: "Nom enregistré.",
+    nameSaved: "Profil enregistré.",
   },
   en: {
     panel: "Panel",
@@ -29,9 +31,11 @@ const content = {
     logo: "Logo",
     noLogo: "No logo",
     name: "Name",
+    phone: "Phone",
+    phoneHint: "So we can reach you (setup help, urgent matters).",
     save: "Save",
     logoUpdated: "Logo updated.",
-    nameSaved: "Name saved.",
+    nameSaved: "Profile saved.",
   },
   es: {
     panel: "Panel",
@@ -42,9 +46,11 @@ const content = {
     logo: "Logo",
     noLogo: "Sin logo",
     name: "Nombre",
+    phone: "Teléfono",
+    phoneHint: "Para poder contactarte (ayuda con la puesta en marcha, urgencias).",
     save: "Guardar",
     logoUpdated: "Logo actualizado.",
-    nameSaved: "Nombre guardado.",
+    nameSaved: "Perfil guardado.",
   },
 };
 
@@ -54,6 +60,7 @@ export default function PerfilPage() {
 
   const [userId, setUserId] = useState(null);
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [logoUrl, setLogoUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -69,6 +76,7 @@ export default function PerfilPage() {
 
       const { data: host } = await supabase.from("hosts").select("*").eq("id", user.id).single();
       setName(host?.name ?? "");
+      setPhone(host?.phone ?? "");
       setLogoUrl(host?.logo_url ?? null);
       setLoading(false);
     }
@@ -100,7 +108,7 @@ export default function PerfilPage() {
     setSaving(true);
     setMessage("");
     const supabase = createClient();
-    const { error } = await supabase.from("hosts").update({ name }).eq("id", userId);
+    const { error } = await supabase.from("hosts").update({ name, phone: phone.trim() || null }).eq("id", userId);
     setSaving(false);
     setMessage(error ? error.message : t.nameSaved);
   }
@@ -145,6 +153,17 @@ export default function PerfilPage() {
           <label className="grid gap-1.5">
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.name}</span>
             <input value={name} onChange={(e) => setName(e.target.value)} className="input" />
+          </label>
+          <label className="grid gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink/60">{t.phone}</span>
+            <input
+              type="tel"
+              autoComplete="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="input"
+            />
+            <span className="text-xs text-ink/50">{t.phoneHint}</span>
           </label>
           <button
             type="submit"
