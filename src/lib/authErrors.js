@@ -10,6 +10,7 @@ const messages = {
     email_not_confirmed:
       "Votre email n'est pas encore confirmé. Ouvrez le lien que nous vous avons envoyé (pensez à vérifier vos spams).",
     invalid_credentials: "Email ou mot de passe incorrect.",
+    same_password: "Choisissez un mot de passe différent de l'ancien.",
     over_email_send_rate_limit: "Trop d'emails envoyés pour le moment. Réessayez dans une minute.",
     over_request_rate_limit: "Trop de tentatives. Réessayez dans une minute.",
     fallback: "Une erreur est survenue. Réessayez dans un instant, ou écrivez-nous si le problème continue.",
@@ -22,6 +23,7 @@ const messages = {
     email_not_confirmed:
       "Your email isn't confirmed yet. Open the link we sent you (check your spam folder too).",
     invalid_credentials: "Incorrect email or password.",
+    same_password: "Choose a password different from the old one.",
     over_email_send_rate_limit: "Too many emails sent right now. Try again in a minute.",
     over_request_rate_limit: "Too many attempts. Try again in a minute.",
     fallback: "Something went wrong. Try again in a moment, or write to us if it keeps happening.",
@@ -34,6 +36,7 @@ const messages = {
     email_not_confirmed:
       "Tu email todavía no está confirmado. Abre el enlace que te enviamos (revisa también el spam).",
     invalid_credentials: "Email o contraseña incorrectos.",
+    same_password: "Elige una contraseña distinta de la anterior.",
     over_email_send_rate_limit: "Demasiados emails enviados ahora mismo. Inténtalo de nuevo en un minuto.",
     over_request_rate_limit: "Demasiados intentos. Inténtalo de nuevo en un minuto.",
     fallback: "Ocurrió un error. Inténtalo de nuevo en un momento, o escríbenos si sigue pasando.",

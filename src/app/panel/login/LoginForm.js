@@ -21,6 +21,7 @@ const content = {
       "Ce lien de confirmation a déjà été utilisé ou a expiré. Si votre compte est déjà activé, connectez-vous ci-dessous.",
     resend: "Renvoyer l'email de confirmation",
     resent: "Email de confirmation renvoyé. Vérifiez aussi vos spams.",
+    forgot: "Mot de passe oublié ?",
     noAccount: "Vous n'avez pas encore de compte ?",
     register: "Inscrivez-vous",
   },
@@ -36,6 +37,7 @@ const content = {
       "This confirmation link has already been used or has expired. If your account is already active, log in below.",
     resend: "Resend the confirmation email",
     resent: "Confirmation email resent. Check your spam folder too.",
+    forgot: "Forgot your password?",
     noAccount: "Don't have an account yet?",
     register: "Sign up",
   },
@@ -51,6 +53,7 @@ const content = {
       "Este enlace de confirmación ya se usó o ha caducado. Si tu cuenta ya está activa, inicia sesión abajo.",
     resend: "Reenviar el email de confirmación",
     resent: "Email de confirmación reenviado. Revisa también el spam.",
+    forgot: "¿Olvidaste tu contraseña?",
     noAccount: "¿Todavía no tienes cuenta?",
     register: "Regístrate",
   },
@@ -148,6 +151,9 @@ export default function LoginForm() {
             </button>
           )}
           {resent && <p className="text-sm text-aqua-deep">{t.resent}</p>}
+          <Link href="/panel/olvide-password" className="justify-self-start text-sm font-bold text-aqua-deep">
+            {t.forgot}
+          </Link>
         </form>
         <p className="mt-4 text-sm text-ink/70">
           {t.noAccount}{" "}

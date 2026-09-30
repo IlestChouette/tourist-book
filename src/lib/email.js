@@ -458,3 +458,78 @@ export async function sendIndependentTransferRequest({ nom, telephone, date, heu
   await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "independent_transfer_request", status: "sent" });
   return { sent: true };
 }
+
+const PASSWORD_RESET_COPY = {
+  fr: {
+    subject: "Réinitialisez votre mot de passe Tourist Book",
+    body: (link) => [
+      "Bonjour,",
+      "",
+      "Vous avez demandé à réinitialiser votre mot de passe Tourist Book. Cliquez sur ce lien pour en choisir un nouveau :",
+      "",
+      link,
+      "",
+      "Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet email : votre mot de passe reste inchangé.",
+      "",
+      "À très vite,",
+      "L'équipe Tourist Book",
+    ],
+  },
+  en: {
+    subject: "Reset your Tourist Book password",
+    body: (link) => [
+      "Hello,",
+      "",
+      "You asked to reset your Tourist Book password. Click this link to choose a new one:",
+      "",
+      link,
+      "",
+      "If you didn't ask for this, just ignore this email: your password stays unchanged.",
+      "",
+      "See you soon,",
+      "The Tourist Book team",
+    ],
+  },
+  es: {
+    subject: "Restablece tu contraseña de Tourist Book",
+    body: (link) => [
+      "Hola,",
+      "",
+      "Has pedido restablecer tu contraseña de Tourist Book. Haz clic en este enlace para elegir una nueva:",
+      "",
+      link,
+      "",
+      "Si no lo has pedido tú, ignora este email: tu contraseña no cambia.",
+      "",
+      "Hasta pronto,",
+      "El equipo de Tourist Book",
+    ],
+  },
+};
+
+// Lien de réinitialisation du mot de passe, envoyé depuis notre propre domaine
+// (Resend) plutôt que par le modèle d'email de Supabase : le lien pointe vers
+// tourist-book.com, et rien ne dépend d'un réglage fait à la main dans le
+// dashboard Supabase.
+export async function sendPasswordResetEmail({ to, link, locale = "fr" }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const copy = PASSWORD_RESET_COPY[locale] ?? PASSWORD_RESET_COPY.fr;
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to,
+    replyTo: CONTACT_NOTIFICATION_EMAIL,
+    subject: copy.subject,
+    text: copy.body(link).join("\n"),
+  });
+
+  if (error) {
+    await logEmail({ recipient: to, subject: copy.subject, template: "password_reset", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+
+  await logEmail({ recipient: to, subject: copy.subject, template: "password_reset", status: "sent" });
+  return { sent: true };
+}

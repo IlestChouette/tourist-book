@@ -12,13 +12,22 @@ import { sendHostSignupNotification } from "@/lib/email";
 // Deux formes de lien : token_hash (celui du modèle d'email, fonctionne depuis
 // n'importe quel navigateur ou app mail) et code (lien PKCE par défaut de
 // Supabase, qui exige le même navigateur que l'inscription).
-const CONFIRMABLE_TYPES = ["signup", "email"];
+const CONFIRMABLE_TYPES = ["signup", "email", "recovery"];
+
+// Redirection après validation : uniquement un chemin interne du panel, pour
+// qu'un lien piégé ne puisse pas renvoyer l'hôtelier vers un autre site.
+function safeNext(value) {
+  return typeof value === "string" && value.startsWith("/panel") && !value.includes("//") && !value.includes("\\")
+    ? value
+    : "/panel";
+}
 
 export async function GET(request) {
   const { searchParams, origin } = new URL(request.url);
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
   const code = searchParams.get("code");
+  const next = safeNext(searchParams.get("next"));
 
   const supabase = await createClient();
   let error = null;
@@ -39,7 +48,7 @@ export async function GET(request) {
   } = await supabase.auth.getUser();
   if (user) await ensureHostProfile(user);
 
-  return NextResponse.redirect(new URL("/panel", origin));
+  return NextResponse.redirect(new URL(next, origin));
 }
 
 async function ensureHostProfile(user) {
