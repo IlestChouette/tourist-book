@@ -52,6 +52,8 @@ const content = {
       "Vos voyageurs laissent un message depuis le livret, sans rien installer ni créer de compte. Les messages restent dans le livret : les voyageurs suivants les retrouvent.",
     guestbookLabel: "Livre d'or",
     guestbookCaption: "Exemple tiré du livret de démonstration.",
+    phoneAlt: "Aperçu du livret d'accueil Tourist Book affiché sur un téléphone",
+    demoLink: "Essayer le livret de démonstration →",
     features: [
       { title: "Wifi et horaires en un instant", desc: "Mot de passe, arrivée, départ, itinéraire et stationnement — vos hôtes trouvent tout seuls, à toute heure." },
       { title: "Guide local avec recherche", desc: "Vos recommandations de restaurants, plages et musées, classées par catégorie." },
@@ -142,6 +144,8 @@ const content = {
       "Your guests leave a message from the livret, with nothing to install and no account to create. The messages stay in the livret, so the next guests can read them.",
     guestbookLabel: "Guestbook",
     guestbookCaption: "Example from the demo livret.",
+    phoneAlt: "Preview of a Tourist Book digital welcome book shown on a phone",
+    demoLink: "Try the demo livret →",
     features: [
       { title: "Wifi and schedules, instantly", desc: "Password, check-in, check-out, directions and parking — guests find it all themselves, any time of day." },
       { title: "Local guide with search", desc: "Your restaurant, beach and museum recommendations, organized by category." },
@@ -232,6 +236,8 @@ const content = {
       "Tus huéspedes dejan un mensaje desde el livret, sin instalar nada ni crear una cuenta. Los mensajes se quedan en el livret y los siguientes huéspedes pueden leerlos.",
     guestbookLabel: "Libro de oro",
     guestbookCaption: "Ejemplo del livret de demostración.",
+    phoneAlt: "Vista previa del livret de acogida de Tourist Book en un teléfono",
+    demoLink: "Probar el livret de demostración →",
     features: [
       { title: "Wifi y horarios al instante", desc: "Contraseña, llegada, salida, cómo llegar y aparcamiento — tus huéspedes lo encuentran solos, a cualquier hora." },
       { title: "Guía local con buscador", desc: "Tus recomendaciones de restaurantes, playas y museos, organizadas por categoría." },
@@ -381,26 +387,70 @@ export default async function Home() {
       </header>
 
       <section className="relative overflow-hidden bg-aqua-deep">
-        <div className="mx-auto max-w-3xl px-6 pb-20 pt-6 text-center sm:pb-28 sm:pt-8">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#f7f1e4]/80">{t.eyebrow}</span>
-          <h1 className="mt-5 font-display italic text-4xl leading-tight text-[#f7f1e4] sm:text-5xl">{t.title}</h1>
-          <p className="mx-auto mt-5 max-w-xl text-lg text-[#f7f1e4]/90">{t.subtitle}</p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/panel/registro"
-              className="rounded bg-terracotta px-6 py-3.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
-            >
-              {t.ctaPrimary}
-            </Link>
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 pb-16 pt-6 sm:pt-8 lg:grid-cols-2 lg:gap-10 lg:pb-20">
+          <div className="text-center lg:text-left">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#f7f1e4]/80">{t.eyebrow}</span>
+            <h1 className="mt-5 font-display italic text-4xl leading-tight text-[#f7f1e4] sm:text-5xl">{t.title}</h1>
+            <p className="mx-auto mt-5 max-w-xl text-lg text-[#f7f1e4]/90 lg:mx-0">{t.subtitle}</p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+              <Link
+                href="/panel/registro"
+                className="rounded bg-terracotta px-6 py-3.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
+              >
+                {t.ctaPrimary}
+              </Link>
+              <a
+                href="#planes"
+                className="rounded border border-[#f7f1e4]/40 px-6 py-3.5 font-bold text-[#f7f1e4] transition-colors hover:border-[#f7f1e4]"
+              >
+                {t.ctaSecondary}
+              </a>
+            </div>
+            <p className="mx-auto mt-5 max-w-sm text-xs font-bold tracking-wide text-[#f7f1e4]/70 lg:mx-0">{t.priceNote}</p>
+            <p className="mx-auto mt-3 max-w-md text-sm text-[#f7f1e4]/80 lg:mx-0">✓ {t.legalBadge}</p>
+          </div>
+
+          <div className="text-center">
             <a
-              href="#planes"
-              className="rounded border border-[#f7f1e4]/40 px-6 py-3.5 font-bold text-[#f7f1e4] transition-colors hover:border-[#f7f1e4]"
+              href="/logement/exemple/entrer?code=0000"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t.demoLink}
+              className="relative flex justify-center"
             >
-              {t.ctaSecondary}
+              <span className="absolute inset-x-0 inset-y-10 overflow-hidden rounded-3xl shadow-xl">
+                <Image
+                  src="/hero-apartment.jpg"
+                  alt=""
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 40vw, 90vw"
+                  className="object-cover object-[35%_50%]"
+                />
+                <span className="absolute inset-0 bg-[#12202a]/15" />
+              </span>
+              <span className="relative w-[230px] rounded-[2.6rem] bg-[#12202a] p-2.5 shadow-2xl ring-1 ring-white/10 sm:w-[250px] lg:w-[260px]">
+                <span className="absolute left-1/2 top-[18px] z-10 h-[18px] w-[64px] -translate-x-1/2 rounded-full bg-[#12202a]" />
+                <Image
+                  src="/livret-phone.jpg"
+                  alt={t.phoneAlt}
+                  width={750}
+                  height={1800}
+                  priority
+                  sizes="260px"
+                  className="block h-auto w-full rounded-[2.1rem]"
+                />
+              </span>
+            </a>
+            <a
+              href="/logement/exemple/entrer?code=0000"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-block text-sm font-bold text-[#f7f1e4] underline-offset-4 hover:underline"
+            >
+              {t.demoLink}
             </a>
           </div>
-          <p className="mx-auto mt-5 max-w-sm text-xs font-bold tracking-wide text-[#f7f1e4]/70">{t.priceNote}</p>
-          <p className="mx-auto mt-3 max-w-md text-sm text-[#f7f1e4]/80">✓ {t.legalBadge}</p>
         </div>
         <div className="stripe-band" />
       </section>
