@@ -1,12 +1,11 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import Hero from "@/components/Hero";
+import { HotelFooter, HotelHeader } from "@/components/HotelShell";
 import { getHotelContext } from "@/lib/hotelAuth";
 import { loadDay, loadMeta } from "@/lib/hotelData";
 import { parisDate } from "@/lib/hotelTime";
 import CahierClient from "./CahierClient";
 
-export const metadata = { robots: { index: false, follow: false } };
+export const metadata = { title: "Cahier de consignes", robots: { index: false, follow: false } };
 
 export default async function CahierPage() {
   const ctx = await getHotelContext();
@@ -17,17 +16,19 @@ export default async function CahierPage() {
   const [items, meta] = await Promise.all([loadDay(ctx.hotel.id, today, isManager), loadMeta(ctx.hotel.id)]);
 
   return (
-    <main className="flex-1">
-      <div className="print:hidden">
-        <Hero
-          backHref={isManager ? "/hotel/gestion" : "/hotel"}
-          backLabel={isManager ? "Gestion" : "Espace hôtels"}
-          eyebrow="Cahier de consignes"
-          title={ctx.hotel.name}
-          logo={ctx.hotel.logo_url}
-        />
-      </div>
-      <section className="mx-auto max-w-3xl px-6 py-8">
+    <main className="flex-1 bg-sand-card/50">
+      <HotelHeader
+        hotel={ctx.hotel}
+        links={
+          isManager
+            ? [
+                { href: "/hotel/statistiques", label: "Statistiques" },
+                { href: "/hotel/gestion", label: "Gestion" },
+              ]
+            : [{ href: "/hotel/connexion", label: "Espace manager" }]
+        }
+      />
+      <section className="mx-auto max-w-6xl px-6 py-8">
         <CahierClient
           hotelName={ctx.hotel.name}
           mode={ctx.mode}
@@ -36,12 +37,8 @@ export default async function CahierPage() {
           tags={meta.tags}
           places={meta.places}
         />
-        {!isManager && (
-          <p className="mt-10 text-center text-xs text-ink/40 print:hidden">
-            <Link href="/hotel/connexion">Espace manager</Link>
-          </p>
-        )}
       </section>
+      <HotelFooter />
     </main>
   );
 }

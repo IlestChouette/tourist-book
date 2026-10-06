@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import Hero from "@/components/Hero";
+import { HotelFooter, HotelHeader } from "@/components/HotelShell";
 import { getHotelContext } from "@/lib/hotelAuth";
 import { KIND_LABELS, loadMeta } from "@/lib/hotelData";
 import { addDays, parisDate } from "@/lib/hotelTime";
 
-export const metadata = { robots: { index: false, follow: false } };
+export const metadata = { title: "Statistiques du cahier", robots: { index: false, follow: false } };
 
 const PERIODS = { "7": "7 jours", "30": "30 jours", "90": "90 jours", "365": "12 mois" };
 const KIND_FILTERS = { all: "Tout", problemes: "Problèmes et plaintes", probleme: "Problèmes", plainte: "Plaintes" };
@@ -96,8 +96,8 @@ export default async function StatistiquesPage({ searchParams }) {
   );
 
   return (
-    <main className="flex-1">
-      <Hero backHref="/hotel/gestion" backLabel="Gestion" eyebrow={ctx.hotel.name} title="Statistiques" logo={ctx.hotel.logo_url} />
+    <main className="flex-1 bg-sand-card/50">
+      <HotelHeader hotel={ctx.hotel} title="Statistiques" links={[{ href: "/hotel/cahier", label: "Cahier" }, { href: "/hotel/gestion", label: "Gestion" }]} />
       <section className="mx-auto max-w-3xl px-6 py-8">
         <div className="flex flex-wrap gap-2">
           {Object.entries(PERIODS).map(([key, text]) => (
@@ -143,6 +143,7 @@ export default async function StatistiquesPage({ searchParams }) {
         </p>
         <Bars rows={leftByShift} empty="Rien en suspens, ou aucune consigne n'a d'étiquette d'équipe." />
       </section>
+      <HotelFooter />
     </main>
   );
 }

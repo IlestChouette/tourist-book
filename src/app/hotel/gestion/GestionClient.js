@@ -35,7 +35,6 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
   const manager = staff.find((s) => s.is_manager);
   const roles = tags.filter((t) => t.kind === "role" || t.kind === "custom");
   const rooms = places.filter((p) => p.kind === "room");
-  const areas = places.filter((p) => p.kind === "area");
 
   async function call(body, okText) {
     setBusy(true);
@@ -177,14 +176,17 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
           </label>
           <button type="submit" disabled={busy} className={btn}>Ajouter</button>
         </form>
-        <p className="mt-4 text-sm text-ink/70"><strong>{rooms.length}</strong> chambre{rooms.length > 1 ? "s" : ""}{rooms.length > 0 && ` (${rooms[0].name} → ${rooms[rooms.length - 1].name})`}</p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {areas.map((p) => (
-            <span key={p.id} className="flex items-center gap-1 rounded-full border border-sand-dim px-3 py-1 text-sm text-ink">
+        <p className="mt-4 text-sm text-ink/70">
+          <strong>{rooms.length}</strong> chambre{rooms.length > 1 ? "s" : ""}. Cliquez sur × pour en supprimer une seule.
+        </p>
+        <div className="mt-2 flex max-h-56 flex-wrap gap-2 overflow-y-auto rounded border border-sand-dim bg-sand p-3">
+          {places.map((p) => (
+            <span key={p.id} className="flex items-center gap-1 rounded-full border border-sand-dim bg-sand-card px-3 py-1 text-sm text-ink">
               {p.name}
-              <button type="button" aria-label={`Supprimer ${p.name}`} onClick={() => call({ action: "delete_place", id: p.id })} className="text-ink/40 hover:text-terracotta-deep">×</button>
+              <button type="button" disabled={busy} aria-label={`Supprimer ${p.name}`} onClick={() => call({ action: "delete_place", id: p.id })} className="text-ink/40 hover:text-terracotta-deep">×</button>
             </span>
           ))}
+          {places.length === 0 && <span className="text-sm text-ink/60">Aucune chambre ni lieu pour l'instant.</span>}
         </div>
         {rooms.length > 0 && (
           <button type="button" className={`${btnGhost} mt-3`} onClick={() => window.confirm("Supprimer toutes les chambres ?") && Promise.all(rooms.map((r) => fetch("/api/hotel/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "delete_place", id: r.id }) }))).then(() => router.refresh())}>

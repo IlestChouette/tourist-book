@@ -52,8 +52,9 @@ export async function loadDay(hotelId, day, showNames) {
       priority: c.priority,
       createdAt: c.created_at,
       done,
-      carried: carried && !done,
-      daysOpen: carried && !done ? daysBetween(c.day, day) : 0,
+      // Une consigne épinglée reste affichée par choix, ce n'est pas un retard.
+      carried: carried && !done && !pinnedToday,
+      daysOpen: carried && !done && !pinnedToday ? daysBetween(c.day, day) : 0,
       pinned: pinnedToday,
       pinnedUntil: c.pinned_until,
       closedAt: done ? c.closed_at : null,

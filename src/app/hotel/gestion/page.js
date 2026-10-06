@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import Hero from "@/components/Hero";
+import { HotelFooter, HotelHeader } from "@/components/HotelShell";
 import { getHotelContext } from "@/lib/hotelAuth";
 import { loadMeta } from "@/lib/hotelData";
 import GestionClient from "./GestionClient";
 
-export const metadata = { robots: { index: false, follow: false } };
+export const metadata = { title: "Gestion du cahier", robots: { index: false, follow: false } };
 
 export default async function GestionPage() {
   const ctx = await getHotelContext();
@@ -23,8 +23,8 @@ export default async function GestionPage() {
   ]);
 
   return (
-    <main className="flex-1">
-      <Hero eyebrow="Espace hôtels" title={hotel.name} subtitle="Gestion du cahier de consignes" logo={hotel.logo_url} />
+    <main className="flex-1 bg-sand-card/50">
+      <HotelHeader hotel={hotel} title="Gestion" subtitle="Équipe, chambres, étiquettes et emails du cahier de consignes." links={[{ href: "/hotel/cahier", label: "Cahier" }, { href: "/hotel/statistiques", label: "Statistiques" }]} />
       <section className="mx-auto max-w-3xl px-6 py-8">
         <GestionClient
           userId={ctx.user.id}
@@ -35,6 +35,7 @@ export default async function GestionPage() {
           stations={stations ?? []}
         />
       </section>
+      <HotelFooter />
     </main>
   );
 }
