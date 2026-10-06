@@ -150,7 +150,7 @@ export default function CahierClient({ hotelName, mode, today, initialItems, tag
         )}
       </div>
 
-      <h1 className="mt-4 font-display italic text-3xl capitalize text-ink">{formatDayLong(day)}</h1>
+      <h1 className="mt-4 font-display italic text-3xl text-ink first-letter:uppercase">{formatDayLong(day)}</h1>
       <p className="hidden text-sm text-ink/60 print:block">{hotelName} — cahier de consignes</p>
 
       <div className="mt-5 flex items-stretch gap-4 print:hidden">

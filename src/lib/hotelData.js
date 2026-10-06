@@ -10,7 +10,11 @@ export async function loadMeta(hotelId) {
     admin.from("hotel_places").select("id, name, kind").eq("hotel_id", hotelId).order("name"),
   ]);
   const naturalSort = (a, b) => a.name.localeCompare(b.name, "fr", { numeric: true });
-  return { tags: tags ?? [], places: (places ?? []).sort(naturalSort) };
+  // Équipes d'abord, dans l'ordre de la journée (matin, soir, nuit), puis les postes.
+  const shiftOrder = ["matin", "soir", "nuit"];
+  const rank = (t) => (t.kind === "shift" ? shiftOrder.indexOf(t.name) : t.kind === "role" ? 10 : 20);
+  const tagSort = (a, b) => rank(a) - rank(b) || naturalSort(a, b);
+  return { tags: (tags ?? []).sort(tagSort), places: (places ?? []).sort(naturalSort) };
 }
 
 // Reconstitue la page du cahier pour un jour donné :
