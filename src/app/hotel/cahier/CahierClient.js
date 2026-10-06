@@ -236,18 +236,19 @@ export default function CahierClient({ hotelName, mode, today, initialItems, tag
       <h1 className="mt-5 font-display italic text-3xl text-ink first-letter:uppercase sm:text-4xl">{formatDayLong(day)}</h1>
       <p className="hidden text-sm text-ink/60 print:block">{hotelName} — cahier de consignes</p>
 
+      <button
+        type="button"
+        onClick={() => setCreating(true)}
+        className={`mt-6 flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-terracotta text-ink shadow-[0_6px_16px_-8px_rgba(120,60,20,0.5)] transition active:scale-[0.99] hover:bg-terracotta-deep print:hidden ${focus}`}
+      >
+        <Icon className="h-7 w-7">{I.plus}</Icon>
+        <span className="text-base font-bold uppercase tracking-wide">Nouvelle consigne</span>
+      </button>
+
       <div className="mt-6 grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]">
         <aside className="flex flex-col gap-5 print:hidden">
-          <div className="flex items-stretch gap-4 lg:flex-col">
-            <button
-              type="button"
-              onClick={() => setCreating(true)}
-              className={`flex aspect-square w-36 shrink-0 flex-col items-center justify-center gap-2 rounded-2xl bg-terracotta text-ink shadow-[0_6px_16px_-6px_rgba(120,60,20,0.45)] transition active:scale-[0.97] hover:bg-terracotta-deep lg:w-full ${focus}`}
-            >
-              <Icon className="h-10 w-10">{I.plus}</Icon>
-              <span className="px-2 text-center text-sm font-bold uppercase leading-tight tracking-wide">Nouvelle consigne</span>
-            </button>
-            <dl className="grid flex-1 content-start gap-1.5 text-sm">
+          <div>
+            <dl className="grid content-start gap-1.5 text-sm">
               {[
                 ["À faire", counts.pending, ""],
                 ["Prioritaires", counts.urgent, counts.urgent > 0 ? "text-terracotta-deep" : ""],
