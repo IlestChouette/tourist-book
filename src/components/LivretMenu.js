@@ -519,6 +519,29 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
   const [generatingQr, setGeneratingQr] = useState(false);
   const closeButtonRef = useRef(null);
 
+  // Statistiques pour l'hôte (page Premium « Statistiques ») : une ouverture
+  // par session de navigateur — un rechargement ou un retour depuis la carte
+  // ne compte pas deux fois — puis chaque tuile touchée.
+  function track(event) {
+    try {
+      navigator.sendBeacon("/api/track", JSON.stringify({ slug, event }));
+    } catch {
+      // Statistique perdue, rien de grave pour le voyageur.
+    }
+  }
+
+  useEffect(() => {
+    const key = `tb_open_${slug}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+    } catch {
+      // sessionStorage bloqué (navigation privée stricte) : on compte quand même.
+    }
+    track("open");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
+
   const infoItems = [
     ...(property.directions
       ? [{ key: "directions", label: t.directions, icon: <RouteIcon />, detail: property.directions }]
@@ -690,7 +713,10 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
               : "bg-[var(--host-accent)] text-ink md:border-[var(--host-accent)]/30 md:bg-[var(--host-accent-tint)] md:text-ink md:hover:border-[var(--host-accent)]"
           }`;
           return (
-            <button key={item.key} type="button" onClick={() => setActive(item.key)} title={hint} className={className}>
+            <button key={item.key} type="button" onClick={() => {
+                setActive(item.key);
+                track(item.key);
+              }} title={hint} className={className}>
               <span className="h-9 w-9 md:h-6 md:w-6">{item.icon}</span>
               <span className="text-sm font-bold uppercase leading-tight tracking-wide md:text-[11px]">
                 {item.label}

@@ -198,6 +198,7 @@ const content = {
     searchConsole: "Search Console →",
     identityLookup: "Retrouver un check-in →",
     transferRates: "Tarifs de transfert →",
+    livretStats: "Statistiques livrets →",
     independentTransfer: "Lien transfert indépendant →",
     goalLabel: "Objectif mensuel",
     remaining: (amount) => `Il reste ${amount.toFixed(0)} € pour atteindre l'objectif`,
@@ -257,6 +258,7 @@ const content = {
     searchConsole: "Search Console →",
     identityLookup: "Find a check-in →",
     transferRates: "Transfer rates →",
+    livretStats: "Livret statistics →",
     independentTransfer: "Independent transfer link →",
     goalLabel: "Monthly goal",
     remaining: (amount) => `${amount.toFixed(0)} € left to reach the goal`,
@@ -316,6 +318,7 @@ const content = {
     searchConsole: "Search Console →",
     identityLookup: "Buscar un check-in →",
     transferRates: "Tarifas de transfer →",
+    livretStats: "Estadísticas livrets →",
     independentTransfer: "Enlace transfer independiente →",
     goalLabel: "Objetivo mensual",
     remaining: (amount) => `Faltan ${amount.toFixed(0)} € para llegar al objetivo`,
@@ -517,6 +520,12 @@ export default async function AdminPage() {
             className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
           >
             {t.transferRates}
+          </Link>
+          <Link
+            href="/admin/estadisticas"
+            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+          >
+            {t.livretStats}
           </Link>
           <Link
             href="/transfer-independiente"
