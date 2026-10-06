@@ -570,3 +570,69 @@ export async function sendProfilePhoneRequestEmail({ to, name }) {
   await logEmail({ recipient: to, subject, template: "profile_phone_request", status: "sent" });
   return { sent: true };
 }
+
+const SITE_URL = "https://tourist-book.com";
+const DIGEST_KIND_LABELS = { info: "Info", tache: "Tâche", probleme: "Problème", plainte: "Plainte" };
+
+// Relève du cahier de consignes (6h55, 14h55, 22h55) : les consignes encore
+// ouvertes, prioritaires et reportées d'abord. À 6h55, le PDF de la veille
+// est joint. Un email par destinataire, chacun journalisé.
+export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, pdf }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const lines = [`Cahier de consignes — ${hotelName}`, `Relève de ${slotLabel}`, ""];
+  if (pending.length === 0) {
+    lines.push("Aucune consigne en attente.");
+  } else {
+    lines.push(`${pending.length} consigne${pending.length > 1 ? "s" : ""} en attente :`, "");
+    for (const c of pending) {
+      const flags = [
+        c.priority || c.carried ? "PRIORITAIRE" : null,
+        c.carried ? `ouverte depuis ${c.daysOpen} j` : null,
+        DIGEST_KIND_LABELS[c.kind],
+        c.placeName,
+      ].filter(Boolean);
+      lines.push(`• [${flags.join(" · ")}]`, `  ${c.body.replace(/\n+/g, " ")}`, "");
+    }
+  }
+  lines.push(`Ouvrir le cahier : ${SITE_URL}/hotel/cahier`);
+  if (pdf) lines.push("", "Le PDF des consignes d'hier est joint à ce message.");
+
+  const subject = `Cahier de consignes — ${hotelName} — relève de ${slotLabel} : ${pending.length} en attente`;
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to,
+    replyTo: CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text: lines.join("\n"),
+    ...(pdf ? { attachments: [{ filename: pdf.filename, content: pdf.content }] } : {}),
+  });
+  if (error) {
+    await logEmail({ recipient: to, subject, template: "hotel_digest", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+  await logEmail({ recipient: to, subject, template: "hotel_digest", status: "sent" });
+  return { sent: true };
+}
+
+export async function sendHotelSignupNotification({ hotelName, name, email }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const subject = `Nouvel hôtel inscrit — ${hotelName}`;
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text: ["Nouvel hôtel sur le cahier de consignes", "", `Hôtel : ${hotelName}`, `Manager : ${name || "-"}`, `Email : ${email}`].join("\n"),
+  });
+  if (error) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "hotel_signup_notification", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "hotel_signup_notification", status: "sent" });
+  return { sent: true };
+}
