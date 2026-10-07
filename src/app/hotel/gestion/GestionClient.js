@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import QRCode from "qrcode";
 import { uploadMedia } from "@/lib/uploadMedia";
 
 const label = "text-xs font-bold uppercase tracking-wider text-ink/60";
@@ -20,7 +21,45 @@ function Card({ title, hint, children }) {
   );
 }
 
-export default function GestionClient({ userId, hotel, tags, places, staff, stations }) {
+// Lien privé et QR code des femmes de chambre (module Objets trouvés).
+function LostFoundLink({ token, busy, onRegen }) {
+  const [qr, setQr] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const url = token ? `${window.location.origin}/trouve/${token}` : null;
+
+  async function showQr() {
+    setQr(await QRCode.toDataURL(url, { width: 360, margin: 2 }));
+  }
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // presse-papiers indisponible : le lien reste affiché et sélectionnable
+    }
+  }
+
+  if (!token) {
+    return <button type="button" disabled={busy} onClick={onRegen} className={btn}>Générer le lien</button>;
+  }
+  return (
+    <div>
+      <input readOnly value={url} onFocus={(e) => e.target.select()} className="input h-11 w-full" aria-label="Lien privé des femmes de chambre" />
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button type="button" onClick={copy} className={btnGhost}>{copied ? "Copié !" : "Copier le lien"}</button>
+        <button type="button" onClick={showQr} className={btnGhost}>Afficher le QR code</button>
+        <button type="button" disabled={busy} onClick={() => window.confirm("L'ancien lien ne fonctionnera plus. Continuer ?") && onRegen()} className={btnGhost}>Régénérer le lien</button>
+      </div>
+      {qr && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={qr} alt="QR code du lien" className="mt-4 h-44 w-44 rounded border border-sand-dim" />
+      )}
+    </div>
+  );
+}
+
+export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound }) {
   const router = useRouter();
   const [message, setMessage] = useState(null); // { text, error }
   const [busy, setBusy] = useState(false);
@@ -216,6 +255,12 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
           <button type="submit" disabled={busy} className={`${btn} w-fit`}>Enregistrer</button>
         </form>
       </Card>
+
+      {lostFound && (
+        <Card title="Objets trouvés — lien des femmes de chambre" hint="Chaque femme de chambre garde ce lien dans son téléphone (ou vous collez le QR code sur le chariot). Sans mot de passe ni PIN, il ne permet que d'ajouter un objet : jamais de lire le registre. Si le lien est diffusé par erreur, régénérez-le.">
+          <LostFoundLink token={lostFound.token} busy={busy} onRegen={() => call({ action: "regen_lost_found_token" }, "Lien généré.")} />
+        </Card>
+      )}
 
       <Card title="Postes de réception" hint="Sur l'ordinateur de la réception, activez le poste une seule fois : ensuite chacun s'identifie avec son PIN, sans mot de passe. Puis déconnectez-vous du compte manager sur cet ordinateur.">
         <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); call({ action: "activate_station", label: stationLabel }, "Ce poste est activé. Déconnectez-vous du compte manager pour le laisser à l'équipe."); }}>

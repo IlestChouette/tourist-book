@@ -146,6 +146,15 @@ export async function POST(request) {
       return ok();
     }
 
+    // Lien privé des femmes de chambre (module Objets trouvés, s'il est activé).
+    // Régénérer le lien invalide l'ancien : à faire si le lien a fuité.
+    case "regen_lost_found_token": {
+      if (hotel.lost_found_enabled !== true) return fail("Non autorisé", 403);
+      const token = crypto.randomBytes(24).toString("hex");
+      const { error } = await admin.from("hotels").update({ lost_found_token: token }).eq("id", hotel.id);
+      return error ? fail("Impossible de générer le lien.", 500) : ok();
+    }
+
     default:
       return fail("Action inconnue.");
   }

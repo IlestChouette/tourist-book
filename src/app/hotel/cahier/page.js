@@ -20,12 +20,15 @@ export default async function CahierPage() {
       <HotelHeader
         hotel={ctx.hotel}
         links={
-          isManager
-            ? [
-                { href: "/hotel/statistiques", label: "Statistiques" },
-                { href: "/hotel/gestion", label: "Gestion" },
-              ]
-            : [{ href: "/hotel/connexion", label: "Espace manager" }]
+          [
+            ...(ctx.hotel.lost_found_enabled === true ? [{ href: "/hotel/objets-trouves", label: "Objets trouvés" }] : []),
+            ...(isManager
+              ? [
+                  { href: "/hotel/statistiques", label: "Statistiques" },
+                  { href: "/hotel/gestion", label: "Gestion" },
+                ]
+              : [{ href: "/hotel/connexion", label: "Espace manager" }]),
+          ]
         }
       />
       <section className="mx-auto max-w-6xl px-6 py-8">

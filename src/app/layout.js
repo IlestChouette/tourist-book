@@ -16,7 +16,7 @@ const archivo = Archivo({
   subsets: ["latin"],
 });
 
-const HOTEL_APP_PATHS = ["/hotel/cahier", "/hotel/gestion", "/hotel/statistiques"];
+const HOTEL_APP_PATHS = ["/hotel/cahier", "/hotel/gestion", "/hotel/statistiques", "/hotel/objets-trouves", "/trouve", "/objet"];
 
 export const metadata = {
   metadataBase: new URL("https://tourist-book.com"),

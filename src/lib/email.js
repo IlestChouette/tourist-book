@@ -636,3 +636,54 @@ export async function sendHotelSignupNotification({ hotelName, name, email }) {
   await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "hotel_signup_notification", status: "sent" });
   return { sent: true };
 }
+
+const LOST_ITEM_COPY = {
+  fr: { hi: "Bonjour,", body: (hotel) => `${hotel} a retrouvé un objet qui pourrait vous appartenir :`, cta: "Pour nous dire ce que vous souhaitez en faire (venir le récupérer, demander l'envoi ou le détruire), ouvrez ce lien :" },
+  en: { hi: "Hello,", body: (hotel) => `${hotel} found an item that may belong to you:`, cta: "To tell us what you would like to do (collect it, have it shipped, or dispose of it), open this link:" },
+  es: { hi: "Hola,", body: (hotel) => `${hotel} ha encontrado un objeto que podría ser suyo:`, cta: "Para indicarnos qué desea hacer (recogerlo, que se lo enviemos o destruirlo), abra este enlace:" },
+};
+
+// Email au client : trilingue (l'hôtel ne connaît pas toujours sa langue).
+export async function sendLostItemGuestEmail({ to, hotelName, replyTo, description, photoUrl, link }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const parts = Object.values(LOST_ITEM_COPY).map((c) =>
+    [c.hi, "", c.body(hotelName), description ? `« ${description} »` : "", photoUrl ? `Photo : ${photoUrl}` : "", "", c.cta, link].filter((l) => l !== "").join("\n"),
+  );
+  const subject = `${hotelName} — objet trouvé / lost item / objeto encontrado`;
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: `${hotelName} <notifications@tourist-book.com>`,
+    to,
+    ...(replyTo ? { replyTo } : {}),
+    subject,
+    text: parts.join("\n\n———\n\n"),
+  });
+  if (error) {
+    await logEmail({ recipient: to, subject, template: "lost_item_guest", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+  await logEmail({ recipient: to, subject, template: "lost_item_guest", status: "sent" });
+  return { sent: true };
+}
+
+export async function sendLostItemChoiceNotification({ to, hotelName, number, description, choiceLabel, name, address, phone }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const recipients = (to ?? []).filter(Boolean);
+  if (!apiKey || recipients.length === 0) return { sent: false, reason: "not_configured" };
+
+  const subject = `Objet trouvé n° ${number} — choix du client : ${choiceLabel}`;
+  const lines = [`${hotelName} — objets trouvés`, "", `Objet n° ${number} : ${description || "(sans description)"}`, `Choix du client : ${choiceLabel}`];
+  if (name) lines.push(`Nom : ${name}`);
+  if (address) lines.push(`Adresse d'envoi : ${address}`);
+  if (phone) lines.push(`Téléphone : ${phone}`);
+  lines.push("", "https://tourist-book.com/hotel/objets-trouves");
+
+  const resend = new Resend(apiKey);
+  for (const recipient of recipients) {
+    const { error } = await resend.emails.send({ from: "Tourist Book <notifications@tourist-book.com>", to: recipient, subject, text: lines.join("\n") });
+    await logEmail({ recipient, subject, template: "lost_item_choice", status: error ? "failed" : "sent", ...(error ? { error: error.message } : {}) });
+  }
+  return { sent: true };
+}
