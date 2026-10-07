@@ -44,6 +44,116 @@ export function parseStatsParams(sp, today) {
     service: sp.service || "",
     shift: sp.shift || "",
     place: (sp.place || "").slice(0, 60),
+    detail: /^(place|service|kind|shift|issues|open):/.test(sp.detail || "") || sp.detail === "issues" || sp.detail === "open" ? String(sp.detail).slice(0, 80) : "",
+  };
+}
+
+// Adresse de la page Statistiques avec les filtres actuels, modifiés par `patch`.
+export function statsHref(f, patch = {}) {
+  const n = { ...f, ...patch };
+  const qs = new URLSearchParams();
+  qs.set("range", n.range);
+  if (n.range === "custom") {
+    qs.set("from", n.from);
+    qs.set("to", n.to);
+  }
+  if (n.compare) qs.set("compare", "1");
+  if (n.kinds.length) qs.set("kind", n.kinds.join(","));
+  if (n.service) qs.set("service", n.service);
+  if (n.shift) qs.set("shift", n.shift);
+  if (n.place) qs.set("place", n.place);
+  if (n.detail) qs.set("detail", n.detail);
+  return `/hotel/statistiques?${qs.toString()}`;
+}
+
+export const RECURRENCE_DAYS = 90;
+const ISSUE_KINDS = ["probleme", "plainte"];
+
+// Sélection des consignes derrière un chiffre cliqué (une chambre, un service,
+// un type…), dans la période et avec les filtres actifs.
+export function selectDetail(rows, f, tags) {
+  if (!f.detail) return null;
+  const tagById = Object.fromEntries(tags.map((t) => [t.id, t]));
+  const [type, ...rest] = f.detail.split(":");
+  const value = rest.join(":");
+  const cur = rows.filter((c) => c.day >= f.from && c.day <= f.to && matches(c, f, tagById));
+  const names = (c) => c.tag_ids.map((id) => tagById[id]).filter(Boolean);
+  let list;
+  let title;
+  switch (type) {
+    case "place":
+      list = cur.filter((c) => c.place_name === value);
+      title = /^\d+$/.test(value) ? `Chambre ${value}` : value;
+      break;
+    case "service":
+      list = cur.filter((c) => names(c).some((t) => t.kind !== "shift" && t.name === value));
+      title = `Service : ${value}`;
+      break;
+    case "kind":
+      list = cur.filter((c) => c.kind === value);
+      title = `Type : ${KIND_OPTIONS.find((k) => k.id === value)?.label ?? value}`;
+      break;
+    case "shift":
+      list = cur.filter((c) => names(c).some((t) => t.kind === "shift" && t.name === value) && (!c.closed_at || parisDate(new Date(c.closed_at)) > c.day));
+      title = `Laissées en suspens — équipe ${value}`;
+      break;
+    case "issues":
+      list = cur.filter((c) => ISSUE_KINDS.includes(c.kind));
+      title = "Problèmes et plaintes";
+      break;
+    case "open":
+      list = cur.filter((c) => !c.closed_at);
+      title = "Pas encore clôturées";
+      break;
+    default:
+      return null;
+  }
+  list = list.sort((a, b) => b.created_at.localeCompare(a.created_at));
+  return { type, value, title, list, tagById };
+}
+
+// Récurrence : un problème ou une plainte est « récurrent » si la même chambre
+// (ou le même lieu) a déjà eu un problème ou une plainte du même service dans
+// les 90 jours qui précèdent. `history` : problèmes et plaintes de ces lieux
+// sur une période plus longue, sans les filtres de la page.
+export function withRecurrence(detail, history) {
+  const { tagById } = detail;
+  const service = (c) => c.tag_ids.map((id) => tagById[id]).filter((t) => t && t.kind !== "shift").map((t) => t.id);
+  const items = detail.list.map((c) => {
+    const issue = ISSUE_KINDS.includes(c.kind);
+    let prior = [];
+    if (issue) {
+      const mine = service(c);
+      const start = Date.parse(c.created_at) - RECURRENCE_DAYS * 86400000;
+      prior = history.filter((h) => {
+        if (h.id === c.id || h.place_name !== c.place_name) return false;
+        const t = Date.parse(h.created_at);
+        if (t >= Date.parse(c.created_at) || t < start) return false;
+        // même service si la consigne en a un, sinon n'importe quel problème du lieu
+        return mine.length === 0 || service(h).some((id) => mine.includes(id));
+      });
+    }
+    return {
+      id: c.id,
+      day: c.day,
+      kind: c.kind,
+      body: c.body,
+      place: c.place_name,
+      priority: c.priority,
+      createdAt: c.created_at,
+      closedAt: c.closed_at,
+      tags: c.tag_ids.map((id) => tagById[id]?.name).filter(Boolean),
+      issue,
+      priorCount: prior.length,
+      lastPrior: prior.reduce((m, h) => (h.day > m ? h.day : m), ""),
+    };
+  });
+  const issues = items.filter((i) => i.issue);
+  return {
+    items,
+    issuesCount: issues.length,
+    recurrentCount: issues.filter((i) => i.priorCount > 0).length,
+    firstTimeCount: issues.filter((i) => i.priorCount === 0).length,
   };
 }
 
