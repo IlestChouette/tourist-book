@@ -514,6 +514,127 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: "gestion-tarifs-location-saisonniere-difficultes-experts",
+    title: "Tarifs en location saisonnière : ce qui est vraiment le plus difficile (et comment s'en sortir)",
+    metaDescription:
+      "Quelle est la vraie difficulté pour fixer ses tarifs en location saisonnière ? Ce que disent les experts français, anglais, espagnols, allemands et italiens, le calendrier 2027 de la Côte d'Azur et une méthode simple.",
+    excerpt: "Ce n'est pas de trouver un prix : c'est de le tenir à jour, nuit après nuit. Ce que disent les experts, en cinq langues.",
+    publishedAt: "2026-10-07",
+    blocks: [
+      {
+        type: "lead",
+        text: "« Qu'est-ce qui est le plus difficile pour vous dans la gestion des tarifs ? » La question revient sans cesse chez les propriétaires et les concierges. En lisant les spécialistes du sujet en français, anglais, espagnol, allemand et italien, la réponse est étonnamment la même partout : la difficulté n'est pas de trouver un prix, c'est de le garder juste.",
+      },
+      {
+        type: "stats",
+        items: [
+          { value: "15,5 %", label: "Commission unique d'Airbnb côté hôte, au lieu d'environ 3 % + frais voyageur, annoncée pour tous les hôtes d'ici fin 2026" },
+          { value: "+36 %", label: "Revenu par logement avec prix dynamique, d'après une étude de 541 logements dans 34 pays (éditeur d'outil : à lire avec recul)" },
+          { value: "15–30 %", label: "Commission habituelle d'une conciergerie, selon l'étendue des services" },
+        ],
+      },
+      {
+        type: "icons",
+        items: [
+          {
+            icon: BookIcon,
+            title: "Trouver le bon prix de départ",
+            text: "Beaucoup de propriétaires fixent leur prix au ressenti ou par attachement : 300 € la nuit quand le marché en vaut 220. Les guides le répètent : partez des données et des coûts réels, pas de l'émotion.",
+          },
+          {
+            icon: CompassIcon,
+            title: "Le garder à jour",
+            text: "Le prix posé en janvier puis oublié est l'erreur la plus citée, dans toutes les langues : des semaines trop chères qui restent vides, des pics de demande bradés.",
+          },
+          {
+            icon: ChatIcon,
+            title: "Anticiper les événements",
+            text: "Festivals, salons, ponts, vacances scolaires : la demande monte d'un coup, et il faut le voir avant les autres. Une nuit sous-vendue pendant un événement ne se rattrape pas.",
+          },
+          {
+            icon: ShieldIcon,
+            title: "Séjour minimum et nuits « trou »",
+            text: "Trop strict en basse saison, il laisse des nuits isolées vides ; trop souple en haute saison, il fait perdre les longs séjours rentables. Les experts conseillent de le faire varier avec la saison.",
+          },
+          {
+            icon: WifiIcon,
+            title: "Comprendre ses vrais coûts",
+            text: "Ménage, commission de la plateforme, taxe de séjour, entretien, et pour un concierge sa propre commission : le prix affiché n'est pas la marge réelle. Une commission annoncée à 15 % peut dépasser 25 % une fois les prestations ajoutées.",
+          },
+          {
+            icon: CarIcon,
+            title: "Faire confiance à un outil (ou non)",
+            text: "PriceLabs, Beyond, Wheelhouse : ils calculent une tarification par nuit, mais il faut fixer un prix de base, un minimum et un maximum, et surveiller leurs recommandations.",
+          },
+        ],
+      },
+      {
+        type: "compare",
+        left: {
+          title: "Un prix fixe toute l'année",
+          items: [
+            "Hors saison : des nuits vides à plein tarif",
+            "Pendant les événements : des nuits vendues trop bon marché",
+            "On regarde les concurrents une fois par an, si on y pense",
+            "Les mauvaises surprises arrivent en fin de saison",
+          ],
+        },
+        right: {
+          title: "Un prix revu régulièrement",
+          items: [
+            "Un tarif plancher calculé à partir des coûts réels",
+            "Les dates d'événements marquées dans le calendrier",
+            "Un coup d'œil chaque semaine aux concurrents proches",
+            "Des remises de dernière minute pour remplir les trous",
+          ],
+        },
+      },
+      {
+        type: "text",
+        heading: "Ce que disent les spécialistes, langue par langue",
+        paragraphs: [
+          "En français, des conciergeries et des plateformes comme hoomy ou La Conciergerie du Pouldu parlent de « yield management » : vendre la bonne nuit, au bon prix, au bon moment. Elles insistent sur la durée minimale de séjour qui varie avec les vacances scolaires, les week-ends et les ponts, et rappellent que l'offre progresse plus vite que la demande, ce qui pousse à se différencier.",
+          "En anglais, Smoobu recense huit erreurs classiques : prix fixe à l'année, aucune comparaison avec les voisins, coûts sous-estimés, dernière minute oubliée, tendances de marché ignorées, tarification émotionnelle, pas de différence haute et basse saison, événements locaux ratés. BiggerPockets et HostTools défendent la même idée : arrêter de deviner et suivre des données.",
+          "En espagnol, Interhome, Net2Rent et Chekin expliquent que le prix dynamique consiste à ajuster chaque nuit selon la demande prévue, au lieu d'avoir un tarif haute saison et un tarif basse saison. Ils citent la saisonnalité, le jour de la semaine et les événements locaux comme les trois leviers.",
+          "En allemand, Favorent et Your.Rentals décrivent un calcul fondé sur quatre sources : son propre taux de réservation, les prix des logements comparables, la demande de la région et les événements, la météo ou les vacances. Ils ajoutent un avertissement utile : trop de tarifs saisonniers et de séjours minimums différents finissent par dérouter les voyageurs.",
+          "En italien, Smartness et BnB Academy conseillent de construire le prix de base à partir des coûts réels, de marquer les événements récurrents et, en basse saison, de viser une occupation cible de 40 à 50 % plutôt que de courir après chaque nuit. Pendant un événement, expliquent-ils, on ne multiplie pas le prix par un coefficient fixe : on regarde combien d'offre reste libre.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Ce qui change en 2026 : les frais d'Airbnb",
+        paragraphs: [
+          "Airbnb passe à une commission unique de 15,5 % payée par l'hôte, à la place d'environ 3 % côté hôte plus des frais côté voyageur. Selon les éditeurs d'outils qui suivent le sujet, le changement touche tous les hôtes d'ici la fin 2026, avec une date annoncée au 13 octobre 2026 pour l'Espace économique européen. Vérifiez la date exacte dans votre compte.",
+          "Concrètement, si vous étiez sur l'ancien modèle, votre revenu net par nuit baisse à prix égal. Les options citées sont de relever le prix de base, de tarifer plus finement, de développer la réservation directe et de diversifier les plateformes. Aucune n'est gratuite : relever le prix peut vous faire perdre en visibilité.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "À marquer dans votre calendrier : la Côte d'Azur en 2027",
+        paragraphs: [
+          "Carnaval de Nice : du 9 au 28 février 2027. Fête du Citron à Menton : du 13 au 28 février 2027. MIPIM à Cannes : du 15 au 19 mars 2027. Festival de Cannes : du 11 au 22 mai 2027. Grand Prix de Monaco : du 3 au 6 juin 2027.",
+          "Ce sont les dates annoncées par les organisateurs et les offices de tourisme à ce jour : confirmez-les avant de bloquer vos tarifs. Les logements autour de Cannes, de Nice, de Menton et de Monaco voient la demande monter bien avant ces dates, parfois plusieurs mois avant.",
+        ],
+      },
+      {
+        type: "steps",
+        items: [
+          { n: "1", title: "Calculez votre plancher", text: "Ménage, commission de la plateforme, taxe de séjour, commission du concierge : le prix en dessous duquel vous perdez de l'argent." },
+          { n: "2", title: "Marquez le calendrier", text: "Événements, vacances scolaires, ponts, week-ends : ce sont vos jours à surveiller en priorité." },
+          { n: "3", title: "Revoyez chaque semaine", text: "Dix minutes pour comparer avec trois logements proches et ajuster. Ou un outil, avec un minimum et un maximum que vous contrôlez." },
+        ],
+      },
+      {
+        type: "quote",
+        text: "Le bon prix n'existe pas : il se recalcule.",
+      },
+      {
+        type: "note",
+        text: "Sources consultées en octobre 2026 : Smoobu, Houst, Lodgify, hoomy, La Conciergerie du Pouldu, ALB Conciergerie, BiggerPockets, HostTools, Interhome, Net2Rent, Chekin, Favorent, Your.Rentals, Smartness, BnB Academy, PriceLabs, ainsi que les sites des organisateurs pour les dates 2027. Plusieurs chiffres viennent d'éditeurs d'outils de tarification, qui ont intérêt à promouvoir la tarification dynamique : lisez-les comme des indications, pas comme des garanties. Cet article ne remplace pas un conseil fiscal ou juridique.",
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
