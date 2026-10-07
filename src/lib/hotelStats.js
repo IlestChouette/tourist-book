@@ -230,6 +230,7 @@ export function computeStats(rows, f, tags) {
   const buckets = keys.map((key) => ({
     key,
     label: bucketLabel(key, mode, true),
+    short: mode === "week" ? dayShort.format(new Date(`${key}T12:00:00Z`)) : bucketLabel(key, mode),
     written: 0,
     closed: 0,
     prev: null,

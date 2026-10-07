@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-const W = 760;
 const H = 240;
 const M = { top: 12, right: 12, bottom: 30, left: 36 };
 
@@ -15,7 +14,8 @@ function niceMax(v) {
 // Colonnes empilées : répartition des consignes écrites par type dans le temps.
 // Chaque segment est séparé du suivant par un filet de 2 px, les 4 teintes
 // restent distinctes en cas de daltonisme (palette validée).
-export default function StackedChart({ buckets, kinds }) {
+export default function StackedChart({ buckets, kinds, width = 760 }) {
+  const W = width;
   const [hover, setHover] = useState(null);
   const n = buckets.length;
   const max = niceMax(Math.max(1, ...buckets.map((b) => b.written)));
@@ -25,7 +25,7 @@ export default function StackedChart({ buckets, kinds }) {
   const bw = Math.min(24, Math.max(3, slot * 0.7));
   const y = (v) => M.top + ih - (v / max) * ih;
   const ticks = [0, 1, 2, 3, 4].map((t) => (max / 4) * t);
-  const labelEvery = Math.max(1, Math.ceil(n / 7));
+  const labelEvery = Math.max(1, Math.ceil(n / (W < 600 ? 4 : 7)));
   const b = hover === null ? null : buckets[hover];
 
   return (
@@ -59,7 +59,7 @@ export default function StackedChart({ buckets, kinds }) {
                   return <rect key={k.id} x={cx - bw / 2} y={top} width={bw} height={Math.max(0, h - 2)} rx={isTop ? 3 : 0} fill={k.color} opacity={hover === null || hover === i ? 1 : 0.55} />;
                 })}
                 {i % labelEvery === 0 && (
-                  <text x={cx} y={H - 9} textAnchor="middle" fontSize="11" fill="var(--ink)" fillOpacity="0.6">{bk.label.replace(/^\S+\s(?=\d)/, "")}</text>
+                  <text x={cx} y={H - 9} textAnchor="middle" fontSize="11" fill="var(--ink)" fillOpacity="0.6">{bk.short}</text>
                 )}
               </g>
             );

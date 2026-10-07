@@ -6,6 +6,7 @@ import { loadMeta } from "@/lib/hotelData";
 import { RECURRENCE_DAYS, computeStats, parseStatsParams, selectDetail, statsHref, withRecurrence } from "@/lib/hotelStats";
 import { addDays, formatDayLong, parisDate } from "@/lib/hotelTime";
 import StatsFilters from "./StatsFilters";
+import Chronology from "./Chronology";
 import StackedChart from "./StackedChart";
 import TimelineChart from "./TimelineChart";
 
@@ -60,7 +61,7 @@ function Stat({ label, value, children, href }) {
     </>
   );
   return href ? (
-    <Link href={href} scroll={false} className={`${box} transition-colors hover:border-aqua-deep ${focusRing}`}>
+    <Link href={href} className={`${box} transition-colors hover:border-aqua-deep ${focusRing}`}>
       {inner}
     </Link>
   ) : (
@@ -80,9 +81,9 @@ function Panel({ title, hint, children, className = "" }) {
 
 // Barres horizontales triées : la valeur est au bout de la barre (étiquette
 // directe), l'axe est inutile. Une seule teinte, plus long = plus fréquent.
-// `hrefFor(row)` rend chaque ligne cliquable : le clic ouvre le détail des
-// consignes derrière le chiffre.
-function Bars({ rows, empty, total, hrefFor }) {
+// `detailOf(row)` rend chaque ligne cliquable : le clic déplie, sur la même
+// page, le détail des consignes derrière le chiffre. La ligne ouverte est surlignée.
+function Bars({ rows, empty, total, detailOf, f }) {
   if (rows.length === 0) return <p className="text-sm text-ink/60">{empty}</p>;
   const max = Math.max(...rows.map((r) => r.value));
   return (
@@ -91,7 +92,7 @@ function Bars({ rows, empty, total, hrefFor }) {
         const body = (
           <>
             <span className="truncate text-sm font-bold text-ink">{r.label}</span>
-            <span className="h-5 rounded-r-[4px]" style={{ width: `${Math.max(3, (r.value / max) * 100)}%`, background: COLORS.written }} />
+            <span className="h-5 rounded-r-[4px]" style={{ width: `${r.value ? Math.max(3, (r.value / max) * 100) : 0}%`, background: COLORS.written }} />
             <span className="text-sm tabular-nums text-ink/70">
               <strong className="text-ink">{r.value}</strong>
               {total ? <span className="text-ink/50"> · {Math.round((r.value / total) * 100)} %</span> : null}
@@ -99,11 +100,12 @@ function Bars({ rows, empty, total, hrefFor }) {
           </>
         );
         const cls = "grid grid-cols-[minmax(5rem,9rem)_1fr_auto] items-center gap-3 rounded-lg px-2 py-1.5";
-        const href = hrefFor?.(r);
+        const d = detailOf?.(r);
+        const active = d && f.detail === d;
         return (
-          <li key={r.label} title={`${r.label} : ${r.value}${href ? " — cliquer pour le détail" : ""}`}>
-            {href ? (
-              <Link href={href} scroll={false} className={`${cls} transition-colors hover:bg-sand-card ${focusRing}`}>{body}</Link>
+          <li key={r.label} title={`${r.label} : ${r.value}${d ? " — cliquer pour le détail" : ""}`}>
+            {d ? (
+              <Link href={`${statsHref(f, { detail: active ? "" : d })}${active ? "" : "#detalle"}`} scroll={!active} aria-expanded={active} className={`${cls} transition-colors ${active ? "bg-aqua-deep/10 ring-1 ring-aqua-deep" : "hover:bg-sand-card"} ${focusRing}`}>{body}</Link>
             ) : (
               <div className={cls}>{body}</div>
             )}
@@ -213,17 +215,19 @@ export default async function StatistiquesPage({ searchParams }) {
           <Stat label="Consignes écrites" value={cur.written}><Delta cur={cur.written} prev={prev?.written} /></Stat>
           <Stat label="Taux de clôture" value={pct(cur.closeRate)}><Delta cur={cur.closeRate} prev={prev?.closeRate} unit="pts" lowerIsBetter={false} /></Stat>
           <Stat label="Délai moyen de clôture" value={formatDuration(cur.avgHours)}><Delta cur={cur.avgHours} prev={prev?.avgHours} lowerIsBetter /></Stat>
-          <Stat label="Pas encore clôturées" value={cur.open} href={statsHref(f, { detail: "open:1" })}><Delta cur={cur.open} prev={prev?.open} lowerIsBetter /></Stat>
+          <Stat label="Pas encore clôturées" value={cur.open} href={`${statsHref(f, { detail: "open:1" })}#detalle`}><Delta cur={cur.open} prev={prev?.open} lowerIsBetter /></Stat>
         </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Stat label="Problèmes et plaintes" value={cur.issues} href={statsHref(f, { detail: "issues:1" })}><Delta cur={cur.issues} prev={prev?.issues} lowerIsBetter /></Stat>
+          <Stat label="Problèmes et plaintes" value={cur.issues} href={`${statsHref(f, { detail: "issues:1" })}#detalle`}><Delta cur={cur.issues} prev={prev?.issues} lowerIsBetter /></Stat>
           <Stat label="Prioritaires" value={cur.priority}><Delta cur={cur.priority} prev={prev?.priority} lowerIsBetter /></Stat>
           <Stat label="Moyenne par jour" value={(cur.written / f.length).toFixed(1).replace(".", ",")}><Delta cur={cur.written / f.length} prev={prev ? prev.written / f.length : null} /></Stat>
           <Stat label="Chambres concernées" value={s.placesCount}>
             <span className="text-xs text-ink/50">lieux différents sur la période</span>
           </Stat>
         </div>
+
+        {detail && <DetailSection detail={detail} f={f} today={today} tags={meta.tags} />}
 
         <Panel title="Évolution" hint={s.mode === "day" ? "Par jour." : s.mode === "week" ? "Par semaine." : "Par mois."} className="mt-6">
           {cur.written === 0 && !(prev?.written) ? (
@@ -239,16 +243,16 @@ export default async function StatistiquesPage({ searchParams }) {
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <Panel title="Chambres et lieux les plus touchés" hint="Les 10 premiers, avec les filtres choisis. Filtrez sur Problème et Plainte pour repérer les chambres à risque.">
-            <Bars rows={s.topPlaces} hrefFor={(r) => statsHref(f, { detail: `place:${r.label}` })} empty="Aucune consigne sur cette période." />
+            <Bars rows={s.topPlaces} detailOf={(r) => `place:${r.label}`} f={f} empty="Aucune consigne sur cette période." />
           </Panel>
           <Panel title="Par type">
-            <Bars rows={kindRows} total={s.total} hrefFor={(r) => statsHref(f, { detail: `kind:${r.key}` })} empty="Aucune consigne sur cette période." />
+            <Bars rows={kindRows} total={s.total} detailOf={(r) => `kind:${r.key}`} f={f} empty="Aucune consigne sur cette période." />
           </Panel>
           <Panel title="Par service" hint="Postes et étiquettes personnalisées (hors matin / soir / nuit).">
-            <Bars rows={s.byService} hrefFor={(r) => statsHref(f, { detail: `service:${r.label}` })} empty="Aucune consigne n'a d'étiquette de service sur cette période." />
+            <Bars rows={s.byService} detailOf={(r) => `service:${r.label}`} f={f} empty="Aucune consigne n'a d'étiquette de service sur cette période." />
           </Panel>
           <Panel title="Laissées en suspens, par équipe" hint="Consignes d'une équipe (matin, soir, nuit) pas clôturées le jour même.">
-            <Bars rows={s.shiftLeft} hrefFor={(r) => statsHref(f, { detail: `shift:${r.label}` })} empty="Rien en suspens, ou aucune consigne n'a d'étiquette d'équipe." />
+            <Bars rows={s.shiftLeft} detailOf={(r) => `shift:${r.label}`} f={f} empty="Rien en suspens, ou aucune consigne n'a d'étiquette d'équipe." />
           </Panel>
         </div>
 
@@ -298,7 +302,7 @@ export default async function StatistiquesPage({ searchParams }) {
                 <tbody>
                   {s.recurring.map((r) => (
                     <tr key={r.place} className="border-b border-sand-dim last:border-0">
-                      <td className="py-2.5 pr-4 font-bold tabular-nums text-ink"><Link href={statsHref(f, { detail: `place:${r.place}` })} scroll={false} className="text-aqua-deep underline underline-offset-2">{r.place}</Link></td>
+                      <td className="py-2.5 pr-4 font-bold tabular-nums text-ink"><Link href={`${statsHref(f, { detail: `place:${r.place}` })}#detalle`} className="text-aqua-deep underline underline-offset-2">{r.place}</Link></td>
                       <td className="py-2.5 pr-4 text-right tabular-nums">{r.probleme}</td>
                       <td className="py-2.5 pr-4 text-right tabular-nums">{r.plainte}</td>
                       <td className="py-2.5 text-right text-ink/70">{formatDayLong(r.last)}</td>
@@ -326,7 +330,7 @@ export default async function StatistiquesPage({ searchParams }) {
                 <tbody>
                   {s.oldestOpen.map((c) => (
                     <tr key={c.id} className="border-b border-sand-dim last:border-0">
-                      <td className="py-2.5 pr-4 font-bold tabular-nums text-ink"><Link href={statsHref(f, { detail: `place:${c.place}` })} scroll={false} className="text-aqua-deep underline underline-offset-2">{c.place}</Link></td>
+                      <td className="py-2.5 pr-4 font-bold tabular-nums text-ink"><Link href={`${statsHref(f, { detail: `place:${c.place}` })}#detalle`} className="text-aqua-deep underline underline-offset-2">{c.place}</Link></td>
                       <td className="py-2.5 pr-4 text-ink/70">{KIND_LABELS[c.kind]}</td>
                       <td className="max-w-md py-2.5 pr-4 text-ink/80"><span className="line-clamp-2">{c.body}</span></td>
                       <td className="py-2.5 text-right tabular-nums text-ink">{c.days} j</td>
@@ -338,11 +342,11 @@ export default async function StatistiquesPage({ searchParams }) {
           )}
         </Panel>
       </section>
-      {detail && <DetailDrawer detail={detail} f={f} today={today} />}
       <HotelFooter />
     </main>
   );
 }
+
 
 const dayFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Paris" });
 const timeFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
@@ -361,50 +365,74 @@ function closeText(c) {
   return { text: `Clôturée en ${formatDuration((Date.parse(c.closedAt) - Date.parse(c.createdAt)) / 3600000)}`, open: false };
 }
 
-// Panneau de détail : la liste des consignes derrière le chiffre cliqué, avec,
-// pour chaque problème ou plainte, la mention « récurrent » (même lieu, même
-// service, déjà signalé dans les 90 jours qui précèdent) ou « première fois ».
-function DetailDrawer({ detail, f, today }) {
-  const closeHref = statsHref(f, { detail: "" });
+// Détail déplié sur la page : ce qu'il y a derrière le chiffre cliqué, avec
+// graphiques (chronologie des problèmes, types dans le temps, délais) puis la
+// liste. Pour chaque problème ou plainte : « récurrent » (même lieu, même
+// service, déjà signalé dans les 90 jours précédents) ou « première fois ».
+function DetailSection({ detail, f, today, tags }) {
   const isPlace = detail.type === "place";
-  const yearIssues = isPlace ? detail.history.filter((h) => h.day >= addDays(today, -365)) : [];
-  const yearTotal = new Set(yearIssues.map((h) => h.id)).size;
+  const yearTotal = isPlace ? new Set(detail.history.filter((h) => h.day >= addDays(today, -365)).map((h) => h.id)).size : 0;
+  // Les statistiques de la sélection seule (sans refiltrer : elle l'est déjà).
+  const own = computeStats(detail.list, { ...f, compare: false, kinds: [], service: "", shift: "", place: "" }, tags);
+  const kindRows = own.byKind.map((r) => ({ ...r, label: KIND_LABELS[r.label] ?? r.label }));
   const period = f.from === f.to ? formatDayLong(f.from) : `${dayFmt.format(new Date(`${f.from}T12:00:00Z`))} → ${dayFmt.format(new Date(`${f.to}T12:00:00Z`))}`;
+  const n = detail.items.length;
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end print:hidden">
-      <Link href={closeHref} scroll={false} aria-label="Fermer le détail" className="absolute inset-0 bg-[#12202a]/50" />
-      <aside role="dialog" aria-modal="true" aria-label={detail.title} className="relative z-10 flex h-full w-full max-w-xl flex-col overflow-y-auto bg-sand-card p-6 shadow-2xl">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="font-display italic text-3xl text-ink">{detail.title}</h2>
-            <p className="mt-1 text-sm text-ink/60">{period} · {detail.items.length} consigne{detail.items.length > 1 ? "s" : ""}</p>
-          </div>
-          <Link href={closeHref} scroll={false} aria-label="Fermer" className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-sand-dim bg-sand text-ink/70 hover:border-aqua-deep ${focusRing}`}>
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
-          </Link>
+    <section id="detalle" className="mt-6 scroll-mt-4 rounded-xl border-2 border-aqua-deep bg-sand p-5 sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="font-display italic text-3xl text-ink">{detail.title}</h2>
+          <p className="mt-1 text-sm text-ink/60">{period} · {n} consigne{n > 1 ? "s" : ""}</p>
         </div>
+        <Link href={statsHref(f, { detail: "" })} scroll={false} className={`inline-flex h-11 items-center gap-2 rounded-lg border border-sand-dim bg-sand px-4 text-sm font-bold text-ink/70 hover:border-aqua-deep hover:text-aqua-deep ${focusRing}`}>
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>
+          Replier
+        </Link>
+      </div>
 
-        {detail.issuesCount > 0 && (
-          <div className="mt-5 rounded-xl border border-sand-dim bg-sand p-4">
-            <p className="text-ink">
-              <strong>{detail.issuesCount}</strong> problème{detail.issuesCount > 1 ? "s ou plaintes" : " ou plainte"} sur la période :{" "}
-              {detail.recurrentCount > 0 ? (
-                <strong className="text-terracotta-deep">{detail.recurrentCount} récurrent{detail.recurrentCount > 1 ? "s" : ""}</strong>
-              ) : (
-                <strong className="text-aqua-deep">aucun récurrent</strong>
-              )}
-              {detail.firstTimeCount > 0 && <>, {detail.firstTimeCount} première{detail.firstTimeCount > 1 ? "s" : ""} fois</>}.
-            </p>
-            {isPlace && <p className="mt-1 text-sm text-ink/60">Sur les 12 derniers mois : {yearTotal} problème{yearTotal > 1 ? "s" : ""} ou plainte{yearTotal > 1 ? "s" : ""} dans ce lieu.</p>}
-            <p className="mt-2 text-xs text-ink/50">Récurrent = même lieu et même service, déjà signalé dans les {RECURRENCE_DAYS} jours précédents.</p>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-lg bg-sand-card p-4"><p className="text-sm font-bold text-ink/60">Consignes</p><p className="mt-1 text-2xl font-bold tabular-nums text-ink">{n}</p></div>
+        <div className="rounded-lg bg-sand-card p-4"><p className="text-sm font-bold text-ink/60">Problèmes et plaintes</p><p className="mt-1 text-2xl font-bold tabular-nums text-ink">{detail.issuesCount}</p></div>
+        <div className="rounded-lg bg-sand-card p-4">
+          <p className="text-sm font-bold text-ink/60">Récurrents</p>
+          <p className={`mt-1 text-2xl font-bold tabular-nums ${detail.recurrentCount > 0 ? "text-terracotta-deep" : "text-aqua-deep"}`}>{detail.recurrentCount}</p>
+          <p className="text-xs text-ink/50">{detail.firstTimeCount} première{detail.firstTimeCount > 1 ? "s" : ""} fois</p>
+        </div>
+        <div className="rounded-lg bg-sand-card p-4"><p className="text-sm font-bold text-ink/60">Délai moyen de clôture</p><p className="mt-1 text-2xl font-bold tabular-nums text-ink">{formatDuration(own.current.avgHours)}</p></div>
+      </div>
+      {isPlace && <p className="mt-3 text-sm text-ink/70">Sur les 12 derniers mois : {yearTotal} problème{yearTotal > 1 ? "s" : ""} ou plainte{yearTotal > 1 ? "s" : ""} dans ce lieu.</p>}
+      <p className="mt-1 text-xs text-ink/50">Récurrent = même lieu et même service, déjà signalé dans les {RECURRENCE_DAYS} jours précédents.</p>
+
+      {n === 0 ? (
+        <p className="mt-6 text-sm text-ink/60">Aucune consigne avec ces filtres.</p>
+      ) : (
+        <>
+          <div className="mt-6">
+            <h3 className="text-lg font-bold text-ink">Chronologie</h3>
+            <p className="mb-3 text-sm text-ink/60">Chaque point est une consigne, rangée par service. Orange : problème récurrent.</p>
+            <Chronology items={detail.items} from={f.from} to={f.to} colors={{ recurrent: "#d9763a", first: "#0a8f87", other: "#9aa5a8" }} />
           </div>
-        )}
 
-        {detail.items.length === 0 ? (
-          <p className="mt-6 text-sm text-ink/60">Aucune consigne avec ces filtres.</p>
-        ) : (
-          <ul className="mt-5 grid gap-3">
+          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            <div>
+              <h3 className="text-lg font-bold text-ink">Types dans le temps</h3>
+              <div className="mt-3"><StackedChart buckets={own.buckets} kinds={KIND_SERIES} width={440} /></div>
+            </div>
+            <div className="grid content-start gap-6">
+              <div>
+                <h3 className="text-lg font-bold text-ink">Par type</h3>
+                <div className="mt-3"><Bars rows={kindRows} total={own.total} empty="" f={f} /></div>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-ink">Délai de clôture</h3>
+                <div className="mt-3"><Bars rows={own.closeDist} total={own.current.closedCount} empty="Aucune consigne clôturée." f={f} /></div>
+              </div>
+            </div>
+          </div>
+
+          <h3 className="mt-8 text-lg font-bold text-ink">Les consignes</h3>
+          <ul className="mt-3 grid gap-3 lg:grid-cols-2">
             {detail.items.map((c) => {
               const close = closeText(c);
               return (
@@ -433,13 +461,13 @@ function DetailDrawer({ detail, f, today }) {
               );
             })}
           </ul>
-        )}
-        {isPlace && (
-          <Link href={statsHref(f, { detail: "", place: detail.value })} scroll={false} className={`mt-5 inline-flex h-11 items-center justify-center rounded-lg border border-sand-dim bg-sand px-4 text-sm font-bold text-aqua-deep hover:border-aqua-deep ${focusRing}`}>
-            Filtrer toute la page sur ce lieu
-          </Link>
-        )}
-      </aside>
-    </div>
+          {isPlace && (
+            <Link href={statsHref(f, { detail: "", place: detail.value })} scroll={false} className={`mt-5 inline-flex h-11 items-center justify-center rounded-lg border border-sand-dim bg-sand px-4 text-sm font-bold text-aqua-deep hover:border-aqua-deep ${focusRing}`}>
+              Filtrer toute la page sur ce lieu
+            </Link>
+          )}
+        </>
+      )}
+    </section>
   );
 }

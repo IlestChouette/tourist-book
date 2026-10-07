@@ -62,7 +62,7 @@ export default function TimelineChart({ buckets, compare, colors }) {
           {buckets.map((bk, i) =>
             i % labelEvery === 0 ? (
               <text key={bk.key} x={x(i)} y={H - 10} textAnchor="middle" fontSize="11" fill="var(--ink)" fillOpacity="0.6">
-                {bk.label.replace(/^\S+\s(?=\d)/, "")}
+                {bk.short}
               </text>
             ) : null,
           )}
