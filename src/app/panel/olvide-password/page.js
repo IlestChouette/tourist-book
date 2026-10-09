@@ -15,6 +15,9 @@ const content = {
     submit: "Envoyer le lien →",
     sending: "Envoi…",
     error: "Une erreur est survenue. Réessayez dans un instant.",
+    notFound: "Aucun compte n'est enregistré avec cet email.",
+    createAccount: "Créer un compte hôtelier",
+    createHotel: "Créer l'espace de mon hôtel",
     sentTitle: "Vérifiez votre boîte mail",
     sent: "Si un compte existe avec cette adresse, vous allez recevoir un lien pour réinitialiser votre mot de passe.",
     spam: "Rien reçu ? Regardez dans vos spams ou courriers indésirables, puis réessayez dans une minute.",
@@ -28,6 +31,9 @@ const content = {
     submit: "Send the link →",
     sending: "Sending…",
     error: "Something went wrong. Try again in a moment.",
+    notFound: "No account is registered with this email.",
+    createAccount: "Create a host account",
+    createHotel: "Create my hotel's space",
     sentTitle: "Check your inbox",
     sent: "If an account exists with this address, you'll receive a link to reset your password.",
     spam: "Nothing there? Look in your spam or junk folder, then try again in a minute.",
@@ -41,6 +47,9 @@ const content = {
     submit: "Enviar el enlace →",
     sending: "Enviando…",
     error: "Ocurrió un error. Inténtalo de nuevo en un momento.",
+    notFound: "No hay ninguna cuenta registrada con este email.",
+    createAccount: "Crear una cuenta de anfitrión",
+    createHotel: "Crear el espacio de mi hotel",
     sentTitle: "Revisa tu correo",
     sent: "Si existe una cuenta con esta dirección, recibirás un enlace para restablecer tu contraseña.",
     spam: "¿No ves nada? Mira en el spam o correo no deseado, y vuelve a intentarlo en un minuto.",
@@ -63,7 +72,9 @@ export default function OlvidePasswordPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, locale }),
       });
-      setStatus(res.ok ? "sent" : "error");
+      if (!res.ok) return setStatus("error");
+      const data = await res.json().catch(() => ({}));
+      setStatus(data.found === false ? "notfound" : "sent");
     } catch {
       setStatus("error");
     }
@@ -99,6 +110,13 @@ export default function OlvidePasswordPage() {
               {status === "sending" ? t.sending : t.submit}
             </button>
             {status === "error" && <p className="text-sm text-terracotta-deep">{t.error}</p>}
+            {status === "notfound" && (
+              <div className="grid gap-2">
+                <p className="text-sm text-terracotta-deep">{t.notFound}</p>
+                <Link href="/panel/registro" className="justify-self-start text-sm font-bold text-aqua-deep">{t.createAccount} →</Link>
+                <Link href="/hotel/inscription" className="justify-self-start text-sm font-bold text-aqua-deep">{t.createHotel} →</Link>
+              </div>
+            )}
             <Link href="/panel/login" className="text-sm font-bold text-aqua-deep">
               {t.back}
             </Link>

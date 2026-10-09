@@ -24,6 +24,9 @@ const content = {
     forgot: "Mot de passe oublié ?",
     noAccount: "Vous n'avez pas encore de compte ?",
     register: "Inscrivez-vous",
+    notFound: "Aucun compte n'est enregistré avec cet email.",
+    createAccount: "Créer un compte gratuitement →",
+    wrongPassword: "Mot de passe incorrect.",
   },
   en: {
     home: "Home",
@@ -40,6 +43,9 @@ const content = {
     forgot: "Forgot your password?",
     noAccount: "Don't have an account yet?",
     register: "Sign up",
+    notFound: "No account is registered with this email.",
+    createAccount: "Create a free account →",
+    wrongPassword: "Incorrect password.",
   },
   es: {
     home: "Inicio",
@@ -56,6 +62,9 @@ const content = {
     forgot: "¿Olvidaste tu contraseña?",
     noAccount: "¿Todavía no tienes cuenta?",
     register: "Regístrate",
+    notFound: "No hay ninguna cuenta registrada con este email.",
+    createAccount: "Crear una cuenta gratis →",
+    wrongPassword: "Contraseña incorrecta.",
   },
 };
 
@@ -69,6 +78,7 @@ export default function LoginForm() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [needsConfirm, setNeedsConfirm] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const [resent, setResent] = useState(false);
   const confirmError = searchParams.get("confirm") === "error";
 
@@ -80,6 +90,7 @@ export default function LoginForm() {
     e.preventDefault();
     setSending(true);
     setError("");
+    setNotFound(false);
 
     const supabase = createClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -88,9 +99,32 @@ export default function LoginForm() {
     });
 
     if (signInError) {
-      setSending(false);
       setNeedsConfirm(signInError.code === "email_not_confirmed");
-      setError(authErrorMessage(signInError, locale));
+      let message = authErrorMessage(signInError, locale);
+      // Email ou mot de passe faux : on dit lequel des deux, et si l'email n'a
+      // pas de compte on invite à en créer un. Si la vérification échoue, on
+      // garde le message générique.
+      if (signInError.code === "invalid_credentials") {
+        try {
+          const res = await fetch("/api/account-exists", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: form.email }),
+          });
+          if (res.ok) {
+            const { exists } = await res.json();
+            if (exists) message = t.wrongPassword;
+            else {
+              message = t.notFound;
+              setNotFound(true);
+            }
+          }
+        } catch {
+          // message générique
+        }
+      }
+      setSending(false);
+      setError(message);
       return;
     }
 
@@ -141,6 +175,11 @@ export default function LoginForm() {
             {sending ? t.submitting : t.submit}
           </button>
           {error && <p className="text-sm text-terracotta-deep">{error}</p>}
+          {notFound && (
+            <Link href="/panel/registro" className="justify-self-start rounded border border-aqua-deep px-4 py-2 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card">
+              {t.createAccount}
+            </Link>
+          )}
           {needsConfirm && !resent && (
             <button
               type="button"

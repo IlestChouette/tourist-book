@@ -12,7 +12,7 @@ export async function POST(request) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: "Vous n'êtes pas connecté. Connectez-vous ou créez un compte pour continuer." }, { status: 401 });
 
   const { propertyName } = await request.json().catch(() => ({}));
   if (!propertyName || typeof propertyName !== "string") {
@@ -31,7 +31,7 @@ export async function POST(request) {
       .maybeSingle(),
     admin.from("hosts").select("name, email").eq("id", user.id).maybeSingle(),
   ]);
-  if (!property) return NextResponse.json({ error: "Logement introuvable" }, { status: 404 });
+  if (!property) return NextResponse.json({ error: "Aucun compte ou logement trouvé. Créez un compte pour commencer." }, { status: 404 });
 
   try {
     await sendPropertyCreatedNotification({

@@ -9,8 +9,9 @@ const SITE_URL = process.env.SITE_URL || "https://tourist-book.com";
 const LOCALES = ["fr", "en", "es"];
 const THROTTLE_MS = 60_000;
 
-// Demande de réinitialisation de mot de passe. La réponse est identique que le
-// compte existe ou non, pour ne pas révéler quels emails sont inscrits.
+// Demande de réinitialisation de mot de passe. La réponse dit si un compte existe
+// avec cet email, pour inviter à en créer un sinon (choix produit : cela révèle
+// quels emails sont inscrits ; l'envoi reste limité à un email par minute).
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
   const address = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
@@ -18,6 +19,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "Email invalide" }, { status: 400 });
   }
   const locale = LOCALES.includes(body.locale) ? body.locale : "fr";
+  let found = false;
 
   try {
     const admin = createAdminClient();
@@ -33,10 +35,13 @@ export async function POST(request) {
       .eq("template", "password_reset")
       .gt("created_at", since);
 
+    // Un email envoyé dans la dernière minute prouve que le compte existe.
+    if (count) found = true;
     if (!count) {
       const { data, error } = await admin.auth.admin.generateLink({ type: "recovery", email: address });
       const tokenHash = data?.properties?.hashed_token;
       if (!error && tokenHash) {
+        found = true;
         const link = `${SITE_URL}/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=recovery&next=/panel/restablecer-password`;
         await sendPasswordResetEmail({ to: address, link, locale });
       }
@@ -45,5 +50,5 @@ export async function POST(request) {
     console.error("forgot-password failed:", err);
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, found });
 }

@@ -10,16 +10,33 @@ export default function HotelConnexionPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setSending(true);
     setError("");
+    setNotFound(false);
     const supabase = createClient();
     const { error: err } = await supabase.auth.signInWithPassword(form);
     if (err) {
+      let message = authErrorMessage(err, "fr");
+      // Email ou mot de passe faux : on dit lequel, et si l'email n'a pas de
+      // compte on invite à créer l'espace de l'hôtel.
+      if (err.code === "invalid_credentials") {
+        try {
+          const res = await fetch("/api/account-exists", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: form.email }) });
+          if (res.ok) {
+            const { exists } = await res.json();
+            message = exists ? "Mot de passe incorrect." : "Aucun compte n'est enregistré avec cet email.";
+            setNotFound(!exists);
+          }
+        } catch {
+          // message générique
+        }
+      }
       setSending(false);
-      return setError(authErrorMessage(err, "fr"));
+      return setError(message);
     }
     window.location.href = "/hotel/gestion";
   }
@@ -45,6 +62,11 @@ export default function HotelConnexionPage() {
             {sending ? "Connexion…" : "Se connecter →"}
           </button>
           {error && <p className="text-sm text-terracotta-deep">{error}</p>}
+          {notFound && (
+            <Link href="/hotel/inscription" className="justify-self-start rounded border border-aqua-deep px-4 py-2 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card">
+              Créer l'espace de mon hôtel →
+            </Link>
+          )}
         </form>
         <p className="mt-4 text-sm text-ink/70">
           <Link href="/panel/olvide-password" className="font-bold text-aqua-deep">
