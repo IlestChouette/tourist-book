@@ -15,7 +15,7 @@ export function IconGrid({ items }) {
           </span>
           <div>
             <h3 className="font-bold text-ink">{title}</h3>
-            <p className="mt-1 text-sm text-ink/70">{text}</p>
+            <p className="mt-1 text-base text-ink/70 sm:text-sm">{text}</p>
           </div>
         </div>
       ))}
@@ -30,7 +30,7 @@ export function StepFlow({ items }) {
         <div key={s.n}>
           <span className="font-display italic text-3xl text-terracotta-deep">{s.n}</span>
           <h3 className="mt-2 font-bold text-ink">{s.title}</h3>
-          <p className="mt-1 text-sm text-ink/70">{s.text}</p>
+          <p className="mt-1 text-base text-ink/70 sm:text-sm">{s.text}</p>
         </div>
       ))}
     </div>
@@ -42,7 +42,7 @@ export function CompareBlock({ left, right }) {
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="rounded-xl border border-sand-dim bg-sand p-5">
         <span className="text-xs font-bold uppercase tracking-wider text-ink/50">{left.title}</span>
-        <ul className="mt-3 grid gap-2 text-sm text-ink/80">
+        <ul className="mt-3 grid gap-2 text-base text-ink/80 sm:text-sm">
           {left.items.map((i) => (
             <li key={i} className="flex gap-2">
               <span className="text-ink/40">–</span>
@@ -53,7 +53,7 @@ export function CompareBlock({ left, right }) {
       </div>
       <div className="rounded-xl border border-aqua-deep bg-aqua-deep/[0.06] p-5">
         <span className="text-xs font-bold uppercase tracking-wider text-aqua-deep">{right.title}</span>
-        <ul className="mt-3 grid gap-2 text-sm text-ink/80">
+        <ul className="mt-3 grid gap-2 text-base text-ink/80 sm:text-sm">
           {right.items.map((i) => (
             <li key={i} className="flex gap-2">
               <span className="text-aqua-deep">✓</span>

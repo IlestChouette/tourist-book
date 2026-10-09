@@ -14,10 +14,24 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   const post = getBlogPost(slug);
   if (!post) return {};
+  const url = `https://tourist-book.com/blog/${post.slug}`;
+  // openGraph/twitter explicites : sinon la page hérite de ceux du layout
+  // (« Tourist Book ») et Facebook n'affiche pas le titre de l'article.
+  // L'image vient de opengraph-image.js (titre de l'article).
   return {
     title: `${post.title} — Tourist Book`,
     description: post.metaDescription,
     alternates: { canonical: `/blog/${post.slug}` },
+    openGraph: {
+      type: "article",
+      url,
+      siteName: "Tourist Book",
+      locale: "fr_FR",
+      title: post.title,
+      description: post.metaDescription,
+      publishedTime: post.publishedAt,
+    },
+    twitter: { card: "summary_large_image", title: post.title, description: post.metaDescription },
   };
 }
 
@@ -38,8 +52,8 @@ export default async function BlogPostPage({ params }) {
   return (
     <main className="flex-1">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
-      <Hero backHref="/blog" backLabel="Blog" eyebrow={dateFormatter.format(new Date(post.publishedAt))} title={post.title} />
-      <article className="mx-auto max-w-3xl px-6 py-14">
+      <Hero compact backHref="/blog" backLabel="Blog" eyebrow={dateFormatter.format(new Date(post.publishedAt))} title={post.title} />
+      <article className="mx-auto max-w-3xl px-6 py-10 sm:py-14">
         <div className="grid gap-10">
           {post.blocks.map((block, i) => (
             <BlogBlock key={i} block={block} />

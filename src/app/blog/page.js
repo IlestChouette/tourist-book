@@ -6,6 +6,14 @@ export const metadata = {
   title: "Blog — Tourist Book",
   description: "Guides pour créer un livret d'accueil efficace, gérer l'enregistrement des voyageurs et automatiser les questions du quotidien.",
   alternates: { canonical: "/blog" },
+  openGraph: {
+    type: "website",
+    url: "https://tourist-book.com/blog",
+    siteName: "Tourist Book",
+    locale: "fr_FR",
+    title: "Blog — Tourist Book",
+    description: "Guides pour créer un livret d'accueil efficace, gérer l'enregistrement des voyageurs et automatiser les questions du quotidien.",
+  },
 };
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", { year: "numeric", month: "long", day: "numeric" });
