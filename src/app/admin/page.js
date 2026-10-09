@@ -8,6 +8,7 @@ import { stripe } from "@/lib/stripe";
 import LogoutButton from "@/components/LogoutButton";
 import EmailsSentTabs from "@/components/EmailsSentTabs";
 import { getLocale } from "@/lib/i18n/locale";
+import { getTransferCommissionPct } from "@/lib/transferPricing";
 
 // Vrai MRR calculé depuis Stripe plutôt que depuis le prix de liste local —
 // reflète les coupons/réductions réellement appliqués sur chaque abonnement.
@@ -224,7 +225,7 @@ const content = {
     month: "Mois",
     transferCount: "Demandes",
     totalBilled: "Total facturé",
-    commission: "Commission estimée (≈20%)",
+    commission: "Commission estimée",
     noPriceNote: (n) => `${n} sans prix enregistré (avant l'ajout du calcul automatique)`,
     transferDetailTitle: "Détail des transferts",
     traveler: "Voyageur",
@@ -284,7 +285,7 @@ const content = {
     month: "Month",
     transferCount: "Requests",
     totalBilled: "Total billed",
-    commission: "Estimated commission (≈20%)",
+    commission: "Estimated commission",
     noPriceNote: (n) => `${n} with no price recorded (before automatic pricing was added)`,
     transferDetailTitle: "Transfer detail",
     traveler: "Traveler",
@@ -344,7 +345,7 @@ const content = {
     month: "Mes",
     transferCount: "Solicitudes",
     totalBilled: "Total facturado",
-    commission: "Comisión estimada (≈20%)",
+    commission: "Comisión estimada",
     noPriceNote: (n) => `${n} sin precio registrado (antes de agregar el cálculo automático)`,
     transferDetailTitle: "Detalle de transfers",
     traveler: "Viajero",
@@ -446,13 +447,19 @@ export default async function AdminPage() {
       bucket.total += price;
     }
   }
+  // Le prix affiché est net × (1 + c) : la commission est donc prix × c / (1 + c).
+  // `c` est la commission configurée dans /admin/tarifas (20 % par défaut).
+  // Limite connue : le taux appliqué à chaque demande n'est pas enregistré, le
+  // taux actuel s'applique donc à tout l'historique.
+  const commissionPct = await getTransferCommissionPct();
+  const commissionShare = commissionPct / (100 + commissionPct);
   const transferMonths = [...transfersByMonth.entries()]
     .sort(([a], [b]) => (a < b ? 1 : -1))
-    .map(([month, bucket]) => ({ month, ...bucket, commission: bucket.total / 6 }));
+    .map(([month, bucket]) => ({ month, ...bucket, commission: bucket.total * commissionShare }));
 
   // Détail par transfert : le prix net du conducteur n'est jamais enregistré
   // (seul le prix final majoré l'est) — on le déduit du prix affiché en
-  // inversant la majoration de 20%, comme pour la commission ci-dessus.
+  // inversant la majoration configurée, comme pour la commission ci-dessus.
   const transferDetails = (transfers ?? []).map((req) => {
     const price = Number(req.details?.prixEstime);
     const hasPrice = Number.isFinite(price);
@@ -464,7 +471,7 @@ export default async function AdminPage() {
       from: req.details?.lieu || "-",
       to: req.details?.destination || "-",
       price: hasPrice ? price : null,
-      net: hasPrice ? price / 1.2 : null,
+      net: hasPrice ? price / (1 + commissionPct / 100) : null,
     };
   });
 
@@ -717,7 +724,7 @@ export default async function AdminPage() {
                   <th className="px-4 py-2 font-bold text-ink/70">{t.month}</th>
                   <th className="px-4 py-2 font-bold text-ink/70">{t.transferCount}</th>
                   <th className="px-4 py-2 font-bold text-ink/70">{t.totalBilled}</th>
-                  <th className="px-4 py-2 font-bold text-ink/70">{t.commission}</th>
+                  <th className="px-4 py-2 font-bold text-ink/70">{t.commission} (≈{commissionPct} %)</th>
                 </tr>
               </thead>
               <tbody>

@@ -5,7 +5,9 @@ import { sendTransferWhatsApp } from "@/lib/whatsapp";
 // Formulaire public, sans logement associé (partagé directement par lien à
 // des voyageurs indépendants) — pas d'authentification, comme /api/requests.
 export async function POST(request) {
-  const body = await request.json();
+  // Aucun tarif vérifiable pour un transfert sans logement : on ignore tout
+  // prix envoyé par le navigateur (il serait transmis tel quel au transporteur).
+  const { prixEstime: _ignored, ...body } = await request.json();
   const { nom, telephone } = body;
   if (!nom || !telephone) {
     return NextResponse.json({ error: "Données invalides" }, { status: 400 });

@@ -44,7 +44,8 @@ function param(value) {
 export async function sendTransferWhatsApp({ propertyLabel, nom, telephone, details }) {
   const token = process.env.WHATSAPP_ACCESS_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const recipients = (process.env.WHATSAPP_TRANSPORT_NUMBERS || "")
+  // Repli sur l'ancien nom de variable (au singulier) pour les déploiements déjà configurés.
+  const recipients = (process.env.WHATSAPP_TRANSPORT_NUMBERS || process.env.WHATSAPP_TRANSPORT_NUMBER || "")
     .split(",")
     .map((n) => n.replace(/[^\d]/g, ""))
     .filter(Boolean);

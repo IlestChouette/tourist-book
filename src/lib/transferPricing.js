@@ -14,6 +14,17 @@ export async function getTransferPricing() {
   return { commissionPct: Number(setting?.value ?? 20), cities: cities ?? [] };
 }
 
+// Commission configurée (20 % tant que l'admin n'a rien changé).
+export async function getTransferCommissionPct() {
+  const { data: setting } = await createAdminClient()
+    .from("app_settings")
+    .select("value")
+    .eq("key", "transfer_commission_pct")
+    .maybeSingle();
+  const pct = Number(setting?.value ?? 20);
+  return Number.isFinite(pct) && pct >= 0 ? pct : 20;
+}
+
 export async function transferRatesForCity(city) {
   const { commissionPct, cities } = await getTransferPricing();
   const row = cities.find((c) => c.city === normalizeCity(city));

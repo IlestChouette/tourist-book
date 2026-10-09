@@ -74,14 +74,16 @@ export default function RestablecerPasswordPage() {
     }
     setSaving(true);
     setError("");
-    const { error: updateError } = await createClient().auth.updateUser({ password: form.password });
+    const { data: updated, error: updateError } = await createClient().auth.updateUser({ password: form.password });
     if (updateError) {
       setSaving(false);
       setError(authErrorMessage(updateError, locale));
       return;
     }
     setDone(true);
-    setTimeout(() => router.push("/panel"), 2000);
+    // Un compte hôtel (créé depuis l'espace hôtels) n'a pas de profil hôtelier : retour à son espace.
+    const home = updated?.user?.user_metadata?.account_type === "hotel" ? "/hotel/gestion" : "/panel";
+    setTimeout(() => router.push(home), 2000);
   }
 
   if (hasSession === false) {

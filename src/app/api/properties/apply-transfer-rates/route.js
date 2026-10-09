@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { transferRatesForCity } from "@/lib/transferPricing";
+import { getTransferPricing } from "@/lib/transferPricing";
+import { normalizeCity, ratesFromNet } from "@/lib/transferCityRates";
 
 // Les tarifs de transfert sont admin-only en écriture (RLS) — un hôtelier ne
 // peut pas les insérer lui-même. Cette route applique le tarif standard de
@@ -30,23 +31,33 @@ export async function POST(request) {
     return NextResponse.json({ error: "Logement introuvable" }, { status: 404 });
   }
 
-  const rates = await transferRatesForCity(city);
+  const { commissionPct, cities } = await getTransferPricing();
+  const row = cities.find((c) => c.city === normalizeCity(city));
+  const rates = row ? ratesFromNet(row, commissionPct) : null;
   if (!rates) return NextResponse.json({ applied: false });
 
-  // Sans "force" (cas d'une simple modification du logement), on ne touche
-  // pas des tarifs déjà présents — l'admin a pu les personnaliser à la main
-  // pour ce logement précis. "force" (création, duplication) part toujours
+  // Sans "force" (simple modification du logement), on ne touche pas des tarifs
+  // que l'admin a pu personnaliser à la main pour ce logement précis. Mais si
+  // les tarifs actuels sont ceux d'une ville standard (appliqués
+  // automatiquement) et que la ville a changé (Nice → Cannes), ils doivent
+  // suivre la nouvelle ville. "force" (création, duplication) part toujours
   // d'une fiche neuve : rien à préserver.
   if (!force) {
-    const { count } = await admin
+    const { data: existing } = await admin
       .from("transfer_rates")
-      .select("id", { count: "exact", head: true })
+      .select("passengers, luggage, price")
       .eq("property_id", propertyId)
       .eq("pickup_location", "airport");
-    if (count > 0) return NextResponse.json({ applied: false, reason: "already_set" });
-  } else {
-    await admin.from("transfer_rates").delete().eq("property_id", propertyId).eq("pickup_location", "airport");
+    if ((existing ?? []).length > 0) {
+      const signature = (list) =>
+        [...list].sort((a, b) => a.passengers - b.passengers).map((r) => `${r.passengers}:${r.luggage}:${Number(r.price)}`).join("|");
+      const current = signature(existing);
+      if (current === signature(rates)) return NextResponse.json({ applied: false, reason: "already_set" });
+      const isStandard = cities.some((c) => signature(ratesFromNet(c, commissionPct)) === current);
+      if (!isStandard) return NextResponse.json({ applied: false, reason: "custom_rates" });
+    }
   }
+  await admin.from("transfer_rates").delete().eq("property_id", propertyId).eq("pickup_location", "airport");
 
   const { error } = await admin
     .from("transfer_rates")
