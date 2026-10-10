@@ -102,7 +102,7 @@ export default function HotelInscriptionPage() {
         backLabel="Espace hôtels"
         eyebrow="Espace hôtels"
         title="Créer l'espace de votre hôtel"
-        subtitle="Un mois d'essai gratuit, sans engagement."
+        subtitle="Prêt en 10 minutes."
       />
       <section className="mx-auto max-w-sm px-6 py-10">
         <form onSubmit={handleSubmit} className="grid gap-4">

@@ -6,7 +6,7 @@ import { EmailMockup, PhoneKind, PhonePin, StatsMockup, TabletMockup } from "./M
 const URL = "https://tourist-book.com/hotel";
 const TITLE = "Cahier de consignes numérique pour hôtels — Tourist Book";
 const DESCRIPTION =
-  "Remplacez le cahier papier de votre réception : consignes qui ne se perdent plus entre deux équipes, validation avec le code de la badgeuse, récap par email à chaque relève et statistiques pour la direction. 1 mois d'essai gratuit.";
+  "Remplacez le cahier papier de votre réception : consignes qui ne se perdent plus entre deux équipes, validation avec le code de la badgeuse, récap par email à chaque relève et statistiques pour la direction.";
 
 // Le dossier /hotel est en noindex (espace de travail) : cette page de
 // présentation, elle, doit être référencée.
@@ -76,7 +76,7 @@ const steps = [
   },
 ];
 
-function Cta({ children = "Essayer gratuitement pendant 1 mois", className = "" }) {
+function Cta({ children = "Créer l'espace de mon hôtel", className = "" }) {
   return (
     <Link
       href="/hotel/inscription"
@@ -98,7 +98,7 @@ export default function HotelLandingPage() {
         operatingSystem: "Web",
         description: DESCRIPTION,
         url: URL,
-        offers: { "@type": "Offer", price: "15", priceCurrency: "EUR", description: "Par mois et par service, 1 mois d'essai gratuit" },
+        offers: { "@type": "Offer", price: "15", priceCurrency: "EUR", description: "Par mois et par service" },
         provider: { "@type": "Organization", name: "Tourist Book", url: "https://tourist-book.com" },
       },
       {
@@ -138,7 +138,7 @@ export default function HotelLandingPage() {
               <Cta />
               <a href="#comment" className="text-base font-bold text-[#f7f1e4] underline underline-offset-4 hover:text-white">Voir comment ça marche</a>
             </div>
-            <p className="mt-5 text-sm text-[#f7f1e4]/80">Sans carte bancaire · Prêt en 10 minutes · Aucune formation nécessaire</p>
+            <p className="mt-5 text-sm text-[#f7f1e4]/80">Prêt en 10 minutes · Aucune formation nécessaire · Pour les équipes de réception, conciergerie, technique…</p>
           </div>
           <div className="mx-auto w-full max-w-md md:max-w-none">
             <TabletMockup className="md:-rotate-1" />
@@ -252,7 +252,6 @@ export default function HotelLandingPage() {
             <p className="font-display italic text-6xl text-ink">15 €</p>
             <p className="mt-1 text-lg font-bold text-ink">par mois et par service</p>
             <p className="mt-4 text-ink/70">Statistiques, exports Excel et PDF, récap par email : tout est inclus.</p>
-            <p className="mt-4 rounded-lg bg-aqua-deep/10 px-3 py-2 text-sm font-bold text-aqua-deep">Le premier mois est gratuit, sans carte bancaire.</p>
           </div>
           <div className="mt-8"><Cta className="bg-terracotta" /></div>
         </div>
