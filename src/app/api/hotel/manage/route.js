@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { getHotelContext, isPin, pinHash, sha256, STATION_COOKIE } from "@/lib/hotelAuth";
+import { ACTIVATION_MINUTES, PENDING_LABEL, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE } from "@/lib/hotelAuth";
 
 const fail = (error, status = 400) => NextResponse.json({ error }, { status });
 const PIN_TAKEN = "Ce PIN est déjà utilisé par une autre personne : choisissez-en un autre.";
@@ -140,6 +140,24 @@ export async function POST(request) {
         maxAge: 60 * 60 * 24 * 365,
       });
       return res;
+    }
+    // Code d'activation d'un nouveau poste (6 chiffres, 10 minutes, une fois).
+    // Stocké comme un poste "en attente" : aucune table de plus.
+    case "create_activation_code": {
+      await admin
+        .from("hotel_stations")
+        .delete()
+        .eq("hotel_id", hotel.id)
+        .eq("label", PENDING_LABEL)
+        .lt("created_at", new Date(Date.now() - ACTIVATION_MINUTES * 60 * 1000).toISOString());
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const code = String(crypto.randomInt(100000, 1000000));
+        const { error } = await admin
+          .from("hotel_stations")
+          .insert({ hotel_id: hotel.id, token_hash: activationHash(hotel.id, code), label: PENDING_LABEL });
+        if (!error) return ok({ code, expiresInMinutes: ACTIVATION_MINUTES });
+      }
+      return fail("Impossible de créer le code.", 500);
     }
     case "delete_station": {
       await admin.from("hotel_stations").delete().eq("id", b.id ?? "").eq("hotel_id", hotel.id);

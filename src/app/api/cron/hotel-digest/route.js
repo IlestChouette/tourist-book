@@ -4,6 +4,7 @@ import { sendHotelDigestEmail } from "@/lib/email";
 import { loadDay, loadMeta, loadPending } from "@/lib/hotelData";
 import { buildDayPdf } from "@/lib/hotelPdf";
 import { addDays, parisDate, parisMinutes } from "@/lib/hotelTime";
+import { listHotelSlugs } from "@/lib/hotelSlug";
 
 // Appelé toutes les 5 minutes par Supabase (voir supabase/hotel_digest_cron.sql) :
 // l'offre Vercel gratuite n'autorise qu'une tâche planifiée par jour. C'est ici
@@ -32,6 +33,7 @@ export async function GET(request) {
   const admin = createAdminClient();
   const { data: hotels } = await admin.from("hotels").select("id, name, notification_emails, retention_months");
 
+  const slugs = new Map((await listHotelSlugs(admin)).map((h) => [h.id, h.slug]));
   let sent = 0;
   const errors = [];
   for (const hotel of hotels ?? []) {
@@ -73,7 +75,7 @@ export async function GET(request) {
       if (pending.length === 0 && !pdf) continue;
 
       for (const to of recipients) {
-        await sendHotelDigestEmail({ to, hotelName: hotel.name, slotLabel: slot.label, pending, pdf });
+        await sendHotelDigestEmail({ to, hotelName: hotel.name, slotLabel: slot.label, pending, pdf, cahierPath: slugs.has(hotel.id) ? `/hotel/${slugs.get(hotel.id)}/cahier` : "/hotel/cahier" });
         sent += 1;
       }
     } catch (err) {

@@ -577,7 +577,7 @@ const DIGEST_KIND_LABELS = { info: "Info", tache: "Tâche", probleme: "Problème
 // Relève du cahier de consignes (6h55, 14h55, 22h55) : les consignes encore
 // ouvertes, prioritaires et reportées d'abord. À 6h55, le PDF de la veille
 // est joint. Un email par destinataire, chacun journalisé.
-export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, pdf }) {
+export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, pdf, cahierPath = "/hotel/cahier" }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return { sent: false, reason: "not_configured" };
 
@@ -596,7 +596,7 @@ export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, 
       lines.push(`• [${flags.join(" · ")}]`, `  ${c.body.replace(/\n+/g, " ")}`, "");
     }
   }
-  lines.push(`Ouvrir le cahier : ${SITE_URL}/hotel/cahier`);
+  lines.push(`Ouvrir le cahier : ${SITE_URL}${cahierPath}`);
   if (pdf) lines.push("", "Le PDF des consignes d'hier est joint à ce message.");
 
   const subject = `Cahier de consignes — ${hotelName} — relève de ${slotLabel} : ${pending.length} en attente`;

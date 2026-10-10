@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { HotelFooter, HotelHeader } from "@/components/HotelShell";
 import { getHotelContext } from "@/lib/hotelAuth";
 import { loadMeta } from "@/lib/hotelData";
+import { PENDING_LABEL } from "@/lib/hotelAuth";
+import { slugForHotel } from "@/lib/hotelSlug";
 import GestionClient from "./GestionClient";
 
 export const metadata = { title: "Gestion du cahier", robots: { index: false, follow: false } };
@@ -12,14 +14,15 @@ export default async function GestionPage() {
   if (ctx.mode !== "manager") redirect("/hotel/cahier");
 
   const { admin, hotel } = ctx;
-  const [meta, { data: staff }, { data: stations }] = await Promise.all([
+  const [meta, { data: staff }, { data: stations }, slug] = await Promise.all([
     loadMeta(hotel.id),
     admin
       .from("hotel_staff")
       .select("id, name, role_ids, is_manager, active, pin_hash")
       .eq("hotel_id", hotel.id)
       .order("created_at", { ascending: true }),
-    admin.from("hotel_stations").select("id, label, created_at").eq("hotel_id", hotel.id).order("created_at"),
+    admin.from("hotel_stations").select("id, label, created_at").eq("hotel_id", hotel.id).neq("label", PENDING_LABEL).order("created_at"),
+    slugForHotel(hotel.id, admin),
   ]);
 
   return (
@@ -33,6 +36,7 @@ export default async function GestionPage() {
           places={meta.places}
           staff={(staff ?? []).map((s) => ({ ...s, hasPin: Boolean(s.pin_hash), pin_hash: undefined }))}
           stations={stations ?? []}
+          cahierPath={slug ? `/hotel/${slug}/cahier` : "/hotel/cahier"}
           lostFound={hotel.lost_found_enabled === true ? { token: hotel.lost_found_token ?? null } : null}
         />
       </section>

@@ -8,5 +8,7 @@ import { usePathname } from "next/navigation";
 export default function HideOnPaths({ prefixes, children }) {
   const pathname = usePathname();
   if (prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return null;
+  // /hotel/<nom-de-l-hotel>/cahier : l'adresse propre à chaque hôtel.
+  if (/^\/hotel\/[^/]+\/cahier(\/|$)/.test(pathname)) return null;
   return children;
 }

@@ -21,6 +21,13 @@ export function pinHash(hotelId, pin) {
     .digest("hex");
 }
 
+// Activation d'un poste par code : une ligne "en attente" dans hotel_stations,
+// dont le hash est celui du code (lié à l'hôtel), remplacée par le vrai jeton
+// du poste à l'utilisation.
+export const PENDING_LABEL = "__pending__";
+export const ACTIVATION_MINUTES = 10;
+export const activationHash = (hotelId, code) => sha256(`code:${hotelId}:${code}`);
+
 export const isPin = (value) => typeof value === "string" && /^\d{4}$/.test(value);
 
 // Qui parle ? Soit le manager (session Supabase, propriétaire d'un hôtel),

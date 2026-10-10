@@ -59,7 +59,64 @@ function LostFoundLink({ token, busy, onRegen }) {
   );
 }
 
-export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound }) {
+// Le lien du cahier pour l'équipe et le code d'activation d'un nouvel appareil.
+function TeamLink({ cahierPath }) {
+  const [url, setUrl] = useState(cahierPath);
+  const [qr, setQr] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [activation, setActivation] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function copy() {
+    const full = `${window.location.origin}${cahierPath}`;
+    setUrl(full);
+    try {
+      await navigator.clipboard.writeText(full);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // presse-papiers indisponible : le lien reste affiché
+    }
+  }
+  async function showQr() {
+    setQr(await QRCode.toDataURL(`${window.location.origin}${cahierPath}`, { width: 360, margin: 2 }));
+  }
+  async function newCode() {
+    setBusy(true);
+    setError("");
+    const res = await fetch("/api/hotel/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "create_activation_code" }) });
+    const data = await res.json().catch(() => ({}));
+    setBusy(false);
+    if (!res.ok) return setError(data.error || "Impossible de créer le code.");
+    setActivation({ code: data.code, minutes: data.expiresInMinutes });
+  }
+
+  return (
+    <div>
+      <input readOnly value={url.startsWith("/") && typeof window !== "undefined" ? `${window.location.origin}${url}` : url} onFocus={(e) => e.target.select()} className="input h-11 w-full" aria-label="Lien du cahier pour votre équipe" />
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button type="button" onClick={copy} className={btnGhost}>{copied ? "Copié !" : "Copier le lien"}</button>
+        <button type="button" onClick={showQr} className={btnGhost}>Afficher le QR code</button>
+        <button type="button" disabled={busy} onClick={newCode} className={btn}>Ajouter un appareil (code)</button>
+      </div>
+      {error && <p className="mt-3 text-sm font-bold text-terracotta-deep" role="alert">{error}</p>}
+      {activation && (
+        <div className="mt-4 rounded-xl border-2 border-aqua-deep bg-sand p-5 text-center">
+          <p className="text-sm text-ink/70">Sur le nouvel appareil, ouvrez le lien ci-dessus et tapez ce code :</p>
+          <p className="mt-2 font-display text-5xl italic tracking-[0.2em] text-ink tabular-nums">{activation.code}</p>
+          <p className="mt-2 text-sm text-ink/60">Valable {activation.minutes} minutes, utilisable une seule fois.</p>
+        </div>
+      )}
+      {qr && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={qr} alt="QR code du lien du cahier" className="mt-4 h-44 w-44 rounded border border-sand-dim" />
+      )}
+    </div>
+  );
+}
+
+export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath }) {
   const router = useRouter();
   const [message, setMessage] = useState(null); // { text, error }
   const [busy, setBusy] = useState(false);
@@ -262,7 +319,11 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
         </Card>
       )}
 
-      <Card title="Postes de réception" hint="Sur l'ordinateur de la réception, activez le poste une seule fois : ensuite chacun s'identifie avec son PIN, sans mot de passe. Puis déconnectez-vous du compte manager sur cet ordinateur.">
+      <Card title="Le lien du cahier pour votre équipe" hint="Ce lien est propre à votre hôtel : mettez-le en favori sur chaque ordinateur ou tablette. Un nouvel appareil doit être activé une fois avec un code à 6 chiffres, que vous générez ici. Sans code, le lien ne montre rien.">
+        <TeamLink cahierPath={cahierPath} />
+      </Card>
+
+      <Card title="Postes de réception" hint="Appareils déjà activés. Vous pouvez aussi activer l'ordinateur sur lequel vous êtes connecté, sans code : puis déconnectez-vous du compte manager.">
         <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); call({ action: "activate_station", label: stationLabel }, "Ce poste est activé. Déconnectez-vous du compte manager pour le laisser à l'équipe."); }}>
           <label className="grid gap-1.5">
             <span className={label}>Nom du poste</span>
