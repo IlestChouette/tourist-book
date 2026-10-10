@@ -1,6 +1,7 @@
 import { Bodoni_Moda, Archivo } from "next/font/google";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
+import HideOnPaths from "@/components/HideOnPaths";
 import { getLocale } from "@/lib/i18n/locale";
 import "./globals.css";
 
@@ -14,6 +15,8 @@ const archivo = Archivo({
   variable: "--font-body-src",
   subsets: ["latin"],
 });
+
+const HOTEL_APP_PATHS = ["/hotel/cahier", "/hotel/gestion", "/hotel/statistiques", "/hotel/objets-trouves", "/trouve", "/objet"];
 
 export const metadata = {
   metadataBase: new URL("https://tourist-book.com"),
@@ -45,8 +48,10 @@ export default async function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col bg-sand text-ink font-body">
         {children}
-        <Footer />
-        <CookieConsent locale={locale} />
+        <HideOnPaths prefixes={HOTEL_APP_PATHS}>
+          <Footer />
+          <CookieConsent locale={locale} />
+        </HideOnPaths>
       </body>
     </html>
   );

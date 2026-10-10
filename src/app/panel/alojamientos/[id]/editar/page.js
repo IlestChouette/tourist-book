@@ -6,7 +6,7 @@ import { uploadMedia } from "@/lib/uploadMedia";
 import Hero from "@/components/Hero";
 import AccentColorButton from "@/components/AccentColorButton";
 import FormattableTextarea from "@/components/FormattableTextarea";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 import fieldsDict from "@/lib/i18n/dictionaries/propertyForm";
 
 const MAX_PHOTOS = 5;
@@ -20,7 +20,7 @@ const pageContent = {
 
 export default function EditarAlojamientoPage({ params }) {
   const { id } = use(params);
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = fieldsDict[locale];
   const p = pageContent[locale];
 
@@ -178,6 +178,15 @@ export default function EditarAlojamientoPage({ params }) {
         .eq("id", id);
 
       if (updateError) throw updateError;
+
+      // Réapplique le tarif de transfert de la ville (idempotent si elle n'a
+      // pas changé) au cas où l'hôtelier vient de la corriger.
+      await fetch("/api/properties/apply-transfer-rates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId: id, city: form.city }),
+      }).catch(() => {});
+
       window.location.href = `/panel/alojamientos/${id}`;
     } catch (err) {
       setError(err.message);
@@ -497,6 +506,7 @@ export default function EditarAlojamientoPage({ params }) {
                 onChange={update("general_info")}
                 locale={locale}
               />
+              <span className="mt-1.5 block text-xs text-ink/50">{t.generalInfoHint}</span>
             </div>
           </details>
 

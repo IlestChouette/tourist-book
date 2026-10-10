@@ -4,81 +4,7 @@ import ContactButton from "@/components/ContactButton";
 import PricingCards from "@/components/PricingCards";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { getLocale } from "@/lib/i18n/locale";
-
-const iconProps = {
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.6,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-};
-
-function WifiIcon() {
-  return (
-    <svg {...iconProps} width="22" height="22">
-      <path d="M3 8.5a14 14 0 0 1 18 0" />
-      <path d="M6.5 12a9 9 0 0 1 11 0" />
-      <path d="M9.5 15.5a4.5 4.5 0 0 1 5 0" />
-      <circle cx="12" cy="19" r="1" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function CompassIcon() {
-  return (
-    <svg {...iconProps} width="22" height="22">
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M15 9l-2 6-6 2 2-6 6-2z" />
-    </svg>
-  );
-}
-
-function CarIcon() {
-  return (
-    <svg {...iconProps} width="22" height="22">
-      <path d="M4 16V11l2-4h12l2 4v5" />
-      <path d="M4 16h16" />
-      <circle cx="7.5" cy="16.5" r="1.4" fill="currentColor" stroke="none" />
-      <circle cx="16.5" cy="16.5" r="1.4" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function ChatIcon() {
-  return (
-    <svg {...iconProps} width="22" height="22">
-      <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9A1.5 1.5 0 0 1 18.5 16H10l-4.5 4v-4H5.5A1.5 1.5 0 0 1 4 14.5v-9z" />
-    </svg>
-  );
-}
-
-function ShieldIcon() {
-  return (
-    <svg {...iconProps} width="22" height="22">
-      <path d="M12 3.5l7 2.6v5.4c0 4.5-2.9 7.5-7 9-4.1-1.5-7-4.5-7-9V6.1l7-2.6z" />
-      <path d="M9 12l2 2 4-4" />
-    </svg>
-  );
-}
-
-function LogoIcon() {
-  return (
-    <svg {...iconProps} width="22" height="22">
-      <rect x="4" y="4" width="16" height="16" rx="3" />
-      <path d="M8 9h8M8 13h5" />
-    </svg>
-  );
-}
-
-function BookIcon() {
-  return (
-    <svg {...iconProps} width="22" height="22">
-      <path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5v-13z" />
-      <path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5c.8 0 1.5-.7 1.5-1.5v-13z" />
-    </svg>
-  );
-}
+import { WifiIcon, CompassIcon, CarIcon, ChatIcon, ShieldIcon, LogoIcon, BookIcon } from "@/components/icons";
 
 const featureIcons = [<WifiIcon key="wifi" />, <CompassIcon key="compass" />, <CarIcon key="car" />, <BookIcon key="book" />, <ChatIcon key="chat" />, <LogoIcon key="logo" />];
 
@@ -120,6 +46,8 @@ const content = {
     afterText:
       "Un seul lien, mis à jour à l'instant, en trois langues, à vos couleurs — et le check-in fait avant même l'arrivée de vos hôtes.",
     featuresTitle: "Tout ce dont votre hôte a besoin",
+    phoneAlt: "Aperçu du livret d'accueil Tourist Book affiché sur un téléphone",
+    demoLink: "Essayer le livret de démonstration →",
     features: [
       { title: "Wifi et horaires en un instant", desc: "Mot de passe, arrivée, départ, itinéraire et stationnement — vos hôtes trouvent tout seuls, à toute heure." },
       { title: "Guide local avec recherche", desc: "Vos recommandations de restaurants, plages et musées, classées par catégorie." },
@@ -144,7 +72,8 @@ const content = {
       { label: "Livret numérique en FR / EN / ES, traduit automatiquement par IA", basico: true, premium: true },
       { label: "Wifi, horaires, itinéraire, stationnement, contact", basico: true, premium: true },
       { label: "Guide local avec recherche", basico: true, premium: true },
-      { label: "Réservation de transfert (tarif indicatif inclus) et livre d'or", basico: true, premium: true },
+      { label: "Réservation de transfert (tarif indicatif inclus) — exclusive dans le 06", basico: true, premium: true },
+      { label: "Livre d'or", basico: true, premium: true },
       { label: "Assistant virtuel", basico: false, premium: true },
       { label: "Votre logo sur chaque page", basico: true, premium: true },
       { label: "Lien unique de check-in par réservation", basico: false, premium: true },
@@ -181,6 +110,10 @@ const content = {
         a: "Le livret est disponible en français, anglais et espagnol — le voyageur choisit sa langue en un clic, et même le texte que vous rédigez vous-même (règles, recommandations…) est traduit automatiquement par une IA, vous n'avez rien à faire.",
       },
     ],
+    hotelBandTitle: "Vous gérez un hôtel ?",
+    hotelBandBody: "Le cahier de consignes numérique de votre réception : plus aucune consigne oubliée entre deux équipes.",
+    hotelBandCta: "Découvrir l'espace hôtels →",
+    navHotels: "Hôtels",
     finalCtaTitle: "Prêt à passer au livret 100 % numérique ?",
   },
   en: {
@@ -204,6 +137,8 @@ const content = {
     afterText:
       "One single link, updated instantly, in three languages, with your branding — and check-in done before your guests even arrive.",
     featuresTitle: "Everything your guest needs",
+    phoneAlt: "Preview of a Tourist Book digital welcome book shown on a phone",
+    demoLink: "Try the demo livret →",
     features: [
       { title: "Wifi and schedules, instantly", desc: "Password, check-in, check-out, directions and parking — guests find it all themselves, any time of day." },
       { title: "Local guide with search", desc: "Your restaurant, beach and museum recommendations, organized by category." },
@@ -228,7 +163,8 @@ const content = {
       { label: "Digital welcome book in FR / EN / ES, automatically translated by AI", basico: true, premium: true },
       { label: "Wifi, schedules, directions, parking, contact", basico: true, premium: true },
       { label: "Local guide with search", basico: true, premium: true },
-      { label: "Transfer booking (indicative price included) and guestbook", basico: true, premium: true },
+      { label: "Transfer booking (indicative price included) — exclusive to the 06 area", basico: true, premium: true },
+      { label: "Guestbook", basico: true, premium: true },
       { label: "Virtual assistant", basico: false, premium: true },
       { label: "Your logo on every page", basico: true, premium: true },
       { label: "Unique check-in link per booking", basico: false, premium: true },
@@ -265,6 +201,10 @@ const content = {
         a: "The livret is available in French, English and Spanish — the guest picks their language in one click, and even the text you write yourself (rules, recommendations…) gets automatically translated by AI, no extra work on your end.",
       },
     ],
+    hotelBandTitle: "Do you run a hotel?",
+    hotelBandBody: "A digital handover logbook for your front desk, so no instruction gets lost between shifts. (Available in French.)",
+    hotelBandCta: "Discover the hotel space →",
+    navHotels: "Hotels",
     finalCtaTitle: "Ready to go fully digital?",
   },
   es: {
@@ -288,6 +228,8 @@ const content = {
     afterText:
       "Un único enlace, actualizado al instante, en tres idiomas, con tu logo — y el check-in hecho antes de que lleguen tus huéspedes.",
     featuresTitle: "Todo lo que necesita tu huésped",
+    phoneAlt: "Vista previa del livret de acogida de Tourist Book en un teléfono",
+    demoLink: "Probar el livret de demostración →",
     features: [
       { title: "Wifi y horarios al instante", desc: "Contraseña, llegada, salida, cómo llegar y aparcamiento — tus huéspedes lo encuentran solos, a cualquier hora." },
       { title: "Guía local con buscador", desc: "Tus recomendaciones de restaurantes, playas y museos, organizadas por categoría." },
@@ -312,7 +254,8 @@ const content = {
       { label: "Livret digital en FR / EN / ES, traducido automáticamente con IA", basico: true, premium: true },
       { label: "Wifi, horarios, itinerario, aparcamiento, contacto", basico: true, premium: true },
       { label: "Guía local con buscador", basico: true, premium: true },
-      { label: "Reserva de transfer (con tarifa indicativa incluida) y libro de oro", basico: true, premium: true },
+      { label: "Reserva de transfer (con tarifa indicativa incluida) — exclusivo en el 06", basico: true, premium: true },
+      { label: "Libro de oro", basico: true, premium: true },
       { label: "Asistente virtual", basico: false, premium: true },
       { label: "Tu logo en cada página", basico: true, premium: true },
       { label: "Enlace único de check-in por reserva", basico: false, premium: true },
@@ -349,6 +292,10 @@ const content = {
         a: "El livret está disponible en francés, inglés y español — el huésped elige su idioma con un clic, y hasta el texto que tú mismo escribes (reglas, recomendaciones…) se traduce automáticamente con IA, sin que tengas que hacer nada.",
       },
     ],
+    hotelBandTitle: "¿Gestionas un hotel?",
+    hotelBandBody: "El cuaderno de consignas digital de tu recepción: ninguna consigna se pierde entre turnos. (Disponible en francés.)",
+    hotelBandCta: "Descubrir el espacio hoteles →",
+    navHotels: "Hoteles",
     finalCtaTitle: "¿Listo para pasar al libro 100 % digital?",
   },
 };
@@ -421,6 +368,9 @@ export default async function Home() {
               locale={locale}
               className="[&_button]:text-[#f7f1e4]/60 [&_button:disabled]:text-[#f7f1e4] [&_button:hover]:text-[#f7f1e4] [&_span]:text-[#f7f1e4]/40"
             />
+            <Link href="/hotel" className="hidden text-sm font-bold text-[#f7f1e4]/80 hover:text-[#f7f1e4] sm:inline">
+              {t.navHotels}
+            </Link>
             <Link href="/panel/login" className="text-sm font-bold text-[#f7f1e4]/80 hover:text-[#f7f1e4]">
               {t.login}
             </Link>
@@ -435,26 +385,70 @@ export default async function Home() {
       </header>
 
       <section className="relative overflow-hidden bg-aqua-deep">
-        <div className="mx-auto max-w-3xl px-6 pb-20 pt-6 text-center sm:pb-28 sm:pt-8">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#f7f1e4]/80">{t.eyebrow}</span>
-          <h1 className="mt-5 font-display italic text-4xl leading-tight text-[#f7f1e4] sm:text-5xl">{t.title}</h1>
-          <p className="mx-auto mt-5 max-w-xl text-lg text-[#f7f1e4]/90">{t.subtitle}</p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/panel/registro"
-              className="rounded bg-terracotta px-6 py-3.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
-            >
-              {t.ctaPrimary}
-            </Link>
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 pb-16 pt-6 sm:pt-8 lg:grid-cols-2 lg:gap-10 lg:pb-20">
+          <div className="text-center lg:text-left">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#f7f1e4]/80">{t.eyebrow}</span>
+            <h1 className="mt-5 font-display italic text-4xl leading-tight text-[#f7f1e4] sm:text-5xl">{t.title}</h1>
+            <p className="mx-auto mt-5 max-w-xl text-lg text-[#f7f1e4]/90 lg:mx-0">{t.subtitle}</p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+              <Link
+                href="/panel/registro"
+                className="rounded bg-terracotta px-6 py-3.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
+              >
+                {t.ctaPrimary}
+              </Link>
+              <a
+                href="#planes"
+                className="rounded border border-[#f7f1e4]/40 px-6 py-3.5 font-bold text-[#f7f1e4] transition-colors hover:border-[#f7f1e4]"
+              >
+                {t.ctaSecondary}
+              </a>
+            </div>
+            <p className="mx-auto mt-5 max-w-sm text-xs font-bold tracking-wide text-[#f7f1e4]/70 lg:mx-0">{t.priceNote}</p>
+            <p className="mx-auto mt-3 max-w-md text-sm text-[#f7f1e4]/80 lg:mx-0">✓ {t.legalBadge}</p>
+          </div>
+
+          <div className="text-center">
             <a
-              href="#planes"
-              className="rounded border border-[#f7f1e4]/40 px-6 py-3.5 font-bold text-[#f7f1e4] transition-colors hover:border-[#f7f1e4]"
+              href="/logement/exemple/entrer?code=0000"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t.demoLink}
+              className="relative flex justify-center"
             >
-              {t.ctaSecondary}
+              <span className="absolute inset-x-0 inset-y-10 overflow-hidden rounded-3xl shadow-xl">
+                <Image
+                  src="/hero-apartment.jpg"
+                  alt=""
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 40vw, 90vw"
+                  className="object-cover object-[35%_50%]"
+                />
+                <span className="absolute inset-0 bg-[#12202a]/15" />
+              </span>
+              <span className="relative w-[230px] rounded-[2.6rem] bg-[#12202a] p-2.5 shadow-2xl ring-1 ring-white/10 sm:w-[250px] lg:w-[260px]">
+                <span className="absolute left-1/2 top-[18px] z-10 h-[18px] w-[64px] -translate-x-1/2 rounded-full bg-[#12202a]" />
+                <Image
+                  src="/livret-phone.jpg"
+                  alt={t.phoneAlt}
+                  width={750}
+                  height={1800}
+                  priority
+                  sizes="260px"
+                  className="block h-auto w-full rounded-[2.1rem]"
+                />
+              </span>
+            </a>
+            <a
+              href="/logement/exemple/entrer?code=0000"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-block text-sm font-bold text-[#f7f1e4] underline-offset-4 hover:underline"
+            >
+              {t.demoLink}
             </a>
           </div>
-          <p className="mt-5 text-xs font-bold uppercase tracking-widest text-[#f7f1e4]/70">{t.priceNote}</p>
-          <p className="mx-auto mt-3 max-w-md text-sm text-[#f7f1e4]/80">✓ {t.legalBadge}</p>
         </div>
         <div className="stripe-band" />
       </section>
@@ -545,7 +539,9 @@ export default async function Home() {
               <tbody>
                 {t.comparison.map((row) => (
                   <tr key={row.label} className="border-b border-sand-dim last:border-0">
-                    <td className="px-5 py-3 text-ink/80">{row.label}</td>
+                    <td className="px-5 py-3 text-ink/80">
+                      <span className="block max-w-sm">{row.label}</span>
+                    </td>
                     <td className="px-5 py-3 text-center">
                       <Check on={row.basico} />
                     </td>
@@ -557,7 +553,22 @@ export default async function Home() {
               </tbody>
             </table>
           </div>
-          <p className="mt-5 text-center text-xs text-ink/50">{t.pricingNote}</p>
+          <p className="mx-auto mt-5 max-w-md text-center text-xs text-ink/50">{t.pricingNote}</p>
+        </div>
+      </section>
+
+      <section className="bg-aqua-deep/[0.08] py-14">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 px-6 text-center md:flex-row md:justify-between md:text-left">
+          <div className="max-w-xl">
+            <h2 className="font-display italic text-3xl text-ink">{t.hotelBandTitle}</h2>
+            <p className="mt-2 text-ink/70">{t.hotelBandBody}</p>
+          </div>
+          <Link
+            href="/hotel"
+            className="inline-block shrink-0 rounded bg-aqua-deep px-6 py-3.5 font-bold text-[#f7f1e4] transition-colors hover:bg-aqua-deep/90"
+          >
+            {t.hotelBandCta}
+          </Link>
         </div>
       </section>
 
@@ -581,24 +592,29 @@ export default async function Home() {
                 {item.q}
                 <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
               </summary>
-              <p className="mt-3 text-ink/70">{item.a}</p>
+              <p className="mt-3 max-w-prose text-ink/70">{item.a}</p>
             </details>
           ))}
         </div>
         <div className="mt-8 text-center">
-          <ContactButton locale={locale} />
+          <ContactButton locale={locale} variant="solid" />
         </div>
       </section>
 
       <section className="bg-aqua-deep py-16 text-center">
         <h2 className="font-display italic text-3xl text-[#f7f1e4]">{t.finalCtaTitle}</h2>
-        <Link
-          href="/panel/registro"
-          className="mt-6 inline-block rounded bg-terracotta px-7 py-3.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
-        >
-          {t.ctaPrimary}
-        </Link>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-4 px-6">
+          <Link
+            href="/panel/registro"
+            className="inline-block rounded bg-terracotta px-7 py-3.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
+          >
+            {t.ctaPrimary}
+          </Link>
+          <ContactButton locale={locale} variant="dark" />
+        </div>
       </section>
+
+      <ContactButton locale={locale} variant="floating" />
     </main>
   );
 }

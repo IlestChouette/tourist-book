@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Hero from "@/components/Hero";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 
 const content = {
   fr: {
@@ -76,7 +76,7 @@ const content = {
 const PICKUP_KEYS = ["airport", "train_station", "other"];
 
 export default function TransferIndependientePage() {
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
   const pickupLabels = { airport: t.airport, train_station: t.trainStation, other: t.other };
 

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import Hero from "@/components/Hero";
 import QrCodeButton from "@/components/QrCodeButton";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 
 const content = {
   fr: {
@@ -21,6 +21,7 @@ const content = {
     edit: "Modifier →",
     activate: "Activer l'abonnement →",
     reservations: "Réservations et check-in →",
+    statistics: "Statistiques →",
     transferts: "Demandes de transfert →",
     requestCancel: "Demander la résiliation",
     deleting: "Suppression…",
@@ -42,6 +43,7 @@ const content = {
     edit: "Edit →",
     activate: "Activate subscription →",
     reservations: "Bookings and check-in →",
+    statistics: "Statistics →",
     transferts: "Transfer requests →",
     requestCancel: "Request cancellation",
     deleting: "Deleting…",
@@ -63,6 +65,7 @@ const content = {
     edit: "Editar →",
     activate: "Activar suscripción →",
     reservations: "Reservas y check-in →",
+    statistics: "Estadísticas →",
     transferts: "Solicitudes de transfer →",
     requestCancel: "Solicitar cancelación",
     deleting: "Eliminando…",
@@ -75,7 +78,7 @@ const content = {
 
 export default function AlojamientoDetallePage({ params }) {
   const { id } = use(params);
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -207,6 +210,14 @@ export default function AlojamientoDetallePage({ params }) {
               className="inline-block rounded bg-terracotta px-5 py-3 font-bold text-ink transition-colors hover:bg-terracotta-deep"
             >
               {t.reservations}
+            </Link>
+          )}
+          {active && property.plan === "premium" && (
+            <Link
+              href={`/panel/alojamientos/${id}/estadisticas`}
+              className="inline-block rounded border border-aqua-deep px-5 py-3 font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
+            >
+              {t.statistics}
             </Link>
           )}
           {active && property.postal_code?.startsWith("06") && (

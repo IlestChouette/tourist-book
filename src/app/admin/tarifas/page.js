@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import TarifasClient from "./TarifasClient";
+import { getTransferPricing } from "@/lib/transferPricing";
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -16,10 +17,10 @@ export default async function TarifasPage() {
   if (!me?.is_admin) notFound();
 
   const admin = createAdminClient();
-  const { data: properties } = await admin
-    .from("properties")
-    .select("id, name, city")
-    .order("name", { ascending: true });
+  const [{ data: properties }, pricing] = await Promise.all([
+    admin.from("properties").select("id, name, city").order("name", { ascending: true }),
+    getTransferPricing(),
+  ]);
 
-  return <TarifasClient properties={properties ?? []} />;
+  return <TarifasClient properties={properties ?? []} pricing={pricing} />;
 }

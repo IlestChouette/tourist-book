@@ -1,7 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export default function Hero({ backHref, backLabel, eyebrow, title, subtitle, stamps, photo, logo }) {
+// `compact` : titres longs (articles de blog) — plus petits sur téléphone, pour
+// que le début de l'article soit visible sans faire défiler tout un écran.
+export default function Hero({ backHref, backLabel, eyebrow, title, subtitle, stamps, photo, logo, compact = false }) {
   const light = Boolean(photo);
 
   return (
@@ -22,7 +24,7 @@ export default function Hero({ backHref, backLabel, eyebrow, title, subtitle, st
             alt="Tourist Book"
             width={278}
             height={106}
-            className="h-20 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] sm:h-24"
+            className={`w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] sm:h-24 ${compact ? "h-14" : "h-20"}`}
           />
         </Link>
         {backHref && (
@@ -39,7 +41,7 @@ export default function Hero({ backHref, backLabel, eyebrow, title, subtitle, st
         )}
       </div>
 
-      <div className="relative mx-auto max-w-2xl px-6 pb-14 pt-6 sm:pb-16">
+      <div className={`relative mx-auto max-w-2xl px-6 pt-6 sm:pb-16 ${compact ? "pb-9" : "pb-14"}`}>
         {logo && (
           <div className="mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-[#f7f1e4]/50 bg-[#f7f1e4] p-1.5">
             <Image src={logo} alt="" width={48} height={48} className="h-full w-full object-contain" />
@@ -57,7 +59,7 @@ export default function Hero({ backHref, backLabel, eyebrow, title, subtitle, st
           </span>
         )}
         <h1
-          className={`mt-3 font-display italic text-5xl ${
+          className={`mt-3 font-display italic ${compact ? "text-[1.9rem] leading-[1.15] sm:text-5xl" : "text-5xl"} ${
             light ? "text-[#f7f1e4] [text-shadow:0_2px_12px_rgba(0,0,0,0.55)]" : "text-ink"
           }`}
         >

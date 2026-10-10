@@ -4,8 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { uploadMedia } from "@/lib/uploadMedia";
+import { authErrorMessage } from "@/lib/authErrors";
+import { MailIcon } from "@/components/icons";
 import Hero from "@/components/Hero";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 
 const content = {
   fr: {
@@ -26,8 +28,15 @@ const content = {
     alreadyHaveAccount: "Vous avez déjà un compte ?",
     login: "Connectez-vous",
     mustAcceptTerms: "Vous devez accepter les Conditions d'utilisation et la Politique de confidentialité pour continuer.",
-    confirmEmail:
-      "Compte créé, mais il faut confirmer l'email. Vérifiez votre boîte de réception (ou désactivez \"Confirm email\" dans Supabase pendant les tests).",
+    subtitle: "Votre livret prêt en 5 minutes. Offre annuelle : 1 mois offert.",
+    checkTitle: "Vérifiez votre boîte mail",
+    checkSentTo: "Nous venons d'envoyer un lien de confirmation à",
+    checkAfter: "Cliquez dessus : votre compte sera activé et vous arriverez directement dans votre espace.",
+    checkSpam: "Rien reçu ? Regardez dans vos spams ou courriers indésirables.",
+    logoLater: "Vous pourrez ajouter votre logo depuis votre profil, une fois connecté.",
+    resend: "Renvoyer l'email",
+    resending: "Envoi…",
+    resent: "Email renvoyé. Patientez une minute avant d'en redemander un.",
   },
   en: {
     home: "Home",
@@ -47,8 +56,15 @@ const content = {
     alreadyHaveAccount: "Already have an account?",
     login: "Log in",
     mustAcceptTerms: "You must accept the Terms of use and the Privacy policy to continue.",
-    confirmEmail:
-      "Account created, but the email still needs confirming. Check your inbox (or disable \"Confirm email\" in Supabase while testing).",
+    subtitle: "Your livret ready in 5 minutes. Annual plan: 1 month free.",
+    checkTitle: "Check your inbox",
+    checkSentTo: "We just sent a confirmation link to",
+    checkAfter: "Click it: your account will be activated and you'll land straight in your space.",
+    checkSpam: "Nothing there? Look in your spam or junk folder.",
+    logoLater: "You'll be able to add your logo from your profile once you're logged in.",
+    resend: "Resend the email",
+    resending: "Sending…",
+    resent: "Email resent. Wait a minute before asking for another one.",
   },
   es: {
     home: "Inicio",
@@ -68,13 +84,20 @@ const content = {
     alreadyHaveAccount: "¿Ya tienes cuenta?",
     login: "Inicia sesión",
     mustAcceptTerms: "Debes aceptar los Términos de uso y la Política de privacidad para continuar.",
-    confirmEmail:
-      "Cuenta creada, pero falta confirmar el email. Revisa tu bandeja de entrada (o desactiva \"Confirm email\" en Supabase mientras probamos).",
+    subtitle: "Tu livret listo en 5 minutos. Plan anual: 1 mes gratis.",
+    checkTitle: "Revisa tu correo",
+    checkSentTo: "Acabamos de enviar un enlace de confirmación a",
+    checkAfter: "Haz clic en él: tu cuenta quedará activada y entrarás directamente a tu espacio.",
+    checkSpam: "¿No ves nada? Mira en el spam o correo no deseado.",
+    logoLater: "Podrás añadir tu logo desde tu perfil una vez dentro.",
+    resend: "Reenviar el email",
+    resending: "Enviando…",
+    resent: "Email reenviado. Espera un minuto antes de pedir otro.",
   },
 };
 
 export default function RegistroPage() {
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
 
   const [form, setForm] = useState({ nombre: "", email: "", phone: "", password: "" });
@@ -82,6 +105,9 @@ export default function RegistroPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [pending, setPending] = useState(null);
+  const [resendState, setResendState] = useState("idle");
+  const [resendError, setResendError] = useState("");
 
   function update(field) {
     return (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -103,17 +129,34 @@ export default function RegistroPage() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/confirm`,
+        // Sans session avant la confirmation, le profil ne peut pas être écrit
+        // ici : nom, téléphone et acceptation voyagent avec le compte et sont
+        // enregistrés par /auth/confirm quand l'hôtelier clique sur le lien.
+        data: { name: form.nombre, phone: form.phone, accepted_terms_at: new Date().toISOString() },
+      },
     });
 
     if (signUpError) {
       setSending(false);
-      setError(signUpError.message);
+      setError(authErrorMessage(signUpError, locale));
       return;
     }
 
+    // Email déjà inscrit et confirmé : Supabase répond "succès" sans rien
+    // envoyer (pour ne pas révéler quels emails ont un compte).
+    if (data.user && data.user.identities?.length === 0) {
+      setSending(false);
+      setError(authErrorMessage({ code: "user_already_exists" }, locale));
+      return;
+    }
+
+    // Vérification d'email activée : pas de session tant que le lien n'est
+    // pas cliqué. Ce n'est pas une erreur — on l'explique.
     if (!data.session) {
       setSending(false);
-      setError(t.confirmEmail);
+      setPending({ email: form.email, logoSkipped: Boolean(logo) });
       return;
     }
 
@@ -139,11 +182,14 @@ export default function RegistroPage() {
     setSending(false);
 
     if (insertError) {
-      setError(insertError.message);
+      console.error("hosts insert failed:", insertError);
+      setError(authErrorMessage({}, locale));
       return;
     }
 
-    fetch("/api/host-signup-notify", {
+    // Attend la requête avant de naviguer : sans ça, window.location.href
+    // interrompt le fetch en plein envoi et la notification ne part jamais.
+    await fetch("/api/host-signup-notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: form.nombre, email: form.email, phone: form.phone }),
@@ -152,9 +198,55 @@ export default function RegistroPage() {
     window.location.href = "/panel";
   }
 
+  async function resendEmail() {
+    setResendState("sending");
+    setResendError("");
+    const supabase = createClient();
+    const { error: resendErr } = await supabase.auth.resend({
+      type: "signup",
+      email: pending.email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/confirm` },
+    });
+    if (resendErr) {
+      setResendState("idle");
+      setResendError(authErrorMessage(resendErr, locale));
+      return;
+    }
+    setResendState("sent");
+  }
+
+  if (pending) {
+    return (
+      <main className="flex-1">
+        <Hero backHref="/" backLabel={t.home} eyebrow="Tourist Book" title={t.checkTitle} />
+        <section className="mx-auto max-w-sm px-6 py-10 text-center">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-terracotta text-ink">
+            <MailIcon />
+          </span>
+          <p className="mt-5 text-ink/80">
+            {t.checkSentTo} <strong className="break-all text-ink">{pending.email}</strong>.
+          </p>
+          <p className="mt-3 text-ink/80">{t.checkAfter}</p>
+          <p className="mt-3 text-sm text-ink/60">{t.checkSpam}</p>
+          {pending.logoSkipped && <p className="mt-3 text-sm text-ink/60">{t.logoLater}</p>}
+          <button
+            type="button"
+            onClick={resendEmail}
+            disabled={resendState === "sending"}
+            className="mt-6 rounded border border-aqua-deep px-5 py-2.5 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card disabled:opacity-60"
+          >
+            {resendState === "sending" ? t.resending : t.resend}
+          </button>
+          {resendState === "sent" && <p className="mt-3 text-sm text-aqua-deep">{t.resent}</p>}
+          {resendError && <p className="mt-3 text-sm text-terracotta-deep">{resendError}</p>}
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="flex-1">
-      <Hero backHref="/" backLabel={t.home} eyebrow="Tourist Book" title={t.title} />
+      <Hero backHref="/" backLabel={t.home} eyebrow="Tourist Book" title={t.title} subtitle={t.subtitle} />
       <section className="mx-auto max-w-sm px-6 py-10">
         <form onSubmit={handleSubmit} className="grid gap-4">
           <label className="grid gap-1.5">

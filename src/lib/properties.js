@@ -10,7 +10,7 @@ export async function getPropertyBySlug(slug) {
 
   const { data: rates } = await admin
     .from("transfer_rates")
-    .select("pickup_location, passengers, price")
+    .select("pickup_location, passengers, luggage, price")
     .eq("property_id", data.id)
     .order("passengers", { ascending: true });
 
