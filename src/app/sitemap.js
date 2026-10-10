@@ -4,6 +4,7 @@ const BASE_URL = "https://tourist-book.com";
 
 const routes = [
   { path: "/", priority: 1, changeFrequency: "weekly" },
+  { path: "/hotel", priority: 0.8, changeFrequency: "monthly" },
   { path: "/blog", priority: 0.6, changeFrequency: "weekly" },
   { path: "/livret-accueil-nice", priority: 0.7, changeFrequency: "monthly" },
   { path: "/livret-accueil-cannes", priority: 0.7, changeFrequency: "monthly" },

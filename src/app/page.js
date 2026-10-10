@@ -110,6 +110,10 @@ const content = {
         a: "Le livret est disponible en français, anglais et espagnol — le voyageur choisit sa langue en un clic, et même le texte que vous rédigez vous-même (règles, recommandations…) est traduit automatiquement par une IA, vous n'avez rien à faire.",
       },
     ],
+    hotelBandTitle: "Vous gérez un hôtel ?",
+    hotelBandBody: "Le cahier de consignes numérique de votre réception : plus aucune consigne oubliée entre deux équipes. Essai gratuit.",
+    hotelBandCta: "Découvrir l'espace hôtels →",
+    navHotels: "Hôtels",
     finalCtaTitle: "Prêt à passer au livret 100 % numérique ?",
   },
   en: {
@@ -197,6 +201,10 @@ const content = {
         a: "The livret is available in French, English and Spanish — the guest picks their language in one click, and even the text you write yourself (rules, recommendations…) gets automatically translated by AI, no extra work on your end.",
       },
     ],
+    hotelBandTitle: "Do you run a hotel?",
+    hotelBandBody: "A digital handover logbook for your front desk, so no instruction gets lost between shifts. Free trial. (Available in French.)",
+    hotelBandCta: "Discover the hotel space →",
+    navHotels: "Hotels",
     finalCtaTitle: "Ready to go fully digital?",
   },
   es: {
@@ -284,6 +292,10 @@ const content = {
         a: "El livret está disponible en francés, inglés y español — el huésped elige su idioma con un clic, y hasta el texto que tú mismo escribes (reglas, recomendaciones…) se traduce automáticamente con IA, sin que tengas que hacer nada.",
       },
     ],
+    hotelBandTitle: "¿Gestionas un hotel?",
+    hotelBandBody: "El cuaderno de consignas digital de tu recepción: ninguna consigna se pierde entre turnos. Prueba gratuita. (Disponible en francés.)",
+    hotelBandCta: "Descubrir el espacio hoteles →",
+    navHotels: "Hoteles",
     finalCtaTitle: "¿Listo para pasar al libro 100 % digital?",
   },
 };
@@ -356,6 +368,9 @@ export default async function Home() {
               locale={locale}
               className="[&_button]:text-[#f7f1e4]/60 [&_button:disabled]:text-[#f7f1e4] [&_button:hover]:text-[#f7f1e4] [&_span]:text-[#f7f1e4]/40"
             />
+            <Link href="/hotel" className="hidden text-sm font-bold text-[#f7f1e4]/80 hover:text-[#f7f1e4] sm:inline">
+              {t.navHotels}
+            </Link>
             <Link href="/panel/login" className="text-sm font-bold text-[#f7f1e4]/80 hover:text-[#f7f1e4]">
               {t.login}
             </Link>
@@ -539,6 +554,21 @@ export default async function Home() {
             </table>
           </div>
           <p className="mx-auto mt-5 max-w-md text-center text-xs text-ink/50">{t.pricingNote}</p>
+        </div>
+      </section>
+
+      <section className="bg-aqua-deep/[0.08] py-14">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 px-6 text-center md:flex-row md:justify-between md:text-left">
+          <div className="max-w-xl">
+            <h2 className="font-display italic text-3xl text-ink">{t.hotelBandTitle}</h2>
+            <p className="mt-2 text-ink/70">{t.hotelBandBody}</p>
+          </div>
+          <Link
+            href="/hotel"
+            className="inline-block shrink-0 rounded bg-aqua-deep px-6 py-3.5 font-bold text-[#f7f1e4] transition-colors hover:bg-aqua-deep/90"
+          >
+            {t.hotelBandCta}
+          </Link>
         </div>
       </section>
 
