@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getHotelContext, resolveActor } from "@/lib/hotelAuth";
+import { hotelHasAccess } from "@/lib/hotelBilling";
 import { isDay, parisDate } from "@/lib/hotelTime";
 
 // Actions sur une consigne existante : clôturer (valider), rouvrir (manager),
@@ -9,6 +10,9 @@ export async function PATCH(request, { params }) {
   const { id } = await params;
   const ctx = await getHotelContext();
   if (!ctx) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  if (!hotelHasAccess(ctx.hotel)) {
+    return NextResponse.json({ error: "L'accès au cahier est suspendu. Prévenez votre manager." }, { status: 402 });
+  }
 
   const b = await request.json().catch(() => ({}));
   const { admin, hotel } = ctx;

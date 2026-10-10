@@ -687,3 +687,23 @@ export async function sendLostItemChoiceNotification({ to, hotelName, number, de
   }
   return { sent: true };
 }
+
+export async function sendHotelSubscriptionNotification({ hotelName, services }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const subject = `Nouvel abonnement hôtel — ${hotelName ?? "?"}`;
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text: [`Un hôtel vient de s'abonner au cahier de consignes.`, "", `Hôtel : ${hotelName ?? "-"}`, `Services : ${services ?? "-"} (${(services ?? 0) * 15} €/mois)`].join("\n"),
+  });
+  if (error) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "hotel_subscription_notification", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "hotel_subscription_notification", status: "sent" });
+  return { sent: true };
+}

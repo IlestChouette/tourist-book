@@ -116,7 +116,73 @@ function TeamLink({ cahierPath }) {
   );
 }
 
-export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath }) {
+const SERVICE_PRICE = 15;
+
+// Abonnement : 15 €/mois par service, sans mois d'essai.
+function BillingCard({ billing }) {
+  const [quantity, setQuantity] = useState(Math.max(1, billing.services || 1));
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function go(path, body) {
+    setBusy(true);
+    setError("");
+    const res = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body ?? {}) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.url) {
+      setBusy(false);
+      return setError(data.error || "Une erreur est survenue. Réessayez.");
+    }
+    window.location.href = data.url;
+  }
+
+  if (billing.exempt) {
+    return (
+      <Card title="Abonnement" hint="Cet hôtel n'est pas facturé (démonstration).">
+        <p className="rounded-lg bg-aqua-deep/10 px-4 py-3 font-bold text-aqua-deep">Aucun paiement à effectuer.</p>
+      </Card>
+    );
+  }
+  if (billing.status === "active") {
+    return (
+      <Card title="Abonnement" hint={`${billing.services} service${billing.services > 1 ? "s" : ""} · ${billing.services * SERVICE_PRICE} € par mois`}>
+        <p className="rounded-lg bg-aqua-deep/10 px-4 py-3 font-bold text-aqua-deep">
+          Abonnement actif{billing.periodEnd ? ` · prochain paiement le ${new Date(billing.periodEnd).toLocaleDateString("fr-FR")}` : ""}
+        </p>
+        <button type="button" disabled={busy} onClick={() => go("/api/hotel/billing/portal")} className={`${btnGhost} mt-4`}>Gérer mon abonnement, mes factures</button>
+        {error && <p className="mt-3 text-sm font-bold text-terracotta-deep" role="alert">{error}</p>}
+      </Card>
+    );
+  }
+  const pastDue = billing.status === "past_due";
+  return (
+    <div className="mt-6 rounded border-2 border-terracotta-deep bg-sand-card p-5">
+      <h2 className="font-display italic text-2xl text-ink">{pastDue ? "Paiement à régulariser" : "Activez votre abonnement"}</h2>
+      <p className="mt-1 text-sm text-ink/70">
+        {pastDue
+          ? "Le dernier paiement a échoué. Mettez à jour votre carte pour que le cahier reste accessible à vos équipes."
+          : "Le cahier s'ouvre à vos équipes dès le paiement. 15 € par mois et par service (réception, conciergerie, technique…), sans engagement ni mois d'essai."}
+      </p>
+      {pastDue ? (
+        <button type="button" disabled={busy} onClick={() => go("/api/hotel/billing/portal")} className={`${btn} mt-4`}>Mettre à jour le paiement</button>
+      ) : (
+        <div className="mt-4 flex flex-wrap items-end gap-4">
+          <label className="grid gap-1.5">
+            <span className={label}>Nombre de services</span>
+            <select value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="input h-11 w-28">
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </label>
+          <p className="pb-2 text-lg font-bold text-ink">{quantity * SERVICE_PRICE} € par mois</p>
+          <button type="button" disabled={busy} onClick={() => go("/api/hotel/billing/checkout", { quantity })} className={btn}>Payer et activer</button>
+        </div>
+      )}
+      {error && <p className="mt-3 text-sm font-bold text-terracotta-deep" role="alert">{error}</p>}
+    </div>
+  );
+}
+
+export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath, billing }) {
   const router = useRouter();
   const [message, setMessage] = useState(null); // { text, error }
   const [busy, setBusy] = useState(false);
@@ -180,11 +246,15 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
         <button type="button" onClick={logout} className={`${btnGhost} px-5 py-3`}>Se déconnecter</button>
       </div>
 
+      {billing && billing.status !== "active" && !billing.exempt && <BillingCard billing={billing} />}
+
       {message && (
         <p className={`mt-4 rounded border p-3 text-sm font-bold ${message.error ? "border-terracotta-deep text-terracotta-deep" : "border-aqua-deep text-aqua-deep"}`} role="status">
           {message.text}
         </p>
       )}
+
+      {billing && (billing.status === "active" || billing.exempt) && <BillingCard billing={billing} />}
 
       <Card title="Votre hôtel" hint="Le logo apparaît en haut du cahier.">
         <div className="flex flex-wrap items-center gap-4">

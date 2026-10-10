@@ -5,6 +5,7 @@ import { loadDay, loadMeta, loadPending } from "@/lib/hotelData";
 import { buildDayPdf } from "@/lib/hotelPdf";
 import { addDays, parisDate, parisMinutes } from "@/lib/hotelTime";
 import { listHotelSlugs } from "@/lib/hotelSlug";
+import { hotelHasAccess } from "@/lib/hotelBilling";
 
 // Appelé toutes les 5 minutes par Supabase (voir supabase/hotel_digest_cron.sql) :
 // l'offre Vercel gratuite n'autorise qu'une tâche planifiée par jour. C'est ici
@@ -31,12 +32,13 @@ export async function GET(request) {
   const today = parisDate(now);
   const yesterday = addDays(today, -1);
   const admin = createAdminClient();
-  const { data: hotels } = await admin.from("hotels").select("id, name, notification_emails, retention_months");
+  const { data: hotels } = await admin.from("hotels").select("*");
 
   const slugs = new Map((await listHotelSlugs(admin)).map((h) => [h.id, h.slug]));
   let sent = 0;
   const errors = [];
   for (const hotel of hotels ?? []) {
+    if (!hotelHasAccess(hotel)) continue; // abonnement non réglé : pas de relève par email
     // On "réserve" le créneau avant d'envoyer : si deux appels arrivent en
     // même temps, un seul passe (clé primaire hotel/jour/créneau).
     const { error: claimError } = await admin

@@ -1,12 +1,29 @@
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendSubscriptionStartedNotification, sendSubscriptionActivatedNotification } from "@/lib/email";
+import { sendSubscriptionStartedNotification, sendSubscriptionActivatedNotification, sendHotelSubscriptionNotification } from "@/lib/email";
+import { billingStatusOf } from "@/lib/hotelBilling";
 
 // Depuis la version d'API Stripe utilisée ici, "current_period_end" n'est
 // plus sur l'abonnement lui-même mais sur chacune de ses lignes (items).
 function periodEndOf(subscription) {
   const end = subscription.items?.data?.[0]?.current_period_end;
   return end ? new Date(end * 1000).toISOString() : null;
+}
+
+// Abonnement d'un hôtel (cahier de consignes) : même webhook que les livrets,
+// reconnu par la clé "hotel_id" dans les métadonnées.
+async function syncHotelSubscription(admin, hotelId, subscription, deleted = false) {
+  const { data: hotel } = await admin.from("hotels").select("billing_status, past_due_since").eq("id", hotelId).maybeSingle();
+  const status = deleted ? "canceled" : billingStatusOf(subscription.status);
+  const update = {
+    stripe_subscription_id: subscription.id,
+    billing_status: status,
+    services_count: subscription.items?.data?.[0]?.quantity ?? 0,
+    current_period_end: periodEndOf(subscription),
+    past_due_since: status === "past_due" ? hotel?.past_due_since ?? new Date().toISOString() : null,
+  };
+  await admin.from("hotels").update(update).eq("id", hotelId);
+  return { before: hotel?.billing_status, after: status, update };
 }
 
 export async function POST(request) {
@@ -25,6 +42,17 @@ export async function POST(request) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object;
+      if (session.metadata?.hotel_id) {
+        const subscription = await stripe.subscriptions.retrieve(session.subscription);
+        const { update } = await syncHotelSubscription(admin, session.metadata.hotel_id, subscription);
+        try {
+          const { data: hotel } = await admin.from("hotels").select("name").eq("id", session.metadata.hotel_id).maybeSingle();
+          await sendHotelSubscriptionNotification({ hotelName: hotel?.name, services: update.services_count });
+        } catch (err) {
+          console.error("sendHotelSubscriptionNotification failed:", err);
+        }
+        break;
+      }
       const propertyId = session.metadata?.property_id;
       const plan = session.metadata?.plan;
       const cycle = session.metadata?.cycle;
@@ -69,6 +97,10 @@ export async function POST(request) {
     case "customer.subscription.updated":
     case "customer.subscription.deleted": {
       const subscription = event.data.object;
+      if (subscription.metadata?.hotel_id) {
+        await syncHotelSubscription(admin, subscription.metadata.hotel_id, subscription, event.type === "customer.subscription.deleted");
+        break;
+      }
       const propertyId = subscription.metadata?.property_id;
       if (propertyId) {
         await admin

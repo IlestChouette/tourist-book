@@ -37,6 +37,18 @@ export default async function GestionPage() {
           staff={(staff ?? []).map((s) => ({ ...s, hasPin: Boolean(s.pin_hash), pin_hash: undefined }))}
           stations={stations ?? []}
           cahierPath={slug ? `/hotel/${slug}/cahier` : "/hotel/cahier"}
+          billing={
+            hotel.billing_status === undefined
+              ? null
+              : {
+                  exempt: hotel.billing_exempt === true,
+                  status: hotel.billing_status,
+                  services: hotel.services_count ?? 0,
+                  periodEnd: hotel.current_period_end ?? null,
+                  pastDueSince: hotel.past_due_since ?? null,
+                  hasCustomer: Boolean(hotel.stripe_customer_id),
+                }
+          }
           lostFound={hotel.lost_found_enabled === true ? { token: hotel.lost_found_token ?? null } : null}
         />
       </section>

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getHotelContext, resolveActor } from "@/lib/hotelAuth";
+import { hotelHasAccess } from "@/lib/hotelBilling";
 import { addDays, isDay, parisDate } from "@/lib/hotelTime";
 
 const KINDS = ["info", "tache", "probleme", "plainte"];
@@ -9,6 +10,9 @@ const KINDS = ["info", "tache", "probleme", "plainte"];
 export async function POST(request) {
   const ctx = await getHotelContext();
   if (!ctx) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  if (!hotelHasAccess(ctx.hotel)) {
+    return NextResponse.json({ error: "L'accès au cahier est suspendu. Prévenez votre manager." }, { status: 402 });
+  }
 
   const b = await request.json().catch(() => ({}));
   const body = typeof b.body === "string" ? b.body.trim() : "";
