@@ -158,7 +158,7 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
         </form>
       </Card>
 
-      <Card title="Équipe" hint="Chaque personne a un PIN à 4 chiffres (ce peut être le même que celui de Skello) et un ou plusieurs postes. Désactiver quelqu'un bloque son PIN ; ce qu'il a écrit reste dans le cahier.">
+      <Card title="Équipe" hint="Chaque personne a un PIN à 4 chiffres et un ou plusieurs postes. Conseil : mettez le même code que celui de la badgeuse (Skello) — personne n'a un nouveau code à retenir, et à l'écran il est écrit « Essayez avec votre code de la badgeuse ». Désactiver quelqu'un bloque son PIN ; ce qu'il a écrit reste dans le cahier.">
         <ul className="grid gap-3">
           {staff.filter((s) => !s.is_manager).map((s) => (
             <li key={s.id} className={`rounded border border-sand-dim p-3 ${s.active ? "" : "opacity-60"}`}>
