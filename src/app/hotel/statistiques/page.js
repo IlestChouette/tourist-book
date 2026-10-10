@@ -194,6 +194,8 @@ export default async function StatistiquesPage({ searchParams }) {
   const cur = s.current;
   const prev = s.previous;
   const period = f.from === f.to ? formatDayLong(f.from) : `du ${formatDayLong(f.from)} au ${formatDayLong(f.to)}`;
+  const exportQuery = new URLSearchParams({ range: f.range, from: f.from, to: f.to, compare: f.compare ? "1" : "0", kind: f.kinds.join(","), service: f.service, shift: f.shift, place: f.place }).toString();
+  const exportBtn = "inline-flex h-11 items-center gap-2 rounded-lg border border-sand-dim bg-sand px-4 text-sm font-bold text-ink/70 transition-colors hover:border-aqua-deep hover:text-aqua-deep";
   const kindRows = s.byKind.map((r) => ({ ...r, key: r.label, label: KIND_LABELS[r.label] ?? r.label }));
 
   return (
@@ -206,9 +208,14 @@ export default async function StatistiquesPage({ searchParams }) {
           Consignes {period}
           {f.compare && <> · comparées au {formatDayLong(f.prevFrom)} → {formatDayLong(f.prevTo)}</>}
         </p>
-        <a href={`/api/hotel/stats-csv?${new URLSearchParams({ range: f.range, from: f.from, to: f.to, kind: f.kinds.join(","), service: f.service, shift: f.shift, place: f.place })}`} className="inline-flex h-11 items-center gap-2 rounded-lg border border-sand-dim bg-sand px-4 text-sm font-bold text-ink/70 transition-colors hover:border-aqua-deep hover:text-aqua-deep print:hidden">
-          Exporter en CSV
-        </a>
+        <div className="flex flex-wrap gap-2 print:hidden">
+          <a href={`/api/hotel/stats-summary-csv?${exportQuery}`} className={exportBtn}>
+            Télécharger le résumé (Excel)
+          </a>
+          <a href={`/api/hotel/stats-csv?${exportQuery}`} className={exportBtn}>
+            Télécharger toutes les consignes (Excel)
+          </a>
+        </div>
         </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -370,6 +377,7 @@ function closeText(c) {
 // liste. Pour chaque problème ou plainte : « récurrent » (même lieu, même
 // service, déjà signalé dans les 90 jours précédents) ou « première fois ».
 function DetailSection({ detail, f, today, tags }) {
+  const detailExport = `/api/hotel/stats-csv?${new URLSearchParams({ range: f.range, from: f.from, to: f.to, kind: f.kinds.join(","), service: f.service, shift: f.shift, place: f.place, detail: f.detail })}`;
   const isPlace = detail.type === "place";
   const yearTotal = isPlace ? new Set(detail.history.filter((h) => h.day >= addDays(today, -365)).map((h) => h.id)).size : 0;
   // Les statistiques de la sélection seule (sans refiltrer : elle l'est déjà).
@@ -390,6 +398,9 @@ function DetailSection({ detail, f, today, tags }) {
           Replier
         </Link>
       </div>
+      <a href={detailExport} className="mt-3 inline-flex h-11 items-center rounded-lg border border-sand-dim bg-sand px-4 text-sm font-bold text-ink/70 hover:border-aqua-deep hover:text-aqua-deep">
+        Télécharger cette liste (Excel)
+      </a>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg bg-sand-card p-4"><p className="text-sm font-bold text-ink/60">Consignes</p><p className="mt-1 text-2xl font-bold tabular-nums text-ink">{n}</p></div>
