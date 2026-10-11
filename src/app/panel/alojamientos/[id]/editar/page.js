@@ -7,6 +7,8 @@ import Hero from "@/components/Hero";
 import AccentColorButton from "@/components/AccentColorButton";
 import FormattableTextarea from "@/components/FormattableTextarea";
 import { useClientLocale } from "@/lib/i18n/clientLocale";
+import CustomButtonsEditor from "@/components/CustomButtonsEditor";
+import { cleanCustomButtons } from "@/lib/customButtons";
 import fieldsDict from "@/lib/i18n/dictionaries/propertyForm";
 
 const MAX_PHOTOS = 5;
@@ -31,6 +33,9 @@ export default function EditarAlojamientoPage({ params }) {
   const [newWastePhoto, setNewWastePhoto] = useState(null);
   const [existingKeyPhotos, setExistingKeyPhotos] = useState([]);
   const [newKeyPhotos, setNewKeyPhotos] = useState([]);
+  // null = colonne custom_buttons absente (migration pas encore passée) :
+  // on n'affiche ni ne sauvegarde rien pour ne pas casser l'enregistrement.
+  const [customButtons, setCustomButtons] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -69,6 +74,7 @@ export default function EditarAlojamientoPage({ params }) {
         setExistingPhotos(data.photos ?? []);
         setExistingWastePhoto(data.waste_photo ?? null);
         setExistingKeyPhotos(data.key_photos ?? []);
+        setCustomButtons(Array.isArray(data.custom_buttons) ? data.custom_buttons : null);
       }
       setLoading(false);
     }
@@ -174,6 +180,7 @@ export default function EditarAlojamientoPage({ params }) {
           accent_color: form.accent_color || null,
           photos: [...existingPhotos, ...uploadedUrls],
           key_photos: [...existingKeyPhotos, ...uploadedKeyUrls],
+          ...(customButtons ? { custom_buttons: cleanCustomButtons(customButtons) } : {}),
         })
         .eq("id", id);
 
@@ -606,6 +613,8 @@ export default function EditarAlojamientoPage({ params }) {
               </label>
             </div>
           </details>
+
+          {customButtons && <CustomButtonsEditor value={customButtons} onChange={setCustomButtons} locale={locale} />}
 
           <button
             type="submit"

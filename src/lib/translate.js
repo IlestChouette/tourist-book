@@ -72,9 +72,19 @@ export async function translateProperty(property, locale) {
     .eq("locale", locale);
   const cacheByField = Object.fromEntries((cachedRows ?? []).map((r) => [r.field, r]));
 
+  // Boutons personnalisés : nom et texte aplatis en champs "cb_<id>_label" /
+  // "cb_<id>_text" pour passer par le même cache (clé stable par id).
+  const customButtons = Array.isArray(property.custom_buttons) ? property.custom_buttons : [];
+  const customFields = customButtons.flatMap((b) => [`cb_${b.id}_label`, `cb_${b.id}_text`]);
+  const source = { ...property };
+  for (const b of customButtons) {
+    source[`cb_${b.id}_label`] = b.label;
+    source[`cb_${b.id}_text`] = b.text;
+  }
+
   const toTranslate = {};
-  for (const field of TRANSLATABLE_FIELDS) {
-    const original = property[field];
+  for (const field of [...TRANSLATABLE_FIELDS, ...customFields]) {
+    const original = source[field];
     if (!original) continue;
 
     const cached = cacheByField[field];
@@ -100,6 +110,13 @@ export async function translateProperty(property, locale) {
         translated_text: translatedText,
       });
     }
+  }
+  if (customButtons.length > 0) {
+    translated.custom_buttons = customButtons.map((b) => ({
+      ...b,
+      label: translated[`cb_${b.id}_label`] ?? b.label,
+      text: translated[`cb_${b.id}_text`] ?? b.text,
+    }));
   }
   if (upserts.length > 0) {
     await admin.from("translation_cache").upsert(upserts, { onConflict: "property_id,field,locale" });
