@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import Hero from "@/components/Hero";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
+import { slugify, randomCode } from "@/lib/slug";
 
 const content = {
   fr: {
@@ -15,6 +16,10 @@ const content = {
     empty: "Vous n'avez pas encore ajouté de logement.",
     noSubscription: "sans abonnement",
     plan: { basico: "Essentiel", premium: "Premium" },
+    duplicate: "Dupliquer",
+    duplicating: "Duplication…",
+    duplicateCopySuffix: "(copie)",
+    duplicateFailed: (msg) => `Impossible de dupliquer : ${msg}`,
   },
   en: {
     eyebrow: "Host panel",
@@ -24,6 +29,10 @@ const content = {
     empty: "You haven't added any property yet.",
     noSubscription: "no subscription",
     plan: { basico: "Essential", premium: "Premium" },
+    duplicate: "Duplicate",
+    duplicating: "Duplicating…",
+    duplicateCopySuffix: "(copy)",
+    duplicateFailed: (msg) => `Could not duplicate: ${msg}`,
   },
   es: {
     eyebrow: "Panel hotelero",
@@ -33,14 +42,20 @@ const content = {
     empty: "Todavía no has añadido ningún alojamiento.",
     noSubscription: "sin suscripción",
     plan: { basico: "Básico", premium: "Premium" },
+    duplicate: "Duplicar",
+    duplicating: "Duplicando…",
+    duplicateCopySuffix: "(copia)",
+    duplicateFailed: (msg) => `No se pudo duplicar: ${msg}`,
   },
 };
 
 export default function AlojamientosPage() {
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [duplicatingId, setDuplicatingId] = useState(null);
+  const [duplicateError, setDuplicateError] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -59,6 +74,65 @@ export default function AlojamientosPage() {
     load();
   }, []);
 
+  async function handleDuplicate(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const property = properties.find((p) => p.id === e.currentTarget.dataset.id);
+    setDuplicatingId(property.id);
+    setDuplicateError("");
+
+    const supabase = createClient();
+    const newName = `${property.name} ${t.duplicateCopySuffix}`;
+    const slug = `${slugify(newName)}-${Math.random().toString(36).slice(2, 6)}`;
+
+    // Repart de toutes les infos du logement d'origine, sauf ce qui est
+    // propre à cette fiche précise : identifiant, slug, code d'accès, et
+    // l'abonnement (une copie n'hérite pas du paiement de l'originale).
+    const {
+      id: _id,
+      created_at: _createdAt,
+      slug: _slug,
+      access_code: _accessCode,
+      plan: _plan,
+      subscription_status: _subscriptionStatus,
+      stripe_subscription_id: _stripeSubscriptionId,
+      trial_ends_at: _trialEndsAt,
+      billing_cycle: _billingCycle,
+      ...rest
+    } = property;
+
+    const { data: inserted, error } = await supabase
+      .from("properties")
+      .insert({ ...rest, name: newName, slug, access_code: randomCode() })
+      .select("id")
+      .single();
+
+    if (error) {
+      setDuplicatingId(null);
+      setDuplicateError(t.duplicateFailed(error.message));
+      return;
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    // Attend la requête avant de naviguer : sans ça, window.location.href
+    // interrompt le fetch en plein envoi et la notification ne part jamais.
+    await fetch("/api/property-created-notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hostEmail: user?.email, propertyName: newName, city: property.city }),
+    }).catch(() => {});
+
+    await fetch("/api/properties/apply-transfer-rates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ propertyId: inserted.id, city: property.city, force: true }),
+    }).catch(() => {});
+
+    window.location.href = `/panel/alojamientos/${inserted.id}/editar`;
+  }
+
   return (
     <main className="flex-1">
       <Hero eyebrow={t.eyebrow} title={t.title} />
@@ -74,6 +148,7 @@ export default function AlojamientosPage() {
         {!loading && properties.length === 0 && (
           <p className="mt-6 text-ink/60">{t.empty}</p>
         )}
+        {duplicateError && <p className="mt-3 text-sm text-terracotta-deep">{duplicateError}</p>}
 
         <div className="mt-6 grid gap-3">
           {properties.map((p) => {
@@ -82,7 +157,7 @@ export default function AlojamientosPage() {
               <Link
                 key={p.id}
                 href={`/panel/alojamientos/${p.id}`}
-                className="flex items-center gap-4 rounded border border-sand-dim bg-sand-card p-4 transition-colors hover:border-aqua-deep"
+                className="relative flex items-center gap-4 rounded border border-sand-dim bg-sand-card p-4 pb-10 transition-colors hover:border-aqua-deep"
               >
                 {p.photos?.[0] ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -101,6 +176,15 @@ export default function AlojamientosPage() {
                 >
                   {active ? (t.plan[p.plan] ?? p.plan) : t.noSubscription}
                 </span>
+                <button
+                  type="button"
+                  onClick={handleDuplicate}
+                  data-id={p.id}
+                  disabled={duplicatingId === p.id}
+                  className="absolute bottom-2 right-2 rounded border border-sand-dim px-2.5 py-1.5 text-xs font-bold text-ink/60 transition-colors hover:border-aqua-deep hover:text-aqua-deep disabled:opacity-50"
+                >
+                  {duplicatingId === p.id ? t.duplicating : t.duplicate}
+                </button>
               </Link>
             );
           })}

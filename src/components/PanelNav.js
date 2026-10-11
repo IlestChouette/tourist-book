@@ -5,12 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LogoutButton from "@/components/LogoutButton";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 import navDict from "@/lib/i18n/dictionaries/nav";
 
 export default function PanelNav() {
   const pathname = usePathname();
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = navDict[locale];
 
   // Sur login/inscription, pas encore de session hôtelier — on affiche quand

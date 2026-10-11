@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { matchRate } from "@/lib/transferRateMatch";
 
 const content = {
   fr: {
@@ -78,22 +79,6 @@ const content = {
 // choisi par le voyageur aux tarifs fixés par l'admin — le libellé affiché,
 // lui, change selon la langue du voyageur.
 const PICKUP_KEYS = ["airport", "train_station", "other"];
-
-// Le prix dépend du véhicule, donc à la fois des passagers ET des bagages —
-// une berline peut suffire pour 4 passagers mais pas avec 6 grosses valises.
-// On garde les tarifs qui couvrent les deux besoins, puis le moins cher parmi
-// eux (le plus petit véhicule adapté, pas juste celui avec le moins de places).
-function matchRate(rates, pickupKey, passengers, luggage) {
-  if (!rates?.length || pickupKey === "other") return null;
-  const candidates = rates.filter(
-    (r) =>
-      r.pickup_location === pickupKey &&
-      r.passengers >= passengers &&
-      (r.luggage == null || r.luggage >= luggage)
-  );
-  if (!candidates.length) return null;
-  return candidates.reduce((best, r) => (r.price < best.price ? r : best));
-}
 
 export default function TransfertForm({ slug, propertyName, propertyAddress, locale = "fr", rates = [], hostMode = false }) {
   const t = content[locale];

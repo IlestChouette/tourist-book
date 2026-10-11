@@ -20,7 +20,12 @@ export default async function TransfertPage({ params }) {
       />
 
       <section className="mx-auto max-w-2xl px-6 py-10">
-        <TransfertForm slug={slug} propertyName={property.name} propertyAddress={property.address} />
+        <TransfertForm
+          slug={slug}
+          propertyName={property.name}
+          propertyAddress={property.address}
+          rates={property.transfer_rates}
+        />
       </section>
     </main>
   );

@@ -2,21 +2,36 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { hashPassword, randomPassword } from "@/lib/password";
 import { sendGuestCheckinCredentials } from "@/lib/email";
+import { translateProperty } from "@/lib/translate";
 
 export async function GET(request, { params }) {
   const { token } = await params;
+  const locale = request.nextUrl.searchParams.get("locale");
   const admin = createAdminClient();
 
   const { data: reservation } = await admin
     .from("reservations")
     .select(
-      "id, guest_name, arrival_date, departure_date, status, property_id, properties(name, slug, host_id, house_rules, hosts(logo_url))"
+      "id, guest_name, arrival_date, departure_date, status, property_id, properties(id, name, slug, host_id, house_rules, hosts(logo_url))"
     )
     .eq("token", token)
     .single();
 
   if (!reservation) {
     return NextResponse.json({ error: "Réservation introuvable" }, { status: 404 });
+  }
+
+  // Le règlement intérieur est saisi par l'hôte en français — on le traduit
+  // pour le voyageur avec le même pipeline (et le même cache) que le livret,
+  // plutôt que de compter sur la traduction automatique du navigateur, qui ne
+  // touche pas ce texte chargé après coup en JavaScript.
+  let houseRules = reservation.properties?.house_rules || null;
+  if (houseRules && locale && locale !== "fr") {
+    const translated = await translateProperty(
+      { id: reservation.properties.id, house_rules: houseRules },
+      locale
+    );
+    houseRules = translated.house_rules;
   }
 
   return NextResponse.json({
@@ -27,7 +42,7 @@ export async function GET(request, { params }) {
     status: reservation.status,
     propertyName: reservation.properties?.name,
     propertySlug: reservation.properties?.slug,
-    houseRules: reservation.properties?.house_rules || null,
+    houseRules,
   });
 }
 

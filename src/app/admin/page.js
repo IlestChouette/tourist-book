@@ -6,7 +6,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { monthlyRevenue, PRICES } from "@/lib/pricing";
 import { stripe } from "@/lib/stripe";
 import LogoutButton from "@/components/LogoutButton";
+import EmailsSentTabs from "@/components/EmailsSentTabs";
 import { getLocale } from "@/lib/i18n/locale";
+import { getTransferCommissionPct } from "@/lib/transferPricing";
 
 // Vrai MRR calculé depuis Stripe plutôt que depuis le prix de liste local —
 // reflète les coupons/réductions réellement appliqués sur chaque abonnement.
@@ -37,10 +39,22 @@ const dateLocale = { fr: "fr-FR", en: "en-GB", es: "es-ES" };
 // eux-mêmes d'abord (plus intéressants à suivre au quotidien), puis les
 // notifications internes. Tout template inconnu est ajouté à la fin.
 const EMAIL_TEMPLATE_ORDER = [
+  "host_signup_notification",
+  "property_created_notification",
+  "subscription_started_notification",
+  "subscription_activated_notification",
   "no_property_reminder",
   "listing_tips",
   "transfer_request_notification",
-  "host_signup_notification",
+  "independent_transfer_request",
+  "guest_checkin_credentials",
+  "password_reset",
+  "profile_phone_request",
+  "hotel_digest",
+  "hotel_signup_notification",
+  "lost_item_guest",
+  "lost_item_choice",
+  "hotel_subscription_notification",
   "contact_lead_notification",
   "reminder_batch_notification",
   "listing_tips_batch_notification",
@@ -49,30 +63,66 @@ const EMAIL_TEMPLATE_ORDER = [
 
 const emailTemplateLabels = {
   fr: {
+    host_signup_notification: "Nouvelles inscriptions",
+    property_created_notification: "Nouveaux logements créés",
+    subscription_started_notification: "Nouveaux abonnements démarrés",
+    subscription_activated_notification: "Essais convertis en payant",
     no_property_reminder: "Relance — premier logement pas encore créé",
     listing_tips: "Conseils logement — hôtes déjà inscrits",
     transfer_request_notification: "Demandes de transfert",
-    host_signup_notification: "Nouvelles inscriptions",
+    independent_transfer_request: "Transfert indépendant (lien direct)",
+    guest_checkin_credentials: "Identifiants envoyés au voyageur",
+    password_reset: "Mot de passe oublié",
+    profile_phone_request: "Invitation à ajouter son téléphone",
+    hotel_digest: "Relève cahier de consignes (hôtel)",
+    hotel_signup_notification: "Nouvel hôtel inscrit",
+    lost_item_guest: "Objet trouvé — email au client",
+    lost_item_choice: "Objet trouvé — choix du client",
+    hotel_subscription_notification: "Nouvel abonnement hôtel",
     contact_lead_notification: "Contacts — formulaire landing page",
     reminder_batch_notification: "Résumé cron — relance premier logement",
     listing_tips_batch_notification: "Résumé cron — conseils logement",
     other: "Autres",
   },
   en: {
+    host_signup_notification: "New signups",
+    property_created_notification: "New properties created",
+    subscription_started_notification: "New subscriptions started",
+    subscription_activated_notification: "Trials converted to paid",
     no_property_reminder: "Reminder — first listing not created yet",
     listing_tips: "Listing tips — existing hosts",
     transfer_request_notification: "Transfer requests",
-    host_signup_notification: "New signups",
+    independent_transfer_request: "Independent transfer (direct link)",
+    guest_checkin_credentials: "Credentials sent to guest",
+    password_reset: "Forgotten password",
+    profile_phone_request: "Invitation to add phone number",
+    hotel_digest: "Hotel shift digest",
+    hotel_signup_notification: "New hotel signed up",
+    lost_item_guest: "Lost item — guest email",
+    lost_item_choice: "Lost item — guest choice",
+    hotel_subscription_notification: "New hotel subscription",
     contact_lead_notification: "Contacts — landing page form",
     reminder_batch_notification: "Cron summary — no-listing reminder",
     listing_tips_batch_notification: "Cron summary — listing tips",
     other: "Other",
   },
   es: {
+    host_signup_notification: "Nuevas inscripciones",
+    property_created_notification: "Nuevos alojamientos creados",
+    subscription_started_notification: "Nuevas suscripciones iniciadas",
+    subscription_activated_notification: "Pruebas convertidas en pago",
     no_property_reminder: "Recordatorio — primer alojamiento sin crear",
     listing_tips: "Consejos de alojamiento — hoteleros ya inscritos",
     transfer_request_notification: "Solicitudes de transporte",
-    host_signup_notification: "Nuevas inscripciones",
+    independent_transfer_request: "Transfer independiente (enlace directo)",
+    guest_checkin_credentials: "Credenciales enviadas al huésped",
+    password_reset: "Contraseña olvidada",
+    profile_phone_request: "Invitación a añadir el teléfono",
+    hotel_digest: "Relevo del cuaderno (hotel)",
+    hotel_signup_notification: "Nuevo hotel registrado",
+    lost_item_guest: "Objeto encontrado — email al cliente",
+    lost_item_choice: "Objeto encontrado — elección del cliente",
+    hotel_subscription_notification: "Nueva suscripción de hotel",
     contact_lead_notification: "Contactos — formulario landing page",
     reminder_batch_notification: "Resumen cron — recordatorio primer alojamiento",
     listing_tips_batch_notification: "Resumen cron — consejos de alojamiento",
@@ -156,7 +206,9 @@ const content = {
     status: "Statut",
     created: "Créé le",
     noSubscription: "sans abonnement",
-    viewLivret: "Voir le livret →",
+    viewLivret: "Livret",
+    trialUntil: (date) => `En essai jusqu'au ${date}`,
+    renewsOn: (date) => `Renouvellement le ${date}`,
     name: "Nom",
     email: "Email",
     phone: "Téléphone",
@@ -167,10 +219,24 @@ const content = {
     searchConsole: "Search Console →",
     identityLookup: "Retrouver un check-in →",
     transferRates: "Tarifs de transfert →",
+    livretStats: "Statistiques livrets →",
     independentTransfer: "Lien transfert indépendant →",
     goalLabel: "Objectif mensuel",
     remaining: (amount) => `Il reste ${amount.toFixed(0)} € pour atteindre l'objectif`,
     clientsNeeded: (n) => `≈ ${n} client${n > 1 ? "s" : ""} de plus au rythme actuel`,
+    transfersTitle: "Comptabilité des transferts",
+    noTransfers: "Aucune demande de transfert.",
+    month: "Mois",
+    transferCount: "Demandes",
+    totalBilled: "Total facturé",
+    commission: "Commission estimée",
+    noPriceNote: (n) => `${n} sans prix enregistré (avant l'ajout du calcul automatique)`,
+    transferDetailTitle: "Détail des transferts",
+    traveler: "Voyageur",
+    route: "Trajet",
+    priceLabel: "Prix payé",
+    netDriver: "Net conducteur (estimé)",
+    noPrice: "—",
     emailsSent: "Emails envoyés",
     noEmails: "Aucun email envoyé.",
     recipient: "Destinataire",
@@ -200,7 +266,9 @@ const content = {
     status: "Status",
     created: "Created",
     noSubscription: "no subscription",
-    viewLivret: "View livret →",
+    viewLivret: "Livret",
+    trialUntil: (date) => `Trialing until ${date}`,
+    renewsOn: (date) => `Renews on ${date}`,
     name: "Name",
     email: "Email",
     phone: "Phone",
@@ -211,10 +279,24 @@ const content = {
     searchConsole: "Search Console →",
     identityLookup: "Find a check-in →",
     transferRates: "Transfer rates →",
+    livretStats: "Livret statistics →",
     independentTransfer: "Independent transfer link →",
     goalLabel: "Monthly goal",
     remaining: (amount) => `${amount.toFixed(0)} € left to reach the goal`,
     clientsNeeded: (n) => `≈ ${n} more client${n > 1 ? "s" : ""} at the current rate`,
+    transfersTitle: "Transfer accounting",
+    noTransfers: "No transfer requests yet.",
+    month: "Month",
+    transferCount: "Requests",
+    totalBilled: "Total billed",
+    commission: "Estimated commission",
+    noPriceNote: (n) => `${n} with no price recorded (before automatic pricing was added)`,
+    transferDetailTitle: "Transfer detail",
+    traveler: "Traveler",
+    route: "Route",
+    priceLabel: "Price paid",
+    netDriver: "Net for driver (estimated)",
+    noPrice: "—",
     emailsSent: "Emails sent",
     noEmails: "No emails sent yet.",
     recipient: "Recipient",
@@ -244,7 +326,9 @@ const content = {
     status: "Estado",
     created: "Creado el",
     noSubscription: "sin suscripción",
-    viewLivret: "Ver el livret →",
+    viewLivret: "Livret",
+    trialUntil: (date) => `En prueba hasta el ${date}`,
+    renewsOn: (date) => `Renovación el ${date}`,
     name: "Nombre",
     email: "Email",
     phone: "Teléfono",
@@ -255,10 +339,24 @@ const content = {
     searchConsole: "Search Console →",
     identityLookup: "Buscar un check-in →",
     transferRates: "Tarifas de transfer →",
+    livretStats: "Estadísticas livrets →",
     independentTransfer: "Enlace transfer independiente →",
     goalLabel: "Objetivo mensual",
     remaining: (amount) => `Faltan ${amount.toFixed(0)} € para llegar al objetivo`,
     clientsNeeded: (n) => `≈ ${n} cliente${n > 1 ? "s" : ""} más al ritmo actual`,
+    transfersTitle: "Contabilidad de transfers",
+    noTransfers: "Aún no hay solicitudes de transfer.",
+    month: "Mes",
+    transferCount: "Solicitudes",
+    totalBilled: "Total facturado",
+    commission: "Comisión estimada",
+    noPriceNote: (n) => `${n} sin precio registrado (antes de agregar el cálculo automático)`,
+    transferDetailTitle: "Detalle de transfers",
+    traveler: "Viajero",
+    route: "Trayecto",
+    priceLabel: "Precio pagado",
+    netDriver: "Neto conductor (estimado)",
+    noPrice: "—",
     emailsSent: "Emails enviados",
     noEmails: "Aún no se ha enviado ningún email.",
     recipient: "Destinatario",
@@ -289,7 +387,7 @@ export default async function AdminPage() {
 
   const admin = createAdminClient();
 
-  const [{ data: hosts }, { data: properties }, { data: requests }, { data: emailLog }] = await Promise.all([
+  const [{ data: hosts }, { data: properties }, { data: requests }, { data: emailLog }, { data: transfers }] = await Promise.all([
     admin
       .from("hosts")
       .select("id, name, email, phone, created_at")
@@ -298,7 +396,7 @@ export default async function AdminPage() {
     admin
       .from("properties")
       .select(
-        "id, name, city, slug, host_id, plan, billing_cycle, subscription_status, stripe_subscription_id, created_at, hosts(name, email, is_admin)"
+        "id, name, city, slug, host_id, plan, billing_cycle, subscription_status, stripe_subscription_id, trial_ends_at, current_period_end, created_at, hosts(name, email, is_admin)"
       )
       .order("created_at", { ascending: false }),
     admin
@@ -310,6 +408,11 @@ export default async function AdminPage() {
       .select("id, recipient, subject, template, status, error, created_at")
       .order("created_at", { ascending: false })
       .limit(50),
+    admin
+      .from("requests")
+      .select("id, created_at, nom, telephone, details, properties(name)")
+      .eq("type", "transfert")
+      .order("created_at", { ascending: false }),
   ]);
 
   // Les alojamientos "exemple" appartiennent au compte admin (is_admin=true)
@@ -328,6 +431,53 @@ export default async function AdminPage() {
   const trialingProperties = activeProperties.filter((p) => p.subscription_status === "trialing");
   const potentialMrr = trialingProperties.reduce((sum, p) => sum + monthlyRevenue(p.plan, p.billing_cycle), 0);
   const pendingRequests = (requests ?? []).filter((r) => r.status === "pendiente");
+
+  // Comptabilité des transferts par mois : nombre de demandes, total facturé
+  // aux voyageurs et commission estimée (le prix affiché est net x1,2 — donc
+  // la commission est le prix moins prix/1,2, soit environ 1/6 du prix). Les
+  // demandes d'avant l'ajout du calcul de prix n'ont pas de "prixEstime" :
+  // comptées, mais exclues du total et de la commission.
+  const transfersByMonth = new Map();
+  for (const req of transfers ?? []) {
+    const monthKey = req.created_at.slice(0, 7);
+    if (!transfersByMonth.has(monthKey)) {
+      transfersByMonth.set(monthKey, { count: 0, withPrice: 0, total: 0 });
+    }
+    const bucket = transfersByMonth.get(monthKey);
+    bucket.count += 1;
+    const price = Number(req.details?.prixEstime);
+    if (Number.isFinite(price)) {
+      bucket.withPrice += 1;
+      bucket.total += price;
+    }
+  }
+  // Le prix affiché est net × (1 + c) : la commission est donc prix × c / (1 + c).
+  // `c` est la commission configurée dans /admin/tarifas (20 % par défaut).
+  // Limite connue : le taux appliqué à chaque demande n'est pas enregistré, le
+  // taux actuel s'applique donc à tout l'historique.
+  const commissionPct = await getTransferCommissionPct();
+  const commissionShare = commissionPct / (100 + commissionPct);
+  const transferMonths = [...transfersByMonth.entries()]
+    .sort(([a], [b]) => (a < b ? 1 : -1))
+    .map(([month, bucket]) => ({ month, ...bucket, commission: bucket.total * commissionShare }));
+
+  // Détail par transfert : le prix net du conducteur n'est jamais enregistré
+  // (seul le prix final majoré l'est) — on le déduit du prix affiché en
+  // inversant la majoration configurée, comme pour la commission ci-dessus.
+  const transferDetails = (transfers ?? []).map((req) => {
+    const price = Number(req.details?.prixEstime);
+    const hasPrice = Number.isFinite(price);
+    return {
+      id: req.id,
+      date: req.created_at,
+      traveler: req.nom,
+      propertyName: req.properties?.name,
+      from: req.details?.lieu || "-",
+      to: req.details?.destination || "-",
+      price: hasPrice ? price : null,
+      net: hasPrice ? price / (1 + commissionPct / 100) : null,
+    };
+  });
 
   // Regroupe le journal d'emails par type plutôt qu'une seule liste
   // chronologique — plus facile de suivre un fil (ex. toutes les relances
@@ -397,6 +547,12 @@ export default async function AdminPage() {
             className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
           >
             {t.transferRates}
+          </Link>
+          <Link
+            href="/admin/estadisticas"
+            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+          >
+            {t.livretStats}
           </Link>
           <Link
             href="/transfer-independiente"
@@ -510,7 +666,13 @@ export default async function AdminPage() {
                   <td className="px-4 py-2 text-ink/70">{p.hosts?.name} · {p.hosts?.email}</td>
                   <td className="px-4 py-2 text-ink/70">{p.plan ?? "—"}</td>
                   <td className="px-4 py-2 text-ink/70">{p.billing_cycle ?? "—"}</td>
-                  <td className="px-4 py-2 text-ink/70">{statusLabel[p.subscription_status] ?? p.subscription_status ?? t.noSubscription}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-ink/70">
+                    {p.subscription_status === "trialing" && p.trial_ends_at
+                      ? t.trialUntil(new Date(p.trial_ends_at).toLocaleDateString(dateLocale[locale]))
+                      : p.subscription_status === "active" && p.current_period_end
+                        ? t.renewsOn(new Date(p.current_period_end).toLocaleDateString(dateLocale[locale]))
+                        : statusLabel[p.subscription_status] ?? p.subscription_status ?? t.noSubscription}
+                  </td>
                   <td className="px-4 py-2 whitespace-nowrap text-ink/70">
                     {new Date(p.created_at).toLocaleString(dateLocale[locale])}
                   </td>
@@ -519,7 +681,7 @@ export default async function AdminPage() {
                       href={`/logement/${p.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold text-aqua-deep hover:underline"
+                      className="inline-block whitespace-nowrap rounded border border-aqua-deep px-3 py-1 text-xs font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
                     >
                       {t.viewLivret}
                     </a>
@@ -556,49 +718,103 @@ export default async function AdminPage() {
           </table>
         </div>
 
-        <h2 className="mt-12 font-display italic text-2xl text-ink">{t.emailsSent}</h2>
-        {(emailLog ?? []).length === 0 && <p className="mt-4 text-ink/60">{t.noEmails}</p>}
-        {orderedEmailTemplates.map((templateKey) => (
-          <div key={templateKey} className="mt-6">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-ink/60">
-              {emailTemplateLabels[locale]?.[templateKey] ?? templateKey}{" "}
-              <span className="text-ink/40">({emailsByTemplate.get(templateKey).length})</span>
-            </h3>
-            <div className="mt-2 overflow-x-auto rounded border border-sand-dim">
-              <table className="w-full min-w-[600px] border-collapse text-sm">
+        <h2 className="mt-12 font-display italic text-2xl text-ink">{t.transfersTitle}</h2>
+        {transferMonths.length === 0 && <p className="mt-4 text-ink/60">{t.noTransfers}</p>}
+        {transferMonths.length > 0 && (
+          <div className="mt-4 overflow-x-auto rounded border border-sand-dim">
+            <table className="w-full min-w-[500px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-sand-dim bg-sand-card text-left">
+                  <th className="px-4 py-2 font-bold text-ink/70">{t.month}</th>
+                  <th className="px-4 py-2 font-bold text-ink/70">{t.transferCount}</th>
+                  <th className="px-4 py-2 font-bold text-ink/70">{t.totalBilled}</th>
+                  <th className="px-4 py-2 font-bold text-ink/70">{t.commission} (≈{commissionPct} %)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transferMonths.map((m) => {
+                  const withoutPrice = m.count - m.withPrice;
+                  return (
+                    <tr key={m.month} className="border-b border-sand-dim last:border-0">
+                      <td className="px-4 py-2 text-ink">{m.month}</td>
+                      <td className="px-4 py-2 text-ink/70">
+                        {m.count}
+                        {withoutPrice > 0 && (
+                          <span className="ml-2 text-xs text-ink/40">({t.noPriceNote(withoutPrice)})</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-ink/70">{m.total.toFixed(2)} €</td>
+                      <td className="px-4 py-2 text-ink/70">{m.commission.toFixed(2)} €</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {transferDetails.length > 0 && (
+          <>
+            <h3 className="mt-8 font-display italic text-xl text-ink">{t.transferDetailTitle}</h3>
+            <div className="mt-4 overflow-x-auto rounded border border-sand-dim">
+              <table className="w-full min-w-[700px] border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-sand-dim bg-sand-card text-left">
                     <th className="px-4 py-2 font-bold text-ink/70">{t.sentAt}</th>
-                    <th className="px-4 py-2 font-bold text-ink/70">{t.recipient}</th>
-                    <th className="px-4 py-2 font-bold text-ink/70">{t.subject}</th>
-                    <th className="px-4 py-2 font-bold text-ink/70">{t.status}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.traveler}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.property}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.route}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.priceLabel}</th>
+                    <th className="px-4 py-2 font-bold text-ink/70">{t.netDriver}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {emailsByTemplate.get(templateKey).map((e) => (
-                    <tr key={e.id} className="border-b border-sand-dim last:border-0">
-                      <td className="px-4 py-2 whitespace-nowrap text-ink/70">
-                        {new Date(e.created_at).toLocaleString(dateLocale[locale])}
+                  {transferDetails.map((d) => (
+                    <tr key={d.id} className="border-b border-sand-dim last:border-0">
+                      <td className="px-4 py-2 text-ink">
+                        {new Date(d.date).toLocaleDateString(dateLocale[locale])}
                       </td>
-                      <td className="px-4 py-2 text-ink">{e.recipient}</td>
-                      <td className="px-4 py-2 text-ink/70">{e.subject}</td>
-                      <td className="px-4 py-2">
-                        <span
-                          className={`rounded px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${
-                            e.status === "sent" ? "bg-sage text-ink" : "bg-terracotta text-ink"
-                          }`}
-                          title={e.error ?? undefined}
-                        >
-                          {e.status === "sent" ? t.emailStatusSent : t.emailStatusFailed}
+                      <td className="px-4 py-2 text-ink/70">{d.traveler}</td>
+                      <td className="px-4 py-2 text-ink/70">{d.propertyName}</td>
+                      <td className="px-4 py-2 text-ink/70">
+                        <span className="block max-w-xs">
+                          {d.from} → {d.to}
                         </span>
+                      </td>
+                      <td className="px-4 py-2 text-ink/70">
+                        {d.price != null ? `${d.price.toFixed(2)} €` : t.noPrice}
+                      </td>
+                      <td className="px-4 py-2 text-ink/70">
+                        {d.net != null ? `${d.net.toFixed(2)} €` : t.noPrice}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
-        ))}
+          </>
+        )}
+
+        <h2 className="mt-12 font-display italic text-2xl text-ink">{t.emailsSent}</h2>
+        {(emailLog ?? []).length === 0 && <p className="mt-4 text-ink/60">{t.noEmails}</p>}
+        {(emailLog ?? []).length > 0 && (
+          <EmailsSentTabs
+            groups={orderedEmailTemplates.map((templateKey) => ({
+              key: templateKey,
+              label: emailTemplateLabels[locale]?.[templateKey] ?? templateKey,
+              emails: emailsByTemplate.get(templateKey),
+            }))}
+            dateLocale={dateLocale[locale]}
+            t={{
+              sentAt: t.sentAt,
+              recipient: t.recipient,
+              subject: t.subject,
+              status: t.status,
+              emailStatusSent: t.emailStatusSent,
+              emailStatusFailed: t.emailStatusFailed,
+            }}
+          />
+        )}
       </section>
     </main>
   );

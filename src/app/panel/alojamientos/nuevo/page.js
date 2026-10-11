@@ -6,22 +6,9 @@ import { uploadMedia } from "@/lib/uploadMedia";
 import Hero from "@/components/Hero";
 import AccentColorButton from "@/components/AccentColorButton";
 import FormattableTextarea from "@/components/FormattableTextarea";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 import fieldsDict from "@/lib/i18n/dictionaries/propertyForm";
-
-function slugify(text) {
-  return text
-    .toString()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function randomCode() {
-  return String(Math.floor(1000 + Math.random() * 9000));
-}
+import { slugify, randomCode } from "@/lib/slug";
 
 const MAX_PHOTOS = 5;
 const MAX_KEY_PHOTOS = 4;
@@ -33,7 +20,7 @@ const pageContent = {
 };
 
 export default function NuevoAlojamientoPage() {
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = fieldsDict[locale];
   const p = pageContent[locale];
 
@@ -166,6 +153,21 @@ export default function NuevoAlojamientoPage() {
         .single();
 
       if (insertError) throw insertError;
+
+      // Attend la requête avant de naviguer : sans ça, window.location.href
+      // interrompt le fetch en plein envoi et la notification ne part jamais.
+      await fetch("/api/property-created-notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hostEmail: user.email, propertyName: form.name, city: form.city }),
+      }).catch(() => {});
+
+      await fetch("/api/properties/apply-transfer-rates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId: inserted.id, city: form.city, force: true }),
+      }).catch(() => {});
+
       window.location.href = `/panel/alojamientos/${inserted.id}/suscribirse`;
       return;
     } catch (err) {
@@ -423,6 +425,7 @@ export default function NuevoAlojamientoPage() {
                 onChange={update("general_info")}
                 locale={locale}
               />
+              <span className="mt-1.5 block text-xs text-ink/50">{t.generalInfoHint}</span>
             </div>
           </details>
 

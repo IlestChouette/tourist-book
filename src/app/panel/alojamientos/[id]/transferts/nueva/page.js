@@ -5,7 +5,7 @@ import Hero from "@/components/Hero";
 import TransfertForm from "@/components/TransfertForm";
 import { createClient } from "@/lib/supabase/client";
 import { fullAddress } from "@/lib/address";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 
 const content = {
   fr: {
@@ -33,7 +33,7 @@ const content = {
 
 export default function NuevaTransfertPage({ params }) {
   const { id } = use(params);
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
 
   const [property, setProperty] = useState(null);

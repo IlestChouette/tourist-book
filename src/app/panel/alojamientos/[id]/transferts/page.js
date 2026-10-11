@@ -4,7 +4,7 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import Hero from "@/components/Hero";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 import { formatTransferWhatsAppMessage } from "@/lib/transferMessage";
 
 const content = {
@@ -69,7 +69,7 @@ const content = {
 
 export default function TransfertsPage({ params }) {
   const { id } = use(params);
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
 
   const [property, setProperty] = useState(null);

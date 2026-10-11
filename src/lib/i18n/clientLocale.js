@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 const SUPPORTED = ["fr", "en", "es"];
 
 // Équivalent côté client de getLocale() (src/lib/i18n/locale.js) : lit le
@@ -18,4 +20,19 @@ export function getClientLocale() {
     }
   }
   return "fr";
+}
+
+// Version hook : démarre sur "fr" (même valeur que le rendu serveur, aucune
+// cookie/langue navigateur n'y étant disponible) puis corrige vers la vraie
+// langue juste après le montage. Évite le mismatch d'hydratation React
+// (erreur #418) qu'un `useState(getClientLocale)` direct provoquait dès que
+// la langue réelle différait du français.
+export function useClientLocale() {
+  const [locale, setLocale] = useState("fr");
+  useEffect(() => {
+    const real = getClientLocale();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocale((current) => (real === current ? current : real));
+  }, []);
+  return locale;
 }

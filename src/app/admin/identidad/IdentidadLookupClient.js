@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 
 const content = {
   fr: {
@@ -62,7 +62,7 @@ const content = {
 };
 
 export default function IdentidadLookupPage() {
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
 
   const [form, setForm] = useState({ q: "", from: "", to: "" });

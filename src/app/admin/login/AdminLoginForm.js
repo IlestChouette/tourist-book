@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 
 const content = {
   fr: { email: "Email", password: "Mot de passe", submitting: "Connexion…", submit: "Entrer →", error: "Email ou mot de passe incorrect." },
@@ -16,7 +16,7 @@ const content = {
 export default function AdminLoginForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/admin";
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
 
   const [form, setForm] = useState({ email: "", password: "" });

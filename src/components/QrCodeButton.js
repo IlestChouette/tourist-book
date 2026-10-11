@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import QRCode from "qrcode";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 
 const content = {
   fr: {
@@ -32,7 +32,7 @@ const content = {
 };
 
 export default function QrCodeButton({ slug, accessCode, propertyName }) {
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
   const [dataUrl, setDataUrl] = useState(null);
   const [generating, setGenerating] = useState(false);

@@ -10,7 +10,6 @@ const content = {
     companyLine: "— Société par actions simplifiée (société à associé unique), capital social de 5 000 €.",
     registry: "SIREN 942 069 949 · RCS Nice",
     address: "Siège social : 143 Promenade des Anglais, 06200 Nice, France",
-    president: "Président : Fernando Francisco Fonseca Pinzon",
     contact: "Contact :",
     companySite: "Site de l'entreprise :",
     hostingTitle: "Hébergement",
@@ -33,7 +32,6 @@ const content = {
     companyLine: "— Simplified joint-stock company (single-shareholder company), share capital of €5,000.",
     registry: "SIREN 942 069 949 · RCS Nice",
     address: "Registered office: 143 Promenade des Anglais, 06200 Nice, France",
-    president: "President: Fernando Francisco Fonseca Pinzon",
     contact: "Contact:",
     companySite: "Company website:",
     hostingTitle: "Hosting",
@@ -56,7 +54,6 @@ const content = {
     companyLine: "— Société par actions simplifiée (société à associé unique), capital social de 5.000 €.",
     registry: "SIREN 942 069 949 · RCS Nice",
     address: "Domicilio social: 143 Promenade des Anglais, 06200 Niza, Francia",
-    president: "Presidente: Fernando Francisco Fonseca Pinzon",
     contact: "Contacto:",
     companySite: "Sitio de la empresa:",
     hostingTitle: "Alojamiento (hébergement)",
@@ -95,7 +92,6 @@ export default async function AvisoLegalPage() {
               </p>
               <p className="mt-2">{t.registry}</p>
               <p className="mt-1">{t.address}</p>
-              <p className="mt-1">{t.president}</p>
               <p className="mt-3">
                 {t.contact}{" "}
                 <a href="mailto:allo@ilestchouette.fr" className="font-bold text-aqua-deep">allo@ilestchouette.fr</a>

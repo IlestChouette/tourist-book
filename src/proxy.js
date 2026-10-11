@@ -32,7 +32,8 @@ export async function proxy(request) {
 
   // Zone hôtelier ("/panel") : protégée, sauf connexion/inscription.
   if (pathname.startsWith("/panel")) {
-    const isAuthPage = pathname === "/panel/login" || pathname === "/panel/registro";
+    const isAuthPage =
+      pathname === "/panel/login" || pathname === "/panel/registro" || pathname === "/panel/olvide-password";
     if (!user && !isAuthPage) {
       const url = request.nextUrl.clone();
       url.pathname = "/panel/login";

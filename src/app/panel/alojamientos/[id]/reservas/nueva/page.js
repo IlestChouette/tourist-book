@@ -3,7 +3,7 @@
 import { use, useState } from "react";
 import Link from "next/link";
 import Hero from "@/components/Hero";
-import { getClientLocale } from "@/lib/i18n/clientLocale";
+import { useClientLocale } from "@/lib/i18n/clientLocale";
 
 const content = {
   fr: {
@@ -55,7 +55,7 @@ const content = {
 
 export default function NuevaReservaPage({ params }) {
   const { id } = use(params);
-  const [locale] = useState(getClientLocale);
+  const locale = useClientLocale();
   const t = content[locale];
 
   const [form, setForm] = useState({ guestName: "", arrivalDate: "", departureDate: "" });

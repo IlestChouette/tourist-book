@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import QRCode from "qrcode";
 import { fullAddress } from "@/lib/address";
 import TransfertForm from "./TransfertForm";
 import CarnetPanel from "./CarnetPanel";
@@ -25,6 +26,9 @@ const content = {
     close: "Fermer",
     copyPassword: "Copier le mot de passe",
     copied: "Copié !",
+    showWifiQr: "Afficher le QR code",
+    generatingQr: "Génération…",
+    scanToConnect: "Scannez avec un autre appareil pour vous connecter automatiquement.",
     whatsapp: "Écrire sur WhatsApp",
     trashPhotoAlt: "Emplacement des poubelles",
     keyPickup: "Récupération des clés",
@@ -34,6 +38,25 @@ const content = {
     toursComingSoon: "La réservation de tours et d'activités arrive bientôt — le partenaire est en cours de configuration.",
     demoHostView: "Vue hôte (démo)",
     demoHint: "* Le bouton « Vue hôte (démo) » n'existe pas sur un vrai livret — il vous montre ce que verrait l'hôte à la réception de ce check-in.",
+    today: "Aujourd'hui",
+    tomorrow: "Demain",
+    conditionLabels: {
+      clear: "Ensoleillé",
+      "cloudy-sun": "Éclaircies",
+      cloudy: "Nuageux",
+      rain: "Pluvieux",
+      storm: "Orageux",
+      snow: "Neige",
+      fog: "Brumeux",
+    },
+    outfitTip(condition, max) {
+      if (condition === "rain" || condition === "storm") return "Prends un parapluie, il pleut.";
+      if (condition === "snow") return "Sors ton manteau le plus chaud.";
+      if (max >= 26) return "Short et t-shirt, journée d'été.";
+      if (max >= 20) return "T-shirt dans la journée, un pull pour le soir.";
+      if (max >= 14) return "Un pull léger fera l'affaire.";
+      return "Prévois une veste chaude.";
+    },
   },
   en: {
     directions: "Directions",
@@ -52,6 +75,9 @@ const content = {
     close: "Close",
     copyPassword: "Copy password",
     copied: "Copied!",
+    showWifiQr: "Show QR code",
+    generatingQr: "Generating…",
+    scanToConnect: "Scan with another device to connect automatically.",
     whatsapp: "Message on WhatsApp",
     trashPhotoAlt: "Trash location",
     keyPickup: "Key pickup",
@@ -61,6 +87,25 @@ const content = {
     toursComingSoon: "Tour and activity booking is coming soon — the partner is being set up.",
     demoHostView: "Host view (demo)",
     demoHint: "* The \"Host view (demo)\" button doesn't exist on a real livret — it shows you what the host would see upon receiving this check-in.",
+    today: "Today",
+    tomorrow: "Tomorrow",
+    conditionLabels: {
+      clear: "Sunny",
+      "cloudy-sun": "Partly cloudy",
+      cloudy: "Cloudy",
+      rain: "Rainy",
+      storm: "Stormy",
+      snow: "Snowy",
+      fog: "Foggy",
+    },
+    outfitTip(condition, max) {
+      if (condition === "rain" || condition === "storm") return "Bring an umbrella, it's raining.";
+      if (condition === "snow") return "Grab your warmest coat.";
+      if (max >= 26) return "Shorts and a t-shirt, summer day.";
+      if (max >= 20) return "T-shirt by day, a light jumper for the evening.";
+      if (max >= 14) return "A light jumper will do.";
+      return "Plan for a warm jacket.";
+    },
   },
   es: {
     directions: "Cómo llegar",
@@ -79,6 +124,9 @@ const content = {
     close: "Cerrar",
     copyPassword: "Copiar contraseña",
     copied: "¡Copiado!",
+    showWifiQr: "Mostrar código QR",
+    generatingQr: "Generando…",
+    scanToConnect: "Escanéalo con otro dispositivo para conectarte automáticamente.",
     whatsapp: "Escribir por WhatsApp",
     trashPhotoAlt: "Ubicación de la basura",
     keyPickup: "Recogida de llaves",
@@ -88,6 +136,25 @@ const content = {
     toursComingSoon: "La reserva de tours y actividades llega pronto — el socio está en proceso de configuración.",
     demoHostView: "Vista del hotelero (demo)",
     demoHint: "* El botón «Vista del hotelero (demo)» no existe en un livret real — te muestra lo que vería el hotelero al recibir este check-in.",
+    today: "Hoy",
+    tomorrow: "Mañana",
+    conditionLabels: {
+      clear: "Soleado",
+      "cloudy-sun": "Parcialmente nublado",
+      cloudy: "Nublado",
+      rain: "Lluvioso",
+      storm: "Tormentoso",
+      snow: "Nieve",
+      fog: "Con niebla",
+    },
+    outfitTip(condition, max) {
+      if (condition === "rain" || condition === "storm") return "Lleva paraguas, va a llover.";
+      if (condition === "snow") return "Saca tu abrigo más grueso.";
+      if (max >= 26) return "Short y camiseta, día de verano.";
+      if (max >= 20) return "Camiseta de día, un suéter ligero para la noche.";
+      if (max >= 14) return "Con un suéter ligero va bien.";
+      return "Lleva una chaqueta abrigada.";
+    },
   },
 };
 
@@ -293,6 +360,93 @@ function CopyIcon() {
   );
 }
 
+function QrIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinejoin="round" className="h-4 w-4">
+      <rect x="3.5" y="3.5" width="6" height="6" rx="1" />
+      <rect x="14.5" y="3.5" width="6" height="6" rx="1" />
+      <rect x="3.5" y="14.5" width="6" height="6" rx="1" />
+      <path d="M14.5 14.5h3v3h-3zM20.5 14.5v3M17.5 20.5h3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+const weatherIconProps = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" };
+
+function SunIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <circle cx="12" cy="12" r="4.5" />
+      <path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8" />
+    </svg>
+  );
+}
+
+function CloudySunIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <path d="M9 8.5a4 4 0 0 1 7.6 1.8" />
+      <circle cx="9" cy="8" r="0.2" />
+      <path d="M6.5 20a3.8 3.8 0 0 1-1-7.5 4.5 4.5 0 0 1 8.7-1.2A4 4 0 0 1 17 19H6.5z" />
+      <path d="M9 3.5v1.3M4.6 5.6l1 1M13.5 4.7l-.9 1.1" />
+    </svg>
+  );
+}
+
+function CloudyIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <path d="M6.5 19.5a3.8 3.8 0 0 1-1-7.5 4.5 4.5 0 0 1 8.7-1.2 4 4 0 0 1 1.8 7.7 4 4 0 0 1-1 .5H6.5z" />
+    </svg>
+  );
+}
+
+function RainIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <path d="M6.5 16a3.8 3.8 0 0 1-1-7.5 4.5 4.5 0 0 1 8.7-1.2A4 4 0 0 1 15 15H6.5z" />
+      <path d="M8 18.5l-1 2.5M12 18.5l-1 2.5M16 18.5l-1 2.5" />
+    </svg>
+  );
+}
+
+function StormIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <path d="M6.5 14.5a3.8 3.8 0 0 1-1-7.5 4.5 4.5 0 0 1 8.7-1.2 4 4 0 0 1 1.8 7.7 4 4 0 0 1-1 .5H6.5z" />
+      <path d="M12.5 15.5l-2.5 4h2.5l-1.5 3.5" />
+    </svg>
+  );
+}
+
+function SnowIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <path d="M6.5 14.5a3.8 3.8 0 0 1-1-7.5 4.5 4.5 0 0 1 8.7-1.2 4 4 0 0 1 1.8 7.7 4 4 0 0 1-1 .5H6.5z" />
+      <path d="M8 18v4M6.3 19l3.4 2M9.7 19l-3.4 2M15 18v4M13.3 19l3.4 2M16.7 19l-3.4 2" />
+    </svg>
+  );
+}
+
+function FogIcon() {
+  return (
+    <svg {...weatherIconProps} className="h-7 w-7">
+      <path d="M6 9.5a4.5 4.5 0 0 1 8.7-1.5" />
+      <path d="M4 13.5h16M3 17h18M6 20.5h12" />
+    </svg>
+  );
+}
+
+const WEATHER_ICONS = {
+  clear: SunIcon,
+  "cloudy-sun": CloudySunIcon,
+  cloudy: CloudyIcon,
+  rain: RainIcon,
+  storm: StormIcon,
+  snow: SnowIcon,
+  fog: FogIcon,
+};
+
 // Choisit un nombre de colonnes (4 à 6) qui remplit la dernière rangée le
 // mieux possible pour N tuiles, plutôt qu'un nombre fixe qui laisse parfois
 // une rangée finale à moitié vide (ex. 10 tuiles sur 6 colonnes → 6 puis 4).
@@ -354,14 +508,39 @@ function VideoEmbed({ url, title }) {
   );
 }
 
-export default function LivretMenu({ property, slug, locale = "fr", isDemo = false }) {
+export default function LivretMenu({ property, slug, locale = "fr", isDemo = false, weather = null }) {
   const t = content[locale];
   const hints = tileHints[locale];
   const [active, setActive] = useState(null);
   const [displayedItem, setDisplayedItem] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [wifiQr, setWifiQr] = useState(null);
+  const [generatingQr, setGeneratingQr] = useState(false);
   const closeButtonRef = useRef(null);
+
+  // Statistiques pour l'hôte (page Premium « Statistiques ») : une ouverture
+  // par session de navigateur — un rechargement ou un retour depuis la carte
+  // ne compte pas deux fois — puis chaque tuile touchée.
+  function track(event) {
+    try {
+      navigator.sendBeacon("/api/track", JSON.stringify({ slug, event }));
+    } catch {
+      // Statistique perdue, rien de grave pour le voyageur.
+    }
+  }
+
+  useEffect(() => {
+    const key = `tb_open_${slug}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+    } catch {
+      // sessionStorage bloqué (navigation privée stricte) : on compte quand même.
+    }
+    track("open");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
 
   const infoItems = [
     ...(property.directions
@@ -425,6 +604,27 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
   function close() {
     setActive(null);
     setCopied(false);
+    setWifiQr(null);
+  }
+
+  // Format standard "WIFI:" reconnu par les appareils de la caméra native
+  // (iOS et Android) — scanner ce QR propose directement "Rejoindre le
+  // réseau", sans que le voyageur tape le mot de passe. Les caractères
+  // spéciaux du format doivent être échappés d'un antislash.
+  function escapeWifiField(value) {
+    return String(value).replace(/([\\;,:"])/g, "\\$1");
+  }
+
+  async function generateWifiQr() {
+    setGeneratingQr(true);
+    const payload = `WIFI:T:WPA;S:${escapeWifiField(property.wifi_ssid)};P:${escapeWifiField(property.wifi_password)};;`;
+    const url = await QRCode.toDataURL(payload, {
+      width: 480,
+      margin: 2,
+      color: { dark: "#223339", light: "#f7f1e4" },
+    });
+    setWifiQr(url);
+    setGeneratingQr(false);
   }
 
   useEffect(() => {
@@ -469,6 +669,36 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
 
   return (
     <div>
+      {weather && weather.length > 0 && (
+        <div className="mb-5">
+          <div className="grid grid-cols-2 gap-3">
+            {weather.slice(0, 2).map((day, i) => {
+              const Icon = WEATHER_ICONS[day.condition] || CloudyIcon;
+              return (
+                <div
+                  key={day.date}
+                  className="flex items-center gap-3 rounded-2xl border border-sand-dim bg-sand-card px-4 py-3 md:rounded-xl"
+                >
+                  <span className="shrink-0 text-[var(--host-accent-deep)]">
+                    <Icon />
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wide text-ink/50">{i === 0 ? t.today : t.tomorrow}</p>
+                    <p className="text-sm font-bold text-ink">
+                      {day.max}° <span className="font-normal text-ink/50">/ {day.min}°</span>
+                    </p>
+                    <p className="text-xs text-ink/60">{t.conditionLabels[day.condition] || t.conditionLabels.cloudy}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-3 rounded-2xl border border-sand-dim bg-sand-card px-4 py-2.5 text-center font-display italic text-sm text-ink/80 md:rounded-xl">
+            {t.outfitTip(weather[0].condition, weather[0].max)}
+          </p>
+        </div>
+      )}
+
       <div
         className="grid grid-cols-2 gap-4 sm:gap-3 tile-grid-wide"
         style={{ "--tile-cols": cols }}
@@ -483,7 +713,10 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
               : "bg-[var(--host-accent)] text-ink md:border-[var(--host-accent)]/30 md:bg-[var(--host-accent-tint)] md:text-ink md:hover:border-[var(--host-accent)]"
           }`;
           return (
-            <button key={item.key} type="button" onClick={() => setActive(item.key)} title={hint} className={className}>
+            <button key={item.key} type="button" onClick={() => {
+                setActive(item.key);
+                track(item.key);
+              }} title={hint} className={className}>
               <span className="h-9 w-9 md:h-6 md:w-6">{item.icon}</span>
               <span className="text-sm font-bold uppercase leading-tight tracking-wide md:text-[11px]">
                 {item.label}
@@ -550,14 +783,35 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
                   <FormattedText text={displayedItem.detail} />
 
                   {displayedItem.key === "wifi" && property.wifi_password && (
-                    <button
-                      type="button"
-                      onClick={copyWifiPassword}
-                      className="mt-3 inline-flex items-center gap-2 rounded border border-aqua-deep px-4 py-2 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
-                    >
-                      <CopyIcon />
-                      {copied ? t.copied : t.copyPassword}
-                    </button>
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={copyWifiPassword}
+                        className="inline-flex items-center gap-2 rounded border border-aqua-deep px-4 py-2 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card"
+                      >
+                        <CopyIcon />
+                        {copied ? t.copied : t.copyPassword}
+                      </button>
+                      {!wifiQr && (
+                        <button
+                          type="button"
+                          onClick={generateWifiQr}
+                          disabled={generatingQr}
+                          className="inline-flex items-center gap-2 rounded border border-aqua-deep px-4 py-2 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card disabled:opacity-60"
+                        >
+                          <QrIcon />
+                          {generatingQr ? t.generatingQr : t.showWifiQr}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {displayedItem.key === "wifi" && wifiQr && (
+                    <div className="mt-4 text-center">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={wifiQr} alt="QR code wifi" className="mx-auto h-40 w-40" />
+                      <p className="mt-2 text-xs text-ink/60">{t.scanToConnect}</p>
+                    </div>
                   )}
 
                   {displayedItem.key === "contact" && whatsapp && (

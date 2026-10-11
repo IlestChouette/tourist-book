@@ -5,6 +5,7 @@ import { fullAddress } from "@/lib/address";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getLocale } from "@/lib/i18n/locale";
 import { translateProperty } from "@/lib/translate";
+import { getWeatherForCity } from "@/lib/weather";
 import LivretHero from "@/components/LivretHero";
 import LivretMenu from "@/components/LivretMenu";
 
@@ -94,6 +95,7 @@ export default async function LivretPage({ params }) {
   const property = await translateProperty(rawProperty, locale);
 
   const photos = property.photos ?? [];
+  const weather = await getWeatherForCity(property.city);
   const checkinStatus = await getGuestCheckinStatus(slug);
   const banner = checkinStatus ? CHECKIN_STATUS_BANNER[locale][checkinStatus] : null;
 
@@ -114,7 +116,7 @@ export default async function LivretPage({ params }) {
         {banner && (
           <div className={`mb-6 rounded border p-4 text-sm ${banner.className}`}>{banner.text}</div>
         )}
-        <LivretMenu property={property} slug={slug} locale={locale} isDemo={slug.startsWith("exemple")} />
+        <LivretMenu property={property} slug={slug} locale={locale} isDemo={slug.startsWith("exemple")} weather={weather} />
       </section>
     </main>
   );

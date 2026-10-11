@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fullAddress } from "@/lib/address";
-import { sendTransferRequestWhatsApp } from "@/lib/whatsapp";
+import { sendTransferWhatsApp } from "@/lib/whatsapp";
 import { sendTransferRequestNotification } from "@/lib/email";
+import { matchRate } from "@/lib/transferRateMatch";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -62,6 +63,19 @@ export async function POST(request) {
 
   delete rest.property;
 
+  // Le prix estimé est recalculé ici à partir des tarifs du logement : celui
+  // que le navigateur envoie n'est pas fiable (n'importe qui peut poster une
+  // valeur falsifiée) et il part tel quel au transporteur par WhatsApp.
+  if (type === "transfert") {
+    const { data: rates } = await admin
+      .from("transfer_rates")
+      .select("pickup_location, passengers, luggage, price")
+      .eq("property_id", property.id);
+    const luggage = (Number(rest.bagagesGrands) || 0) + (Number(rest.bagagesPetits) || 0);
+    const matched = matchRate(rates ?? [], rest.pickupKey, Number(rest.passagers) || 1, luggage);
+    rest.prixEstime = matched ? Number(matched.price) : null;
+  }
+
   const { data: inserted, error } = await admin
     .from("requests")
     .insert({
@@ -80,13 +94,18 @@ export async function POST(request) {
 
   if (type === "transfert") {
     try {
-      const result = await sendTransferRequestWhatsApp({ ...inserted, propertyName: property.name });
+      const result = await sendTransferWhatsApp({
+        propertyLabel: `${property.name} — ${fullAddress(property)}`,
+        nom: inserted.nom,
+        telephone: inserted.telephone,
+        details: inserted.details,
+      });
       if (result.sent) {
         await admin.from("requests").update({ whatsapp_sent: true }).eq("id", inserted.id);
       }
     } catch (err) {
       // Envoi WhatsApp best-effort : la demande est déjà enregistrée même si ça échoue.
-      console.error("sendTransferRequestWhatsApp failed:", err);
+      console.error("sendTransferWhatsApp failed:", err);
     }
 
     try {
