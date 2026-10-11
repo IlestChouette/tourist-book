@@ -7,6 +7,7 @@ import TransfertForm from "./TransfertForm";
 import CarnetPanel from "./CarnetPanel";
 import CarteInteractive from "./CarteInteractive";
 import FormattedText from "./FormattedText";
+import { CustomIcon, cleanCustomButtons } from "@/lib/customButtons";
 
 const content = {
   fr: {
@@ -581,6 +582,14 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
     ...(property.general_info
       ? [{ key: "info", label: t.info, icon: <InfoIcon />, detail: property.general_info }]
       : []),
+    ...cleanCustomButtons(property.custom_buttons).map((b) => ({
+      key: `custom-${b.id}`,
+      custom: true,
+      label: b.label,
+      icon: <CustomIcon name={b.icon} />,
+      detail: b.text,
+      video: b.video,
+    })),
   ];
 
   const navItems = [
@@ -715,7 +724,7 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
           return (
             <button key={item.key} type="button" onClick={() => {
                 setActive(item.key);
-                track(item.key);
+                if (!item.custom) track(item.key);
               }} title={hint} className={className}>
               <span className="h-9 w-9 md:h-6 md:w-6">{item.icon}</span>
               <span className="text-sm font-bold uppercase leading-tight tracking-wide md:text-[11px]">
@@ -781,6 +790,7 @@ export default function LivretMenu({ property, slug, locale = "fr", isDemo = fal
               {!isNav && (
                 <>
                   <FormattedText text={displayedItem.detail} />
+                  {displayedItem.custom && <VideoEmbed url={displayedItem.video} title={displayedItem.label} />}
 
                   {displayedItem.key === "wifi" && property.wifi_password && (
                     <div className="mt-3 flex flex-wrap gap-3">
