@@ -1,6 +1,8 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { cleanCustomTypes, THEMES } from "@/lib/hotelTheme";
+import { SERVICES, cleanServices } from "@/lib/hotelServices";
+import { stripe } from "@/lib/stripe";
 import { ACTIVATION_MINUTES, PENDING_LABEL, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE } from "@/lib/hotelAuth";
 
 const fail = (error, status = 400) => NextResponse.json({ error }, { status });
@@ -53,6 +55,32 @@ export async function POST(request) {
       const types = cleanCustomTypes(b.types);
       const { error } = await admin.from("hotels").update({ consigne_types: types }).eq("id", hotel.id);
       return error ? fail("Impossible d'enregistrer.", 500) : ok();
+    }
+
+    // Services de l'hôtel : ils fixent le prix (15 €/mois chacun). Si
+    // l'abonnement est actif, la quantité Stripe suit, au prorata.
+    case "set_services": {
+      const ids = cleanServices(b.services);
+      if (ids.length === 0) return fail("Gardez au moins un service.");
+      const { error } = await admin.from("hotels").update({ services: ids }).eq("id", hotel.id);
+      if (error) return fail("Impossible d'enregistrer.", 500);
+      // Les étiquettes de poste correspondantes existent (pour adresser une consigne).
+      await admin
+        .from("hotel_tags")
+        .upsert(SERVICES.filter((s) => ids.includes(s.id)).map((s) => ({ hotel_id: hotel.id, name: s.tag, kind: "role" })), { onConflict: "hotel_id,name", ignoreDuplicates: true });
+      if (hotel.stripe_subscription_id && ["active", "past_due"].includes(hotel.billing_status) && !hotel.billing_exempt) {
+        try {
+          const sub = await stripe.subscriptions.retrieve(hotel.stripe_subscription_id);
+          const item = sub.items?.data?.[0];
+          if (item && item.quantity !== ids.length) {
+            await stripe.subscriptionItems.update(item.id, { quantity: ids.length, proration_behavior: "create_prorations" });
+          }
+        } catch (err) {
+          console.error("hotel services stripe update failed:", err);
+          return fail("Services enregistrés, mais l'abonnement n'a pas pu être mis à jour. Réessayez dans un instant.", 502);
+        }
+      }
+      return ok({ count: ids.length });
     }
 
     case "set_manager_pin": {

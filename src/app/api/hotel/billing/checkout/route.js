@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { getHotelContext } from "@/lib/hotelAuth";
 import { hotelServicePriceId } from "@/lib/hotelBilling";
+import { cleanServices, servicesFromTags } from "@/lib/hotelServices";
 
 const SITE_URL = process.env.SITE_URL || "https://tourist-book.com";
 const fail = (error, status) => NextResponse.json({ error }, { status });
@@ -16,7 +17,18 @@ export async function POST(request) {
   if (hotel.billing_status === "active") return fail("L'abonnement est déjà actif.", 400);
 
   const b = await request.json().catch(() => ({}));
-  const quantity = Math.min(20, Math.max(1, Math.floor(Number(b.quantity) || 1)));
+  // Quantité = nombre de services choisis par l'hôtel (colonne présente) ;
+  // sinon l'ancien choix manuel.
+  let quantity = Math.min(20, Math.max(1, Math.floor(Number(b.quantity) || 1)));
+  const managed = hotel.services !== undefined;
+  if (managed) {
+    let ids = cleanServices(hotel.services);
+    if (ids.length === 0) {
+      const { data: tags } = await admin.from("hotel_tags").select("name, kind").eq("hotel_id", hotel.id);
+      ids = servicesFromTags(tags);
+    }
+    quantity = Math.max(1, ids.length);
+  }
 
   try {
     let customerId = hotel.stripe_customer_id;
@@ -34,7 +46,7 @@ export async function POST(request) {
         {
           price: await hotelServicePriceId(),
           quantity,
-          adjustable_quantity: { enabled: true, minimum: 1, maximum: 20 },
+          ...(managed ? {} : { adjustable_quantity: { enabled: true, minimum: 1, maximum: 20 } }),
         },
       ],
       subscription_data: { metadata: { hotel_id: hotel.id, kind: "hotel_cahier" } },

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import QRCode from "qrcode";
 import { uploadMedia } from "@/lib/uploadMedia";
 import { ThemePicker, TypesEditor } from "./AppearanceEditors";
+import { ServicesEditor } from "./ServicesEditor";
 
 const label = "text-xs font-bold uppercase tracking-wider text-ink/60";
 const btn = "rounded bg-aqua-deep px-4 py-2 text-sm font-bold text-sand-card hover:bg-aqua-deep/90 disabled:opacity-60";
@@ -168,13 +169,22 @@ function BillingCard({ billing }) {
         <button type="button" disabled={busy} onClick={() => go("/api/hotel/billing/portal")} className={`${btn} mt-4`}>Mettre à jour le paiement</button>
       ) : (
         <div className="mt-4 flex flex-wrap items-end gap-4">
-          <label className="grid gap-1.5">
-            <span className={label}>Nombre de services</span>
-            <select value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="input h-11 w-28">
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </label>
-          <p className="pb-2 text-lg font-bold text-ink">{quantity * SERVICE_PRICE} € par mois</p>
+          {billing.managed ? (
+            <p className="pb-2 text-lg font-bold text-ink">
+              {billing.planned} service{billing.planned > 1 ? "s" : ""} · {billing.planned * SERVICE_PRICE} € par mois
+              <span className="block text-sm font-normal text-ink/60">Les services se choisissent dans la carte « Services » ci-dessous.</span>
+            </p>
+          ) : (
+            <>
+              <label className="grid gap-1.5">
+                <span className={label}>Nombre de services</span>
+                <select value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="input h-11 w-28">
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </label>
+              <p className="pb-2 text-lg font-bold text-ink">{quantity * SERVICE_PRICE} € par mois</p>
+            </>
+          )}
           <button type="button" disabled={busy} onClick={() => go("/api/hotel/billing/checkout", { quantity })} className={btn}>Payer et activer</button>
         </div>
       )}
@@ -183,7 +193,7 @@ function BillingCard({ billing }) {
   );
 }
 
-export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath, billing, appearance }) {
+export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath, billing, appearance, servicesInfo }) {
   const router = useRouter();
   const [message, setMessage] = useState(null); // { text, error }
   const [busy, setBusy] = useState(false);
@@ -362,6 +372,18 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
           </button>
         )}
       </Card>
+
+      {servicesInfo && (
+        <Card title="Services" hint="Chaque service est facturé 15 € par mois. Cochez ceux qui utilisent le cahier : vous pouvez en ajouter ou en retirer à tout moment.">
+          <ServicesEditor
+            selected={servicesInfo.selected}
+            price={SERVICE_PRICE}
+            subscribed={billing?.status === "active" && !billing?.exempt}
+            busy={busy}
+            onSave={(services) => call({ action: "set_services", services }, "Services enregistrés.")}
+          />
+        </Card>
+      )}
 
       {appearance && (
         <>
