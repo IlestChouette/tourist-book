@@ -640,6 +640,41 @@ export async function sendHotelSignupNotification({ hotelName, name, email }) {
   return { sent: true };
 }
 
+// Alerte à l'équipe Tourist Book (pas à l'hôte) : l'assistant d'un logement
+// approche ou atteint sa limite d'usage, ou un visiteur atteint son quota du jour.
+export async function sendAssistantUsageAlert({ propertyName, slug, kind, count, limit }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const what = {
+    monthly80: `80 % du quota mensuel atteint (${count}/${limit} questions ce mois-ci)`,
+    monthly100: `Quota mensuel atteint (${limit} questions) : l'assistant renvoie désormais vers l'hôte`,
+    visitor: `Un visiteur a atteint ${limit} questions aujourd'hui : l'assistant le renvoie vers l'hôte`,
+  }[kind];
+  const subject = `Assistant — ${propertyName} : ${what.split(" (")[0].split(" :")[0]}`;
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text: [
+      "Usage de l'assistant du livret",
+      "",
+      `Logement : ${propertyName}`,
+      `Livret : ${SITE_URL}/logement/${slug}`,
+      what,
+      "",
+      "Si c'est un abus, les quotas (30 questions/jour/visiteur, 500/mois/logement) protègent déjà le coût. Pour les modifier : src/app/api/assistant/route.js.",
+    ].join("\n"),
+  });
+  if (error) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "assistant_usage_alert", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "assistant_usage_alert", status: "sent" });
+  return { sent: true };
+}
+
 const LOST_ITEM_COPY = {
   fr: { hi: "Bonjour,", body: (hotel) => `${hotel} a retrouvé un objet qui pourrait vous appartenir :`, cta: "Pour nous dire ce que vous souhaitez en faire (venir le récupérer, demander l'envoi ou le détruire), ouvrez ce lien :" },
   en: { hi: "Hello,", body: (hotel) => `${hotel} found an item that may belong to you:`, cta: "To tell us what you would like to do (collect it, have it shipped, or dispose of it), open this link:" },

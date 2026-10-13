@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPropertyBySlug, hasActiveSubscription } from "@/lib/properties";
+import { sendAssistantUsageAlert } from "@/lib/email";
 
 // Modèle économique : les questions d'un voyageur sur un logement sont
 // simples, et chaque appel est facturé à Tourist Book.
@@ -154,12 +155,21 @@ export async function POST(request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
   const visitor = crypto.createHash("sha256").update(`${ip}|${request.headers.get("user-agent") ?? ""}`).digest("hex").slice(0, 16);
   const now = new Date().toISOString();
+  // Alerte (une seule fois par seuil : le compteur est atomique) envoyée à
+  // l'équipe Tourist Book, jamais à l'hôte.
+  const alert = (kind, count, limit) =>
+    sendAssistantUsageAlert({ propertyName: property.name, slug, kind, count, limit }).catch((err) =>
+      console.error("assistant usage alert failed:", err)
+    );
   const daily = await hit(admin, property.id, `v:${visitor}`, now.slice(0, 10));
   if (daily !== null && daily > MAX_DAILY_PER_VISITOR) {
+    if (daily === MAX_DAILY_PER_VISITOR + 1) await alert("visitor", daily, MAX_DAILY_PER_VISITOR);
     return Response.json({ reply: LIMIT_REPLY[locale](contactLine(property)) });
   }
   const monthly = await hit(admin, property.id, "m", now.slice(0, 7));
+  if (monthly === Math.ceil(MAX_MONTHLY_PER_PROPERTY * 0.8)) await alert("monthly80", monthly, MAX_MONTHLY_PER_PROPERTY);
   if (monthly !== null && monthly > MAX_MONTHLY_PER_PROPERTY) {
+    if (monthly === MAX_MONTHLY_PER_PROPERTY + 1) await alert("monthly100", monthly - 1, MAX_MONTHLY_PER_PROPERTY);
     return Response.json({ reply: LIMIT_REPLY[locale](contactLine(property)) });
   }
 
