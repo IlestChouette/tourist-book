@@ -869,6 +869,328 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: "tarif-conciergerie-airbnb-commission-menage",
+    title: "Quel est le tarif d'une conciergerie ? Commission, ménage, frais : comment calculer ce que vous paierez vraiment",
+    metaDescription:
+      "Tarif d'une conciergerie Airbnb : commission en pourcentage, forfaits, tarif horaire du ménage, marge cachée et calcul du revenu net propriétaire. Les réponses aux six questions les plus posées, avec exemples chiffrés.",
+    excerpt: "Pourcentage, forfait, ménage, linge, frais d'entrée : ce que coûte une conciergerie, comment on la rémunère, et comment calculer votre revenu net avant de signer.",
+    publishedAt: "2026-10-13",
+    blocks: [
+      {
+        type: "lead",
+        text: "« Quel est le tarif d'une conciergerie ? » n'a pas une réponse, mais trois : le pourcentage affiché, le coût réel une fois le ménage et le linge ajoutés, et ce qui reste sur votre compte. Voici les repères du marché, les six questions que l'on pose le plus souvent, et un calcul à refaire sur chaque devis. Attention : la plupart des chiffres du secteur viennent de conciergeries ou d'éditeurs d'outils, donc ce sont des ordres de grandeur, pas des vérités.",
+      },
+      {
+        type: "stats",
+        items: [
+          { value: "15–40 %", label: "Fourchette de commission annoncée pour la location courte durée, souvent HT (TVA en plus), selon la ville et le niveau de service" },
+          { value: "12,31 €", label: "SMIC horaire brut en France depuis le 1er juin 2026 : le plancher d'un salarié, avant charges" },
+          { value: "200–500 €", label: "Frais d'installation annoncés par certaines conciergeries, contre 0 € chez d'autres" },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quel est le tarif d'une conciergerie pour un particulier ?",
+        paragraphs: [
+          "Le mot recouvre deux métiers. Pour la gestion d'un logement en courte durée (Airbnb, Booking), le tarif est le plus souvent un pourcentage des loyers générés : de 15 à 40 % HT selon la ville, la taille du bien et le niveau de service, avec 20 % de TVA en plus quand le taux est annoncé hors taxes. Un forfait fixe mensuel existe aussi, de l'ordre de quelques centaines d'euros par mois, mais il est moins répandu.",
+          "Pour une conciergerie privée (courses, démarches, réservations, pressing), le tarif est un abonnement mensuel ou une prestation à l'unité. Les sites spécialisés évoquent des abonnements de 50 à 400 € par mois et des prestations de 50 à 300 € selon la complexité. Ces chiffres viennent surtout de sites de business plans : demandez toujours les grilles de plusieurs prestataires de votre ville.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Comment se rémunère une conciergerie ?",
+        paragraphs: [
+          "Elle se rémunère de quatre façons, souvent combinées : une commission sur les loyers (le modèle le plus courant), un forfait mensuel fixe, une marge sur les prestations qu'elle refacture (ménage, linge, consommables), et parfois des frais d'installation. Un modèle plus marginal consiste à vous verser un loyer fixe et à garder la différence avec les recettes.",
+          "La marge sur le ménage est le point le plus sous-estimé. Le ménage est refacturé au voyageur ou au propriétaire, mais le prestataire est payé moins cher : la différence reste à la conciergerie. Certaines sources estiment qu'une part de 30 à 50 % du prix du ménage peut rester chez la conciergerie ; ce n'est pas une règle, mais c'est une question à poser.",
+        ],
+      },
+      {
+        type: "compare",
+        left: {
+          title: "Ce que l'on lit sur la brochure",
+          items: [
+            "« Commission de 20 % »",
+            "Ménage et linge « selon la prestation »",
+            "Frais d'installation « offerts » ou « à partir de… »",
+            "Aucun exemple chiffré sur votre logement",
+          ],
+        },
+        right: {
+          title: "Ce que vous devez obtenir par écrit",
+          items: [
+            "La base de calcul : loyer seul, ou total voyageur avec frais ?",
+            "Le prix du ménage et le coût réel payé au prestataire",
+            "Le linge, les consommables et les frais ponctuels, ligne par ligne",
+            "Un exemple chiffré sur votre logement, avec le revenu net final",
+          ],
+        },
+      },
+      {
+        type: "text",
+        heading: "Comment calculer les frais de conciergerie ?",
+        paragraphs: [
+          "La formule est simple, et c'est elle qui compte : revenu net propriétaire = chiffre d'affaires voyageurs − commission de la plateforme − commission de la conciergerie − ménage − linge et consommables − frais fixes ou ponctuels. Refaites-la pour chaque devis, avec la même hypothèse de nuits, et comparez le dernier chiffre, pas le pourcentage.",
+          "Un exemple illustratif, aux chiffres inventés : un logement qui génère 2 000 € par mois, une commission de 20 % (400 €), six ménages par mois facturés 60 € alors que le prestataire est payé 50 €. La marge de 10 € par ménage ajoute 60 € par mois, soit 460 € de frais de gestion effectifs avant le linge et les consommables : le taux réel est d'environ 23 %, pas de 20 %.",
+        ],
+      },
+      {
+        type: "steps",
+        items: [
+          { n: "1", title: "Fixez une même hypothèse", text: "Le même nombre de nuits, le même prix moyen, le même nombre de ménages pour chaque conciergerie que vous comparez." },
+          { n: "2", title: "Demandez la base de calcul", text: "La commission porte-t-elle sur le loyer seul, sur le revenu net de la plateforme, ou sur le total payé par le voyageur ?" },
+          { n: "3", title: "Détaillez les prestations annexes", text: "Ménage, linge, consommables, check-in, maintenance : le prix de chaque ligne et ce qui est inclus dans la commission." },
+          { n: "4", title: "Ajoutez les frais ponctuels", text: "Installation, audit photo, frais administratifs mensuels, options payantes comme l'optimisation tarifaire." },
+          { n: "5", title: "Terminez par le net", text: "Ce qui reste sur votre compte par mois, et le taux réel que cela représente sur le chiffre d'affaires." },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quel est le tarif horaire pour le ménage à la conciergerie ?",
+        paragraphs: [
+          "Les conciergeries facturent rarement à l'heure : elles ont des forfaits par logement et par rotation. Le tarif horaire sert surtout à comprendre ce que paie la conciergerie à son prestataire. Les repères trouvés vont de 12 à 18 € de l'heure pour une femme de ménage en direct, et de 22 à 44 € via une société spécialisée ; en Île-de-France, un ménagiste indépendant est cité entre 18 et 25 € de l'heure.",
+          "Pour un salarié, le plancher est le SMIC horaire brut de 12,31 € depuis le 1er juin 2026, avant charges patronales : un tarif horaire inférieur à ce niveau dans une facture d'entreprise doit vous interpeller. Un conseil des guides du secteur : demandez le tarif payé au prestataire et celui refacturé. Un écart de plus de 30 % signale une marge, qui peut être légitime si elle est annoncée.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quel est le tarif pour 1h de ménage ?",
+        paragraphs: [
+          "Comptez en ordre de grandeur de 12 à 25 € de l'heure en direct selon la région et l'expérience, et de 22 à 44 € via une société. Ces chiffres sont des fourchettes publiées par des sites du secteur : ils varient fortement entre Paris, la Côte d'Azur et les villes moyennes.",
+          "En location courte durée, on raisonne plutôt au forfait par logement. Une grille 2026 pour le ménage seul, sans linge ni options, indique par exemple de 35 à 50 € pour un studio de moins de 30 m², de 50 à 70 € pour un T2, de 70 à 95 € pour un T3 et de 95 à 130 € pour un T4 ou une maison. Le temps réel dépend de la surface, du nombre de lits et de l'état dans lequel le voyageur a laissé le logement.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Est-ce rentable d'avoir une conciergerie ?",
+        paragraphs: [
+          "Cela dépend de ce que vous valorisez : votre temps, votre distance, votre taux d'occupation. Une conciergerie vous coûte souvent entre 20 et 30 % des revenus une fois le ménage et les frais annexes ajoutés. Elle est rentable si elle augmente le revenu (meilleurs prix, plus de nuits, meilleurs avis) ou si elle libère un temps que vous ne pouvez pas donner : logement loin de chez vous, plusieurs biens, accueil à toute heure.",
+          "Elle l'est moins pour un propriétaire disponible, proche du logement, avec un seul bien et peu de rotations. Un test simple : calculez le nombre d'heures que vous passez par mois sur les messages, les arrivées, le ménage et le dépannage, multipliez par ce que vaut votre heure, et comparez au coût net de la conciergerie sur votre devis.",
+        ],
+      },
+      {
+        type: "icons",
+        items: [
+          {
+            icon: BookIcon,
+            title: "Un livret pour moins de messages",
+            text: "Wifi, accès, parking, poubelles : un livret d'accueil numérique règle les questions qui reviennent à chaque séjour, que vous gériez seul ou avec une conciergerie.",
+          },
+          {
+            icon: ShieldIcon,
+            title: "Un contrat qui détaille les prestations",
+            text: "Quelle que soit la formule, un contrat écrit avec les tarifs de chaque prestation évite les mauvaises surprises en fin de mois.",
+          },
+          {
+            icon: ChatIcon,
+            title: "Un rapport mensuel",
+            text: "Occupation, prix pratiqués, coûts : une bonne conciergerie sait montrer ce qu'elle fait de votre logement.",
+          },
+        ],
+      },
+      {
+        type: "quote",
+        text: "Comparez le net qui arrive sur votre compte, pas le pourcentage écrit en gros.",
+      },
+      {
+        type: "note",
+        text: "Sources consultées en octobre 2026 : guides et blogs de conciergeries et d'éditeurs d'outils (RentaPlus, Toploc, Lodgify, PriceLabs, Welkeys, Abby, Eldorado Immobilier), sites de business plans pour les conciergeries privées, et info.gouv.fr pour le SMIC. Les fourchettes viennent largement de professionnels du secteur : ce sont des ordres de grandeur à vérifier sur des devis réels. Les exemples chiffrés sont illustratifs.",
+      },
+    ],
+  },
+  {
+    slug: "que-propose-airbnb-frais-alternatives-rentabilite",
+    title: "Quel service propose Airbnb ? Frais, qui peut louer, alternatives et rentabilité : les réponses aux six questions les plus posées",
+    metaDescription:
+      "Quel service propose Airbnb, comment louer un logement, qui a le droit de faire Airbnb, quel est le pourcentage des frais de service, quelles alternatives et quelle rentabilité face à la location longue durée.",
+    excerpt: "Ce qu'Airbnb fait vraiment, combien la plateforme prélève, qui peut y louer, quelles alternatives, et si c'est plus rentable qu'une location à l'année.",
+    publishedAt: "2026-10-13",
+    blocks: [
+      {
+        type: "lead",
+        text: "Airbnb n'est pas un hôtel et n'est pas une agence : c'est une plateforme qui met en relation des personnes qui louent un logement et des voyageurs, et qui prend une commission au passage. Mais autour de cette phrase simple, les mêmes questions reviennent : comment louer, qui en a le droit, combien ça coûte, y a-t-il mieux, est-ce vraiment rentable ? Voici les réponses, avec leurs limites.",
+      },
+      {
+        type: "stats",
+        items: [
+          { value: "15,5 %", label: "Commission unique payée par l'hôte, annoncée à la place du partage hôte (~3 %) et voyageur (~14 %) — calendrier variable selon les profils" },
+          { value: "120 nuits", label: "Plafond par an pour louer sa résidence principale en entier, que la commune peut abaisser jusqu'à 90" },
+          { value: "×2,6", label: "Ordre de grandeur cité par un courtier : ce que rapporte Airbnb face à la longue durée pour de petites surfaces, avant charges et vacance" },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quel service propose Airbnb ?",
+        paragraphs: [
+          "Airbnb est une place de marché : l'hôte publie une annonce, le voyageur réserve et paie via la plateforme, qui reverse le montant à l'hôte après le séjour en gardant sa commission. Elle fournit aussi la messagerie entre les deux, le système d'avis, le paiement sécurisé, la traduction des annonces et un dispositif de protection (AirCover) dont les conditions sont à lire dans l'aide d'Airbnb.",
+          "Ce qu'Airbnb ne fait pas : elle n'accueille pas vos voyageurs, ne fait pas le ménage, ne règle pas les questions réglementaires de votre commune, et ne remplace pas la préparation du logement. Tout cela reste à la charge de l'hôte ou de la conciergerie qui travaille pour lui.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Comment puis-je louer un logement sur Airbnb ?",
+        paragraphs: [
+          "Si vous voulez réserver un logement en tant que voyageur : indiquez la destination et les dates, comparez les annonces et les avis, vérifiez le prix total avec les frais, lisez les règles de la maison et l'annulation, puis payez via la plateforme. Pour mettre un logement en location en tant qu'hôte : créez un compte, publiez l'annonce avec des photos et des règles claires, fixez vos prix et votre calendrier, vérifiez les obligations de votre commune, puis acceptez les réservations.",
+        ],
+      },
+      {
+        type: "steps",
+        items: [
+          { n: "1", title: "Vérifier que vous avez le droit de louer", text: "Propriétaire ou locataire avec accord écrit du bailleur, règlement de copropriété, déclaration en mairie, limite de nuits pour une résidence principale." },
+          { n: "2", title: "Préparer le logement et l'annonce", text: "Photos lumineuses, description exacte, équipements réels, règles claires." },
+          { n: "3", title: "Fixer les prix et le séjour minimum", text: "En partant des coûts réels et des logements comparables du quartier, et en les revoyant régulièrement." },
+          { n: "4", title: "Organiser l'accueil", text: "Remise des clés, ménage, linge, et un livret d'accueil qui répond aux questions avant qu'elles ne soient posées." },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Qui a le droit de faire Airbnb ?",
+        paragraphs: [
+          "Un propriétaire peut louer son logement, sous réserve de la réglementation locale : déclaration en mairie, numéro d'enregistrement là où il est exigé, règlement de copropriété, limite de nuits pour une résidence principale, taxe de séjour. Un locataire ne peut pas sous-louer son logement principal sans l'accord écrit de son bailleur, qui doit aussi porter sur le loyer : sans cet accord, il s'expose à des sanctions, jusqu'à la résiliation du bail et au remboursement des sous-loyers.",
+          "Les logements sociaux (HLM) sont en principe exclus de la sous-location. Quant aux résidences secondaires, elles ne bénéficient pas de la limite de 120 nuits mais relèvent d'autres règles, notamment le changement d'usage dans certaines communes. Pour votre situation précise, vérifiez auprès de votre mairie, de votre bailleur et de votre syndic.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quel est le pourcentage des frais de service sur Airbnb ?",
+        paragraphs: [
+          "Airbnb remplace progressivement l'ancien partage, avec environ 3 % côté hôte et des frais de 14 à 16 % côté voyageur, par une commission unique de 15,5 % payée par l'hôte, calculée sur le prix des nuits et le ménage et non sur les taxes. Selon plusieurs sources, le basculement pour l'Espace économique européen est annoncé à partir du 13 octobre 2026, avec des calendriers différents selon les profils d'hôtes.",
+          "À prix égal, le voyageur voit un montant plus bas et l'hôte reçoit moins. Un exemple chiffré cité par la presse : pour une nuit à 100 €, l'hôte passerait d'environ 97 € à environ 84,50 €, tandis que le voyageur paierait 100 € au lieu de 115 €. Selon le statut fiscal, la TVA peut s'ajouter aux frais en France : lisez l'aide d'Airbnb pour votre cas.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quels sites de location ressemblent à Airbnb ?",
+        paragraphs: [
+          "Les principales alternatives sont Booking.com, dont la commission pour les hôtes est citée entre 15 et 20 %, Abritel (Vrbo), avec une commission ou un abonnement selon l'offre, Gîtes de France, plus rural et avec un label, Tripadvisor Rentals, qui annonce peu de commission, et des plateformes plus petites. Les chiffres varient d'une source à l'autre et d'un pays à l'autre : consultez les conditions de chaque plateforme.",
+          "Une étude s'appuyant sur les conditions générales des plateformes évalue à environ 17 % le total des commissions payées pour une réservation, dont une partie à la charge du voyageur. Retenez surtout que multiplier les plateformes augmente la visibilité mais exige de synchroniser les calendriers pour éviter les doubles réservations.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quelle est la meilleure plateforme gratuite pour la location saisonnière ?",
+        paragraphs: [
+          "Il n'existe pas de plateforme à la fois gratuite et aussi visible qu'Airbnb : celles qui ne prennent pas de commission demandent souvent un abonnement annuel, et celles qui sont gratuites génèrent peu de trafic. La question utile est : à qui vendez-vous ? Une annonce sur une petite plateforme sans commission fonctionne pour une clientèle fidèle ou locale, moins pour attirer des voyageurs étrangers.",
+          "L'option sans commission de plateforme la plus citée est la réservation directe : un site ou une page de réservation, un moteur de paiement et une synchronisation de calendrier. Elle suppose de faire venir soi-même les voyageurs, souvent des clients déjà passés par Airbnb. Un livret d'accueil bien tenu aide à les fidéliser, mais ne se substitue pas à un canal de réservation.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quel est le plus rentable, Airbnb ou location ?",
+        paragraphs: [
+          "En rendement brut, la courte durée gagne presque toujours : les guides citent 6 à 12 % pour Airbnb contre 3 à 5 % pour une location meublée classique. Mais il faut retrancher la vacance, le ménage, le linge, les commissions, la gestion, la taxe de séjour et la fiscalité, plus défavorable depuis 2025 pour les meublés de tourisme non classés (plafond de 15 000 € et abattement de 30 % en micro-BIC).",
+          "Les comparatifs se contredisent : une étude citée par la presse trouve un revenu net plus élevé pour la longue durée dans un cas précis (8 610 € contre 7 680 € sur un an avec 120 nuits Airbnb), d'autres calculs penchent vers la courte durée en zone très touristique. Le bon réflexe est de simuler votre logement avec le taux d'occupation réel de votre quartier, vos charges, et le temps que vous y passez.",
+        ],
+      },
+      {
+        type: "quote",
+        text: "Ce n'est pas la plateforme qui rend un logement rentable : c'est l'écart entre ce qu'il rapporte et ce qu'il demande.",
+      },
+      {
+        type: "note",
+        text: "Sources consultées en octobre 2026 : pages d'aide et comparatifs d'éditeurs d'outils (Smoobu, Hostaway, Hostfully, Lodgify, Toploc, PriceLabs), presse économique (MoneyVox, Tout sur mes finances, MeilleurTaux), guides juridiques sur la sous-location et la loi Le Meur. Les chiffres de commission et de rentabilité viennent largement de professionnels du secteur : à vérifier sur les conditions de chaque plateforme et sur impots.gouv.fr ou service-public.fr.",
+      },
+    ],
+  },
+  {
+    slug: "comment-marche-une-conciergerie-airbnb",
+    title: "Comment marche une conciergerie ? Tâches, obligations, tarifs et activités possibles",
+    metaDescription:
+      "Comment marche une conciergerie Airbnb : ses tâches, ses obligations légales (carte G, assurance), ses tarifs et sa rentabilité, et les activités possibles autour de la location courte durée.",
+    excerpt: "Ce qu'une conciergerie fait au quotidien, ce que la loi lui demande, ce qu'elle coûte et ce qu'elle peut proposer d'autre.",
+    publishedAt: "2026-10-13",
+    blocks: [
+      {
+        type: "lead",
+        text: "Une conciergerie de location courte durée est une entreprise qui s'occupe du logement à la place du propriétaire : elle accueille les voyageurs, organise le ménage et le linge, répond aux messages, et parfois gère l'annonce et les prix. Voici comment cela marche concrètement, ce que cela demande légalement, ce que cela coûte, et ce qu'on peut y faire.",
+      },
+      {
+        type: "stats",
+        items: [
+          { value: "15–30 %", label: "Commission habituellement annoncée sur les loyers, selon l'étendue des services" },
+          { value: "RC Pro", label: "L'assurance de responsabilité civile professionnelle est présentée comme indispensable dès le premier mandat" },
+          { value: "Carte G", label: "La carte professionnelle de gestion immobilière, requise dès que la conciergerie gère les fonds ou la location pour le compte du propriétaire" },
+        ],
+      },
+      {
+        type: "icons",
+        items: [
+          {
+            icon: ChatIcon,
+            title: "Avant le séjour",
+            text: "Réponses aux demandes, envoi des consignes d'arrivée, vérification du calendrier, coordination du ménage et du linge.",
+          },
+          {
+            icon: WifiIcon,
+            title: "Pendant le séjour",
+            text: "Accueil ou remise des clés, assistance en cas de problème (panne, retard, objet oublié), échange avec le voyageur et le prestataire.",
+          },
+          {
+            icon: ShieldIcon,
+            title: "Après le séjour",
+            text: "État des lieux, ménage, linge, contrôle des consommables, avis, compte rendu au propriétaire.",
+          },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quelles sont les tâches d'une conciergerie ?",
+        paragraphs: [
+          "Les missions se rangent en trois familles : l'opérationnel sur place (accueil, remise des clés, ménage, linge, état des lieux, petite maintenance), la relation (messages des voyageurs, avis, imprévus) et la gestion (création ou optimisation de l'annonce, calendrier, prix, suivi des revenus). Certaines conciergeries se limitent à la première famille, d'autres couvrent les trois, ce qui change à la fois le prix et le cadre légal.",
+          "Elles coordonnent aussi des prestataires : équipes de ménage, artisans, blanchisserie. C'est souvent là que se joue la qualité, parce que le voyageur ne fait pas la différence entre la conciergerie et le logement.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quelles sont les obligations d'une conciergerie ?",
+        paragraphs: [
+          "Il faut d'abord un statut et un numéro SIRET dès que l'activité est régulière : la micro-entreprise est courante pour démarrer. Ensuite, la réglementation dépend du périmètre. Une activité limitée au ménage, au linge et à la gestion des entrées et sorties relève des obligations commerciales classiques. Dès que la conciergerie gère la location pour le compte du propriétaire ou manipule des fonds, la loi Hoguet et la carte professionnelle de gestion immobilière (carte G) entrent en jeu, avec une garantie financière dont le montant minimal dépend de l'encaissement ou non de fonds. Ces conditions sont à vérifier auprès de la CCI.",
+          "Quel que soit le périmètre, l'assurance de responsabilité civile professionnelle est considérée comme indispensable : ni l'assurance habitation du propriétaire ni les protections de la plateforme ne couvrent tout. Un contrat écrit qui détaille les prestations, la commission, le ménage, le linge et les conditions de sortie protège les deux parties. Enfin, les obligations du logement restent celles du propriétaire : déclaration en mairie, numéro d'enregistrement, taxe de séjour, limite de nuits.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quels sont les tarifs d'une conciergerie ?",
+        paragraphs: [
+          "Le tarif est le plus souvent un pourcentage des loyers, de 15 à 30 % selon les sources (jusqu'à 40 % HT pour certaines, avec 20 % de TVA en plus), plus le ménage, le linge et parfois des frais d'installation. La différence entre le pourcentage affiché et le coût réel vient souvent de la marge sur le ménage et de la base de calcul.",
+          "Pour calculer ce que vous paierez vraiment, comparez le revenu net pour la même hypothèse de nuits : c'est le seul chiffre qui permet de comparer deux offres. Notre article sur le tarif d'une conciergerie détaille la méthode.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Est-il rentable d'ouvrir une conciergerie ?",
+        paragraphs: [
+          "Cela peut l'être, à condition de compter juste. Les sources du secteur annoncent un investissement de départ de l'ordre de 1 000 à 5 000 € en micro-entreprise à domicile, des charges fixes de 1 500 à 2 500 € par mois dès qu'il y a des outils, des assurances et des salariés, et un seuil de rentabilité entre dix et quinze logements gérés. La marge dépend de la zone, de la saisonnalité et de la qualité du ménage. Un cabinet d'étude affiche une rentabilité de seulement 2,8 % pour les grands opérateurs multi-sites : le modèle ne pardonne pas la désorganisation.",
+          "Un test avant de se lancer : combien de logements pouvez-vous suivre réellement avec votre temps, et que se passe-t-il le jour où deux voyageurs arrivent en même temps ?",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quelles sont les activités possibles pour une conciergerie ?",
+        paragraphs: [
+          "Autour du cœur de métier, une conciergerie peut proposer : l'accueil et le check-in en personne ou à distance, le ménage et le linge, la photographie et la création d'annonces, la tarification et la gestion du calendrier, la petite maintenance et l'entretien courant, l'achat de consommables, des services aux voyageurs comme des courses d'arrivée ou des transferts, et de plus en plus des outils numériques pour les voyageurs.",
+          "Les deux dernières catégories sont celles où un livret d'accueil numérique aide le plus : il règle les questions pratiques à la source, dans la langue du voyageur, et laisse l'équipe se concentrer sur ce qui demande vraiment une personne. Pour une conciergerie qui gère plusieurs logements, un seul compte regroupe les livrets de tous les appartements.",
+        ],
+      },
+      {
+        type: "steps",
+        items: [
+          { n: "1", title: "Choisir le périmètre", text: "Opérationnel seulement, ou gestion complète : c'est ce qui détermine le cadre légal et le prix." },
+          { n: "2", title: "Poser le cadre", text: "Statut, assurance RC Pro, carte G si nécessaire, modèle de contrat écrit." },
+          { n: "3", title: "Standardiser", text: "Check-lists de ménage, modèles de messages, livret par logement, prestataires de remplacement." },
+          { n: "4", title: "Mesurer", text: "Temps passé par logement, marge par prestation, taux d'occupation : sans chiffres, pas de décisions." },
+        ],
+      },
+      {
+        type: "quote",
+        text: "Une conciergerie solide se reconnaît à ce qu'elle a mis par écrit.",
+      },
+      {
+        type: "note",
+        text: "Sources consultées en octobre 2026 : guides et pages de conciergeries et d'éditeurs d'outils (PriceLabs, RentaPlus, Eldorado Immobilier, Welkeys, Propulse by CA, Toute la franchise), articles sur la loi Hoguet et la carte G, sites d'assurance professionnelle. Les chiffres viennent largement de professionnels du secteur : ordres de grandeur à vérifier. Pour toute question juridique, consultez la CCI ou un avocat.",
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
