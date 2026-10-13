@@ -171,6 +171,7 @@ export default function AssistantPanel({ slug, locale = "fr", open, onClose }) {
         <form onSubmit={handleSubmit} className="border-t border-sand-dim p-4">
           <div className="flex gap-2">
             <input
+              maxLength={500}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={t.placeholder}
