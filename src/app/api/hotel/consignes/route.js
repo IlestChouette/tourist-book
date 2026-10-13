@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getHotelContext, resolveActor } from "@/lib/hotelAuth";
 import { hotelHasAccess } from "@/lib/hotelBilling";
 import { addDays, isDay, parisDate } from "@/lib/hotelTime";
+import { cleanCustomTypes } from "@/lib/hotelTheme";
 
 const KINDS = ["info", "tache", "probleme", "plainte"];
 
@@ -19,7 +20,16 @@ export async function POST(request) {
   if (!body || body.length > 2000) {
     return NextResponse.json({ error: "Écrivez la consigne (2000 caractères maximum)." }, { status: 400 });
   }
-  if (!KINDS.includes(b.kind)) return NextResponse.json({ error: "Type invalide." }, { status: 400 });
+  // Type propre à l'hôtel : on retient son type de base (statistiques) et son id.
+  let kind = b.kind;
+  let typeId = null;
+  if (typeof b.typeId === "string" && b.typeId) {
+    const custom = cleanCustomTypes(ctx.hotel.consigne_types).find((t) => t.id === b.typeId && t.active);
+    if (!custom) return NextResponse.json({ error: "Type invalide." }, { status: 400 });
+    kind = custom.kind;
+    typeId = custom.id;
+  }
+  if (!KINDS.includes(kind)) return NextResponse.json({ error: "Type invalide." }, { status: 400 });
 
   const today = parisDate();
   const day = b.day || today;
@@ -55,7 +65,9 @@ export async function POST(request) {
     hotel_id: hotel.id,
     day,
     body,
-    kind: b.kind,
+    kind,
+    // Colonne absente avant la migration : on ne l'envoie que si utile.
+    ...(typeId ? { type_id: typeId } : {}),
     place_id: place.id,
     place_name: place.name,
     tag_ids: tagIds,

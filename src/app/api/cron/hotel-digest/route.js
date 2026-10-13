@@ -70,6 +70,7 @@ export async function GET(request) {
               items,
               tagNames: Object.fromEntries(meta.tags.map((t) => [t.id, t.name])),
               withNames: true,
+              types: hotel.consigne_types,
             }),
           };
         }
@@ -77,7 +78,7 @@ export async function GET(request) {
       if (pending.length === 0 && !pdf) continue;
 
       for (const to of recipients) {
-        await sendHotelDigestEmail({ to, hotelName: hotel.name, slotLabel: slot.label, pending, pdf, cahierPath: slugs.has(hotel.id) ? `/hotel/${slugs.get(hotel.id)}/cahier` : "/hotel/cahier" });
+        await sendHotelDigestEmail({ to, hotelName: hotel.name, slotLabel: slot.label, pending, pdf, replyTo: hotel.reply_to || undefined, types: hotel.consigne_types, cahierPath: slugs.has(hotel.id) ? `/hotel/${slugs.get(hotel.id)}/cahier` : "/hotel/cahier" });
         sent += 1;
       }
     } catch (err) {

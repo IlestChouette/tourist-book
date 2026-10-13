@@ -3,6 +3,7 @@ import { loadDay, loadMeta } from "@/lib/hotelData";
 import { parisDate } from "@/lib/hotelTime";
 import Link from "next/link";
 import { hotelHasAccess } from "@/lib/hotelBilling";
+import { cleanCustomTypes, selectableTypes, themeById, themeStyle } from "@/lib/hotelTheme";
 import CahierClient from "./cahier/CahierClient";
 
 // Le cahier d'un hôtel (même contenu quelle que soit l'adresse d'entrée).
@@ -33,9 +34,15 @@ export default async function CahierView({ ctx }) {
   }
 
   const [items, meta] = await Promise.all([loadDay(ctx.hotel.id, today, isManager), loadMeta(ctx.hotel.id)]);
+  // Couleur choisie par l'hôtel (absente ou inconnue : thème sable d'origine).
+  const themeStyleVars = themeStyle(ctx.hotel.theme);
+  const customTypes = cleanCustomTypes(ctx.hotel.consigne_types);
 
   return (
-    <main className="flex-1 bg-sand-card/50">
+    <main
+      className="flex-1 bg-sand-card/50"
+      style={themeStyleVars ? { ...themeStyleVars, backgroundColor: themeById(ctx.hotel.theme).bg } : undefined}
+    >
       <HotelHeader
         hotel={ctx.hotel}
         links={[
@@ -51,7 +58,7 @@ export default async function CahierView({ ctx }) {
         ]}
       />
       <section className="mx-auto max-w-6xl px-6 py-8">
-        <CahierClient hotelName={ctx.hotel.name} mode={ctx.mode} today={today} initialItems={items} tags={meta.tags} places={meta.places} />
+        <CahierClient hotelName={ctx.hotel.name} mode={ctx.mode} today={today} initialItems={items} tags={meta.tags} places={meta.places} customTypes={customTypes} types={selectableTypes(customTypes)} />
       </section>
       <HotelFooter />
     </main>

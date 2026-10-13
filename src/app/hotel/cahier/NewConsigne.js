@@ -5,12 +5,6 @@ import { addDays } from "@/lib/hotelTime";
 import { Icon } from "./CahierIcons";
 import PinPad from "./PinPad";
 
-const KINDS = [
-  { id: "info", label: "Une information", hint: "À savoir, à transmettre" },
-  { id: "tache", label: "Quelque chose à faire", hint: "Une tâche pour un collègue" },
-  { id: "probleme", label: "Un problème", hint: "Panne, fuite, objet cassé…" },
-  { id: "plainte", label: "Une plainte client", hint: "Un client n'est pas content" },
-];
 const focus = "focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-aqua-deep";
 const big = `flex min-h-16 w-full items-center gap-4 rounded-2xl border-2 px-5 py-3 text-left text-xl font-bold transition active:scale-[0.98] ${focus}`;
 const tile = (on) => `${big} ${on ? "border-aqua-deep bg-aqua-deep text-sand-card" : "border-sand-dim bg-sand text-ink hover:border-aqua-deep"}`;
@@ -25,10 +19,10 @@ const SHIFTS = [
 // Une seule question par écran, des gros boutons, des mots simples : on peut
 // y arriver sans jamais avoir utilisé un ordinateur. Aucune étape n'oblige à
 // comprendre ce qui précède ou ce qui suit.
-export default function NewConsigne({ isManager, today, defaultDay, tags, places, onClose, onCreated }) {
+export default function NewConsigne({ isManager, today, defaultDay, tags, places, types, onClose, onCreated }) {
   const steps = isManager ? ["kind", "place", "message", "who"] : ["kind", "place", "message", "who", "pin"];
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState({ kind: null, placeName: "", body: "", shift: "", roleIds: [], urgent: false, day: defaultDay, pinDays: 0 });
+  const [form, setForm] = useState({ kind: null, typeId: null, placeName: "", body: "", shift: "", roleIds: [], urgent: false, day: defaultDay, pinDays: 0 });
   const [showMore, setShowMore] = useState(false);
   const [showRoles, setShowRoles] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -69,6 +63,7 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
       body: JSON.stringify({
         body: form.body.trim(),
         kind: form.kind,
+        typeId: form.typeId && form.typeId !== form.kind ? form.typeId : undefined,
         placeId: place.id,
         tagIds,
         priority: form.urgent,
@@ -118,12 +113,12 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
             <>
               <h2 className="text-3xl font-bold text-ink">Que voulez-vous signaler ?</h2>
               <div className="mt-6 grid gap-3">
-                {KINDS.map((k) => (
-                  <button key={k.id} type="button" aria-pressed={form.kind === k.id} onClick={() => { set({ kind: k.id }); setStep(1); }} className={tile(form.kind === k.id)}>
-                    <Icon name={k.id} className="h-9 w-9 shrink-0" />
+                {types.map((k) => (
+                  <button key={k.id} type="button" aria-pressed={form.typeId === k.id} onClick={() => { set({ kind: k.kind, typeId: k.id }); setStep(1); }} className={tile(form.typeId === k.id)}>
+                    <Icon name={k.icon} className="h-9 w-9 shrink-0" />
                     <span>
                       {k.label}
-                      <span className={`block text-base font-normal ${form.kind === k.id ? "text-sand-card/85" : "text-ink/60"}`}>{k.hint}</span>
+                      <span className={`block text-base font-normal ${form.typeId === k.id ? "text-sand-card/85" : "text-ink/60"}`}>{k.hint}</span>
                     </span>
                   </button>
                 ))}

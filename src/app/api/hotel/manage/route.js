@@ -1,5 +1,8 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
+import { cleanCustomTypes, THEMES } from "@/lib/hotelTheme";
+import { SERVICES, cleanServices } from "@/lib/hotelServices";
+import { stripe } from "@/lib/stripe";
 import { ACTIVATION_MINUTES, PENDING_LABEL, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE } from "@/lib/hotelAuth";
 
 const fail = (error, status = 400) => NextResponse.json({ error }, { status });
@@ -37,6 +40,47 @@ export async function POST(request) {
       if (b.logoUrl === null || typeof b.logoUrl === "string") update.logo_url = b.logoUrl;
       const { error } = await admin.from("hotels").update(update).eq("id", hotel.id);
       return error ? fail("Impossible d'enregistrer.", 500) : ok();
+    }
+
+    // Couleur du cahier : uniquement les palettes validées (contraste).
+    case "set_theme": {
+      if (!THEMES.some((t) => t.id === b.theme)) return fail("Couleur inconnue.");
+      const { error } = await admin.from("hotels").update({ theme: b.theme === "sable" ? null : b.theme }).eq("id", hotel.id);
+      return error ? fail("Impossible d'enregistrer.", 500) : ok();
+    }
+
+    // Types de consigne propres à l'hôtel (jamais supprimés : désactivés, pour
+    // que les consignes déjà écrites gardent leur libellé).
+    case "set_types": {
+      const types = cleanCustomTypes(b.types);
+      const { error } = await admin.from("hotels").update({ consigne_types: types }).eq("id", hotel.id);
+      return error ? fail("Impossible d'enregistrer.", 500) : ok();
+    }
+
+    // Services de l'hôtel : ils fixent le prix (15 €/mois chacun). Si
+    // l'abonnement est actif, la quantité Stripe suit, au prorata.
+    case "set_services": {
+      const ids = cleanServices(b.services);
+      if (ids.length === 0) return fail("Gardez au moins un service.");
+      const { error } = await admin.from("hotels").update({ services: ids }).eq("id", hotel.id);
+      if (error) return fail("Impossible d'enregistrer.", 500);
+      // Les étiquettes de poste correspondantes existent (pour adresser une consigne).
+      await admin
+        .from("hotel_tags")
+        .upsert(SERVICES.filter((s) => ids.includes(s.id)).map((s) => ({ hotel_id: hotel.id, name: s.tag, kind: "role" })), { onConflict: "hotel_id,name", ignoreDuplicates: true });
+      if (hotel.stripe_subscription_id && ["active", "past_due"].includes(hotel.billing_status) && !hotel.billing_exempt) {
+        try {
+          const sub = await stripe.subscriptions.retrieve(hotel.stripe_subscription_id);
+          const item = sub.items?.data?.[0];
+          if (item && item.quantity !== ids.length) {
+            await stripe.subscriptionItems.update(item.id, { quantity: ids.length, proration_behavior: "create_prorations" });
+          }
+        } catch (err) {
+          console.error("hotel services stripe update failed:", err);
+          return fail("Services enregistrés, mais l'abonnement n'a pas pu être mis à jour. Réessayez dans un instant.", 502);
+        }
+      }
+      return ok({ count: ids.length });
     }
 
     case "set_manager_pin": {
@@ -114,6 +158,14 @@ export async function POST(request) {
     case "delete_tag": {
       await admin.from("hotel_tags").delete().eq("id", b.id ?? "").eq("hotel_id", hotel.id);
       return ok();
+    }
+
+    // Adresse officielle de l'hôtel : les réponses aux emails de relève y arrivent.
+    case "set_reply_to": {
+      const email = String(b.email ?? "").trim().toLowerCase();
+      if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail("Cette adresse n'est pas valide.");
+      const { error } = await admin.from("hotels").update({ reply_to: email || null }).eq("id", hotel.id);
+      return error ? fail("Impossible d'enregistrer.", 500) : ok();
     }
 
     case "set_emails": {

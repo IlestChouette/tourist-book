@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { formatTransferWhatsAppMessage } from "./transferMessage";
 import { createAdminClient } from "./supabase/admin";
+import { typeOf } from "./hotelTheme";
 
 // Journalise chaque tentative d'envoi (succès ou échec) pour que l'admin
 // puisse voir l'historique complet depuis /admin, sans devoir aller chercher
@@ -572,12 +573,14 @@ export async function sendProfilePhoneRequestEmail({ to, name }) {
 }
 
 const SITE_URL = "https://tourist-book.com";
-const DIGEST_KIND_LABELS = { info: "Info", tache: "Tâche", probleme: "Problème", plainte: "Plainte" };
 
 // Relève du cahier de consignes (6h55, 14h55, 22h55) : les consignes encore
 // ouvertes, prioritaires et reportées d'abord. À 6h55, le PDF de la veille
 // est joint. Un email par destinataire, chacun journalisé.
-export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, pdf, cahierPath = "/hotel/cahier" }) {
+// Nom d'expéditeur affiché : le nom de l'hôtel (sans caractères qui casseraient l'en-tête From).
+const senderName = (name) => String(name).replace(/["<>,;:\\\r\n]/g, " ").replace(/\s+/g, " ").trim().slice(0, 60);
+
+export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, pdf, cahierPath = "/hotel/cahier", replyTo, types }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return { sent: false, reason: "not_configured" };
 
@@ -590,7 +593,7 @@ export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, 
       const flags = [
         c.priority || c.carried ? "PRIORITAIRE" : null,
         c.carried ? `ouverte depuis ${c.daysOpen} j` : null,
-        DIGEST_KIND_LABELS[c.kind],
+        typeOf(types, c.kind, c.typeId).short,
         c.placeName,
       ].filter(Boolean);
       lines.push(`• [${flags.join(" · ")}]`, `  ${c.body.replace(/\n+/g, " ")}`, "");
@@ -602,9 +605,9 @@ export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, 
   const subject = `Cahier de consignes — ${hotelName} — relève de ${slotLabel} : ${pending.length} en attente`;
   const resend = new Resend(apiKey);
   const { error } = await resend.emails.send({
-    from: "Tourist Book <notifications@tourist-book.com>",
+    from: `${senderName(hotelName) || "Cahier de consignes"} <notifications@tourist-book.com>`,
     to,
-    replyTo: CONTACT_NOTIFICATION_EMAIL,
+    replyTo: replyTo || CONTACT_NOTIFICATION_EMAIL,
     subject,
     text: lines.join("\n"),
     ...(pdf ? { attachments: [{ filename: pdf.filename, content: pdf.content }] } : {}),

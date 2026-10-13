@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { themeById } from "@/lib/hotelTheme";
 
 const linkClass =
   "rounded-full bg-sand-card/85 px-4 py-2 text-xs font-bold uppercase tracking-widest text-ink/70 transition-colors hover:bg-sand-card print:hidden";
@@ -8,16 +9,16 @@ const linkClass =
 // `links` : [{ href, label }] affichés à droite de la barre.
 export function HotelHeader({ hotel, title, subtitle, links = [] }) {
   return (
-    <header className="relative bg-aqua print:hidden">
+    <header className="relative bg-aqua print:hidden" style={themeById(hotel.theme).band ? { backgroundColor: themeById(hotel.theme).band } : undefined}>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-4">
         <div className="flex min-w-0 items-center gap-4">
           {hotel.logo_url && (
-            <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#f7f1e4]/60 bg-[#f7f1e4] p-1.5 sm:h-20 sm:w-20">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#f7f1e4]/60 bg-[#f7f1e4] p-1.5 sm:h-14 sm:w-14">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={hotel.logo_url} alt="" className="h-full w-full object-contain" />
             </span>
           )}
-          <span className="truncate font-display italic text-2xl text-ink sm:text-3xl">{hotel.name}</span>
+          <span className="truncate font-display italic text-xl text-ink sm:text-2xl">{hotel.name}</span>
         </div>
         <nav className="flex flex-wrap gap-2">
           {links.map((l) => (
@@ -33,7 +34,6 @@ export function HotelHeader({ hotel, title, subtitle, links = [] }) {
           {subtitle && <p className="mt-2 text-ink/70">{subtitle}</p>}
         </div>
       )}
-      <div className="stripe-band" />
     </header>
   );
 }

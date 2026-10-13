@@ -21,6 +21,7 @@ export async function GET(request) {
     items,
     tagNames: Object.fromEntries(meta.tags.map((t) => [t.id, t.name])),
     withNames,
+    types: ctx.hotel.consigne_types,
   });
   return new NextResponse(pdf, {
     headers: {
