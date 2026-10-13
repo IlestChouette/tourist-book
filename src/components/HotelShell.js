@@ -34,7 +34,6 @@ export function HotelHeader({ hotel, title, subtitle, links = [] }) {
           {subtitle && <p className="mt-2 text-ink/70">{subtitle}</p>}
         </div>
       )}
-      <div className="stripe-band" />
     </header>
   );
 }
