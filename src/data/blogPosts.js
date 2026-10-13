@@ -758,6 +758,117 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: "comment-devenir-concierge-airbnb",
+    title: "Comment devenir concierge Airbnb ? Salaire, conditions, rentabilité : les réponses aux six questions les plus posées",
+    metaDescription:
+      "Comment devenir concierge Airbnb : étapes pour se lancer, salaire d'un gestionnaire et d'un concierge, plafonds à ne pas dépasser, conditions pour louer sur Airbnb, rentabilité d'une conciergerie et comment y travailler.",
+    excerpt: "Se lancer à son compte ou y travailler : salaire, plafonds, conditions, rentabilité. Les réponses aux six questions les plus posées, chiffres et limites compris.",
+    publishedAt: "2026-10-13",
+    blocks: [
+      {
+        type: "lead",
+        text: "Concierge Airbnb, c'est un métier que l'on peut exercer de deux façons : en lançant sa propre conciergerie, ou en travaillant dans une conciergerie existante. Les deux ont leurs règles, leurs revenus et leurs pièges. Voici comment s'y prendre, avec les réponses aux six questions que les gens posent le plus souvent, chiffres à l'appui — et leurs limites, parce que beaucoup de chiffres du secteur viennent de ceux qui vendent la conciergerie.",
+      },
+      {
+        type: "stats",
+        items: [
+          { value: "1 000–5 000 €", label: "Investissement de départ annoncé pour une conciergerie lancée en micro-entreprise, depuis chez soi (sources du secteur)" },
+          { value: "15 000 €", label: "Plafond de recettes du micro-BIC pour un meublé de tourisme non classé, depuis 2025 (abattement de 30 %)" },
+          { value: "15–30 %", label: "Commission habituellement annoncée par les conciergeries, selon l'étendue des services" },
+        ],
+      },
+      {
+        type: "steps",
+        items: [
+          { n: "1", title: "Choisir son modèle", text: "Accueil et ménage seulement, ou gestion complète (annonce, prix, messages, calendrier) ? Le second demande plus de responsabilités, et un cadre légal plus strict." },
+          { n: "2", title: "Poser le cadre légal", text: "Statut (micro-entreprise ou société), assurance de responsabilité civile professionnelle et, si vous gérez la location de façon globale ou des fonds du propriétaire, la carte professionnelle de gestion immobilière (carte G). Vérifiez votre cas auprès de la CCI." },
+          { n: "3", title: "Définir ses prestations et ses tarifs", text: "Un contrat écrit qui détaille chaque prestation, la commission, le ménage et le linge, les frais d'entrée et les conditions de sortie." },
+          { n: "4", title: "Trouver ses premiers logements", text: "Un ou deux propriétaires de votre entourage, des annonces locales, le réseau de co-hôtes d'Airbnb : la qualité des premiers retours compte plus que le volume." },
+          { n: "5", title: "S'équiper", text: "Un calendrier synchronisé, des modèles de messages, un livret d'accueil par logement pour ne pas répondre dix fois à la même question, et un prestataire de ménage fiable." },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quel est le salaire moyen d'un gestionnaire de conciergerie Airbnb ?",
+        paragraphs: [
+          "Il n'existe pas de grille officielle fiable pour ce métier récent. Les repères trouvés varient beaucoup : un guide du secteur daté de 2024 situe un débutant autour de 21 800 € par an, soit environ 1 800 € bruts par mois, et un profil expérimenté jusqu'à 55 000 € par an. Une offre d'emploi d'un réseau national annonce de 2 000 € à 8 000 € par mois pour un poste d'exploitation, avec un statut d'indépendant : la fourchette est très large parce qu'elle mêle fixe et commissions.",
+          "Retenez que le salaire d'un gestionnaire dépend surtout de trois choses : le nombre de logements suivis, la ville, et la part variable (commission sur les réservations). Pour un chiffre fiable, regardez les offres actuelles sur les sites d'emploi et la convention collective applicable à votre employeur.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quel est le salaire d'un concierge ?",
+        paragraphs: [
+          "Tout dépend du type de concierge. Pour un concierge d'entreprise, une étude de cabinet de recrutement reprise par le Journal du Net donne un salaire médian de 2 620 € bruts par mois en 2026, avec une fourchette de 1 823 € à 3 417 €. Un concierge d'hôtel suit en général les grilles de la convention collective de l'hôtellerie, avec des variations selon la catégorie de l'établissement et l'ancienneté.",
+          "Un concierge Airbnb indépendant n'a pas de salaire : il a un chiffre d'affaires, fait de commissions et de prestations, dont il retire ses charges. C'est ce qui rend la comparaison avec un salaire délicate.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quel montant ne pas dépasser sur Airbnb ?",
+        paragraphs: [
+          "Il n'y a pas un seul plafond : il y en a plusieurs, et ils ne visent pas la même chose. Côté fiscalité, depuis 2025 un meublé de tourisme non classé relève du micro-BIC jusqu'à 15 000 € de recettes par an, avec un abattement de 30 %. Pour un meublé classé ou une chambre d'hôtes, le plafond reste de 77 700 € avec un abattement de 50 %. Au-delà, le régime réel devient en principe obligatoire.",
+          "Côté nombre de nuits, une résidence principale louée en entier ne peut l'être que 120 nuits par an, et une commune peut descendre cette limite jusqu'à 90 nuits par délibération. La location d'une chambre chez soi, en continuant d'y habiter, n'est pas concernée. Dépasser la limite expose à une amende civile qui peut atteindre 15 000 €.",
+          "Ces règles changent. Vérifiez les montants du jour sur impots.gouv.fr et service-public.fr, et l'arrêté de votre commune.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Quelles sont les conditions pour faire du Airbnb ?",
+        paragraphs: [
+          "En France, la déclaration en mairie est exigée pour les meublés de tourisme, et un numéro d'enregistrement doit figurer sur l'annonce là où il est obligatoire : plusieurs centaines de communes l'imposent déjà, dont Nice, et un téléservice national doit généraliser le dispositif. Les plateformes peuvent suspendre une annonce dont le numéro est absent ou invalide.",
+          "Selon votre situation, d'autres conditions s'ajoutent : une autorisation de changement d'usage dans certaines communes, le règlement de copropriété qui peut encadrer ou interdire la location touristique, la taxe de séjour à reverser, l'assurance du logement et, pour une résidence principale, la limite de nuits. Les règles liées au DPE concernent surtout les baux d'habitation ; pour un meublé de tourisme, confirmez votre cas auprès de votre mairie.",
+          "Notre article sur la loi Le Meur détaille le calendrier pour la Côte d'Azur.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Est-ce rentable d'ouvrir une conciergerie ?",
+        paragraphs: [
+          "Cela peut l'être, mais pas aussi facilement que les brochures le laissent croire. Les sources du secteur évoquent une mise de départ de 1 000 à 5 000 € pour une activité en micro-entreprise à domicile, bien davantage avec un local, et des charges fixes mensuelles de l'ordre de 1 500 à 2 500 € dès qu'il y a des outils, des assurances et des salariés. Les marges nettes annoncées vont de 22 à 34 % selon une franchise, alors qu'une étude de cabinet pour les grands opérateurs multi-sites affiche une rentabilité de 2,8 % : l'écart vient de la taille et du modèle.",
+          "Un ordre de grandeur donné par un prestataire : un logement loué 100 € la nuit, 20 nuits par mois, c'est environ 2 000 € de revenus ; à 20 % de commission, la conciergerie touche autour de 400 € par mois sur ce logement, avant ses charges. Le seuil de rentabilité est souvent estimé entre dix et quinze logements, et atteint entre quatre et sept mois. Ce sont des estimations commerciales, pas des moyennes de marché.",
+          "Ce qui fait la différence : la zone (une ville touristique toute l'année comme Nice ou Cannes n'est pas une station saisonnière), la saisonnalité, la qualité du ménage et la capacité à garder les propriétaires.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Comment est-ce que je peux travailler dans une conciergerie Airbnb ?",
+        paragraphs: [
+          "Les postes vont du ménage et de l'accueil des voyageurs à la coordination des prestataires et à la responsabilité d'un secteur : agent de ménage ou de linge, agent d'accueil et de check-in, assistant gestionnaire, responsable d'exploitation ou city manager, parfois revenue manager ou chargé de relation propriétaires.",
+          "Pour postuler, commencez par les pages carrières des réseaux de conciergerie et les sites d'emploi généralistes (Indeed, France Travail, Welcome to the Jungle), puis contactez directement les conciergeries de votre ville : beaucoup recrutent en continu, surtout en station balnéaire ou en montagne, avec des contrats saisonniers. Une carrière type commence au ménage ou à l'accueil, puis évolue vers la coordination et la gestion d'un secteur.",
+        ],
+      },
+      {
+        type: "icons",
+        items: [
+          {
+            icon: BookIcon,
+            title: "Un livret par logement",
+            text: "Wifi, accès, parking, poubelles : les mêmes questions reviennent à chaque séjour. Un livret d'accueil numérique les règle une fois pour toutes, dans la langue du voyageur.",
+          },
+          {
+            icon: ChatIcon,
+            title: "Moins de messages à traiter",
+            text: "Quand les réponses sont dans le livret, la conciergerie répond moins souvent aux mêmes demandes, et peut suivre plus de logements avec la même équipe.",
+          },
+          {
+            icon: ShieldIcon,
+            title: "Un compte, plusieurs logements",
+            text: "Pour une conciergerie qui gère plusieurs appartements, un seul compte regroupe les livrets, avec le même niveau de qualité pour chaque propriétaire.",
+          },
+        ],
+      },
+      {
+        type: "quote",
+        text: "Se lancer est simple ; durer demande un contrat clair, des chiffres vrais et des propriétaires satisfaits.",
+      },
+      {
+        type: "note",
+        text: "Sources consultées en octobre 2026 : guides et pages de conciergeries et d'éditeurs d'outils (Houst, RentaPlus, PriceLabs, Welkeys, ALB Conciergerie, Eldorado Immobilier, Minut), Journal du Net (salaires, données Michael Page), guides fiscaux sur la loi Le Meur (jedeclaremonmeuble, Optimhome, Legalstart) et pages spécialisées sur l'enregistrement des meublés de tourisme. Les fourchettes de salaires et de rentabilité viennent largement de professionnels du secteur : ce sont des ordres de grandeur, à vérifier. Pour toute décision fiscale ou juridique, consultez impots.gouv.fr, service-public.fr, votre mairie, la CCI ou un professionnel.",
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
