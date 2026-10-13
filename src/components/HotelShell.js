@@ -12,12 +12,12 @@ export function HotelHeader({ hotel, title, subtitle, links = [] }) {
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-4">
         <div className="flex min-w-0 items-center gap-4">
           {hotel.logo_url && (
-            <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#f7f1e4]/60 bg-[#f7f1e4] p-1.5 sm:h-20 sm:w-20">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#f7f1e4]/60 bg-[#f7f1e4] p-1.5 sm:h-14 sm:w-14">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={hotel.logo_url} alt="" className="h-full w-full object-contain" />
             </span>
           )}
-          <span className="truncate font-display italic text-2xl text-ink sm:text-3xl">{hotel.name}</span>
+          <span className="truncate font-display italic text-xl text-ink sm:text-2xl">{hotel.name}</span>
         </div>
         <nav className="flex flex-wrap gap-2">
           {links.map((l) => (
