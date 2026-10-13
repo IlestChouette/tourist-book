@@ -635,6 +635,129 @@ export const blogPosts = [
       },
     ],
   },
+  {
+    slug: "trouver-conciergerie-airbnb-courte-duree",
+    title: "Où trouver une conciergerie Airbnb pour un appartement en courte durée ? Cinq pistes et les questions à poser avant de signer",
+    metaDescription:
+      "Où trouver une conciergerie Airbnb spécialisée dans la courte durée : réseau de co-hôtes Airbnb, conciergeries locales, groupements professionnels, bouche-à-oreille. Commissions, carte G et questions à poser avant de signer.",
+    excerpt: "Annuaires, co-hôtes Airbnb, conciergeries locales : où chercher, ce que ça coûte vraiment, et les questions à poser avant de signer.",
+    publishedAt: "2026-10-13",
+    blocks: [
+      {
+        type: "lead",
+        text: "Trouver une conciergerie n'est pas difficile : il y en a des centaines. Le difficile, c'est de trouver celle qui connaît la courte durée dans votre quartier, qui annonce clairement ce qu'elle prend, et dont le pourcentage affiché correspond à ce que vous verrez réellement sur votre compte. Voici où chercher, et quoi demander avant de signer.",
+      },
+      {
+        type: "stats",
+        items: [
+          { value: "15–30 %", label: "Commission habituellement annoncée par les conciergeries, selon l'étendue des services (sources du secteur : à vérifier devis en main)" },
+          { value: "3", label: "Co-hôtes maximum par annonce sur Airbnb" },
+          { value: "3 devis", label: "Le minimum à comparer, sur le revenu net estimé et pas sur le taux affiché" },
+        ],
+      },
+      {
+        type: "icons",
+        items: [
+          {
+            icon: CompassIcon,
+            title: "Le réseau de co-hôtes d'Airbnb",
+            text: "Airbnb propose des pages par ville : vous indiquez la localisation du logement, vous consultez les profils et les notes des co-hôtes disponibles, vous leur écrivez, puis vous en invitez un sur votre annonce. C'est la piste la plus simple pour comparer des profils avec des avis réels.",
+          },
+          {
+            icon: ChatIcon,
+            title: "Les conciergeries de votre ville",
+            text: "Une recherche sur la carte (« conciergerie Airbnb » + votre ville) donne les structures locales avec leurs avis. Lisez les avis des propriétaires, pas seulement ceux des voyageurs, et regardez depuis quand elles gèrent des logements comme le vôtre.",
+          },
+          {
+            icon: ShieldIcon,
+            title: "Les groupements professionnels",
+            text: "Plusieurs conciergeries se regroupent au sein d'organisations professionnelles : c'est un premier signe de sérieux, sans remplacer la vérification du contrat. Demandez toujours depuis quand elles exercent et sous quel statut.",
+          },
+          {
+            icon: BookIcon,
+            title: "Les plateformes et les groupes de propriétaires",
+            text: "Des plateformes de mise en relation permettent de publier votre besoin ou de consulter des profils de co-hôtes de votre région, et les groupes de propriétaires sont utiles pour obtenir des retours sans filtre.",
+          },
+          {
+            icon: WifiIcon,
+            title: "Le bouche-à-oreille",
+            text: "D'autres hôtes de votre immeuble ou de votre quartier ont sans doute déjà essayé. Demandez-leur ce qu'ils paient réellement, ce qui s'est mal passé, et pourquoi ils ont changé, s'ils l'ont fait.",
+          },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Conciergerie ou co-hôte : ce n'est pas la même chose",
+        paragraphs: [
+          "Un co-hôte est en général une personne de confiance qui vous aide à gérer une location précise, parfois pour un nombre limité de logements. Une conciergerie est une entreprise externe, avec des équipes, des process et souvent plusieurs logements gérés dans le même secteur. Airbnb précise que les conciergeries peuvent participer à son réseau, mais par l'intermédiaire de salariés individuels plutôt que de la structure elle-même.",
+          "Le bon choix dépend de votre besoin. Pour un seul appartement et un propriétaire encore impliqué, un co-hôte local peut suffire. Pour plusieurs logements, ou si vous vivez loin, une conciergerie organisée est plus solide : remplaçant en cas d'absence, ménage coordonné, astreinte.",
+        ],
+      },
+      {
+        type: "compare",
+        left: {
+          title: "Le pourcentage affiché",
+          items: [
+            "« 20 % » sur la page d'accueil",
+            "Souvent calculé sur le revenu net, après la commission de la plateforme",
+            "Ménage et linge refacturés à part, parfois avec une marge",
+            "Frais d'entrée ou de mise en service en plus",
+          ],
+        },
+        right: {
+          title: "Ce qui arrive sur votre compte",
+          items: [
+            "Le revenu net après tous les frais, pour une même hypothèse de nuits",
+            "La marge éventuelle sur le ménage, demandée par écrit",
+            "Les frais d'entrée et les conditions de sortie, détaillés",
+            "Un exemple chiffré sur votre logement, pas un exemple général",
+          ],
+        },
+      },
+      {
+        type: "text",
+        heading: "Les commissions, en clair",
+        paragraphs: [
+          "Les sources du secteur annoncent le plus souvent une fourchette de 15 à 30 % des revenus, avec une moyenne autour de 20 à 25 % pour une gestion complète et environ 15 % pour une offre allégée (messages et calendrier). D'autres guides évoquent des fourchettes plus larges. Ces chiffres viennent surtout des conciergeries elles-mêmes : ils donnent un ordre de grandeur, pas une vérité.",
+          "Le piège le plus fréquent est la base de calcul. Une conciergerie qui annonce 20 % le calcule souvent sur le revenu net de la plateforme, auquel s'ajoutent le ménage, le linge et les frais d'entrée. Comparer deux offres sur le seul taux, c'est comparer deux loyers sans regarder les charges : demandez à chacune de chiffrer, pour votre logement, le montant net que vous recevrez.",
+        ],
+      },
+      {
+        type: "steps",
+        items: [
+          { n: "1", title: "Demandez le statut et la carte G", text: "Si la conciergerie gère les fonds du propriétaire ou la location de façon globale, la carte professionnelle de gestion immobilière (carte G) est en principe requise. Pour de l'accueil, du ménage et de la maintenance sans encaisser de fonds, le cadre est différent. Dans les deux cas, demandez un mandat ou un contrat écrit qui précise les prestations." },
+          { n: "2", title: "Faites chiffrer le revenu net", text: "Une même hypothèse de nuits, trois devis, et la ligne finale : ce que vous encaissez après plateforme, ménage, linge et commission." },
+          { n: "3", title: "Posez la question du ménage", text: "Refacturé au coût réel, ou avec une marge ? C'est souvent là que se cache la différence entre deux offres à pourcentage identique." },
+          { n: "4", title: "Vérifiez l'engagement", text: "Frais d'entrée, durée minimale, préavis, conditions de sortie : tout doit figurer dans le contrat, pas seulement dans la brochure." },
+          { n: "5", title: "Réclamez des indicateurs", text: "Taux d'occupation, tarifs pratiqués, compte rendu mensuel. Une conciergerie sérieuse sait vous montrer ce qu'elle fait de votre logement." },
+        ],
+      },
+      {
+        type: "text",
+        heading: "À Nice, Cannes, Menton, Antibes : l'angle local",
+        paragraphs: [
+          "Sur la Côte d'Azur, la demande est forte mais très inégale d'un mois à l'autre : Carnaval, Festival de Cannes, MIPIM, Grand Prix. Une conciergerie qui connaît votre secteur sait quand elle doit monter les prix, imposer un séjour minimum ou prévoir plus de ménages, et elle vous répond en connaissant vos voisins, votre syndic et vos accès.",
+          "Demandez combien de logements elle gère dans votre quartier, et demandez-lui de vous citer deux propriétaires que vous pouvez appeler.",
+        ],
+      },
+      {
+        type: "text",
+        heading: "Un livret d'accueil, que vous ayez une conciergerie ou non",
+        paragraphs: [
+          "Quelle que soit l'option, les mêmes questions reviennent chez les voyageurs : wifi, code d'accès, parking, où jeter les poubelles. Un livret d'accueil numérique les règle une fois pour toutes, et reste le même que vous gériez vous-même ou que vous confiiez le logement à une conciergerie : le voyageur a un seul lien, et vous pouvez le modifier à tout moment.",
+          "Si vous confiez votre logement, c'est aussi un bon moyen de garder la main : les consignes du logement sont écrites par vous, au même endroit, et la conciergerie les applique.",
+        ],
+      },
+      {
+        type: "quote",
+        text: "Le bon prestataire est celui dont vous savez calculer le coût réel avant de signer.",
+      },
+      {
+        type: "note",
+        text: "Sources consultées en octobre 2026 : pages et guides de conciergeries et d'éditeurs d'outils (Houst, RentaPlus, PriceLabs, Lodgify, Minut), rapports et articles sur la loi Hoguet et la carte G, pages du réseau de co-hôtes d'Airbnb. Les fourchettes de commission viennent largement des professionnels eux-mêmes ; vérifiez toujours le contrat, et pour toute question juridique sur la carte G ou le mandat, consultez la CCI ou un avocat.",
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug) {
