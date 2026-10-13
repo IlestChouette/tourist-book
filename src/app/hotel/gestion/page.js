@@ -4,6 +4,7 @@ import { getHotelContext } from "@/lib/hotelAuth";
 import { loadMeta } from "@/lib/hotelData";
 import { PENDING_LABEL } from "@/lib/hotelAuth";
 import { slugForHotel } from "@/lib/hotelSlug";
+import { cleanCustomTypes } from "@/lib/hotelTheme";
 import GestionClient from "./GestionClient";
 
 export const metadata = { title: "Gestion du cahier", robots: { index: false, follow: false } };
@@ -49,6 +50,8 @@ export default async function GestionPage() {
                   hasCustomer: Boolean(hotel.stripe_customer_id),
                 }
           }
+          // null tant que la migration SQL n'est pas passée : la section reste cachée.
+          appearance={hotel.consigne_types === undefined ? null : { theme: hotel.theme ?? "sable", types: cleanCustomTypes(hotel.consigne_types) }}
           lostFound={hotel.lost_found_enabled === true ? { token: hotel.lost_found_token ?? null } : null}
         />
       </section>

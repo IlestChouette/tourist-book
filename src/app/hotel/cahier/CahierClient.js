@@ -5,14 +5,8 @@ import { addDays, formatDayLong } from "@/lib/hotelTime";
 import { Icon } from "./CahierIcons";
 import NewConsigne from "./NewConsigne";
 import PinPad from "./PinPad";
+import { TONES, typeOf } from "@/lib/hotelTheme";
 
-const KIND_LABEL = { info: "Information", tache: "À faire", probleme: "Problème", plainte: "Plainte client" };
-const KIND_TONE = {
-  info: "bg-aqua-deep/10 text-aqua-deep",
-  tache: "bg-ink/[0.08] text-ink",
-  probleme: "bg-terracotta/30 text-terracotta-deep",
-  plainte: "bg-terracotta-deep text-sand-card",
-};
 const focus = "focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-aqua-deep";
 const bigBtn = `flex min-h-14 items-center justify-center gap-3 rounded-2xl px-5 text-xl font-bold transition active:scale-[0.98] ${focus}`;
 const timeFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
@@ -25,7 +19,7 @@ async function patch(id, body) {
 
 // Un écran, une action principale : écrire. Le reste se lit de haut en bas :
 // d'abord ce qui est important pour tous, puis ce qu'il reste à faire.
-export default function CahierClient({ hotelName, mode, today, initialItems, tags, places }) {
+export default function CahierClient({ hotelName, mode, today, initialItems, tags, places, customTypes, types }) {
   const isManager = mode === "manager";
   const [day, setDay] = useState(today);
   const [items, setItems] = useState(initialItems);
@@ -114,7 +108,14 @@ export default function CahierClient({ hotelName, mode, today, initialItems, tag
     <li key={c.id} className={`rounded-3xl border-2 bg-sand p-5 print:break-inside-avoid ${c.done ? "border-sand-dim" : urgent(c) ? "border-terracotta-deep" : "border-sand-dim"}`}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <span className="rounded-xl bg-ink px-3 py-1 text-2xl font-bold tabular-nums text-sand">{c.placeName}</span>
-        <span className={`rounded-xl px-3 py-1 text-lg font-bold ${KIND_TONE[c.kind]}`}>{KIND_LABEL[c.kind]}</span>
+        {(() => {
+          const t = typeOf(customTypes, c.kind, c.typeId);
+          return (
+            <span className={`inline-flex items-center gap-2 rounded-xl px-3 py-1 text-lg font-bold ${TONES[t.tone] ?? TONES.neutre}`}>
+              <Icon name={t.icon} className="h-5 w-5" /> {t.short}
+            </span>
+          );
+        })()}
         {urgent(c) && !c.done && (
           <span className="rounded-xl bg-terracotta-deep px-3 py-1 text-lg font-bold text-sand-card">
             {c.carried ? `Pas fait depuis ${c.daysOpen} jour${c.daysOpen > 1 ? "s" : ""}` : "Urgent"}
@@ -176,7 +177,7 @@ export default function CahierClient({ hotelName, mode, today, initialItems, tag
         )}
       </p>
 
-      <button type="button" onClick={() => setCreating(true)} className={`mt-6 flex h-24 w-full items-center justify-center gap-4 rounded-3xl bg-terracotta text-3xl font-bold text-ink shadow-[0_8px_20px_-10px_rgba(120,60,20,0.6)] transition active:scale-[0.99] hover:bg-terracotta-deep print:hidden ${focus}`}>
+      <button type="button" onClick={() => setCreating(true)} className={`mt-6 flex h-24 w-full items-center justify-center gap-4 rounded-3xl bg-[var(--cahier-accent,#d9763a)] text-3xl font-bold text-[var(--cahier-accent-text,#223339)] shadow-[0_8px_20px_-10px_rgba(120,60,20,0.6)] transition hover:brightness-95 active:scale-[0.99] print:hidden ${focus}`}>
         <Icon name="plus" className="h-10 w-10" /> Écrire une consigne
       </button>
 
@@ -247,6 +248,7 @@ export default function CahierClient({ hotelName, mode, today, initialItems, tag
           defaultDay={day < today ? today : day}
           tags={tags}
           places={places}
+          types={types}
           onClose={() => setCreating(false)}
           onCreated={() => { setCreating(false); setNotice("C'est enregistré !"); load(day); }}
         />

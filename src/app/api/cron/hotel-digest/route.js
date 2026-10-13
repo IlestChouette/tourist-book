@@ -70,6 +70,7 @@ export async function GET(request) {
               items,
               tagNames: Object.fromEntries(meta.tags.map((t) => [t.id, t.name])),
               withNames: true,
+              types: hotel.consigne_types,
             }),
           };
         }

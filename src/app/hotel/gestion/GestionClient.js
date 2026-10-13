@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import QRCode from "qrcode";
 import { uploadMedia } from "@/lib/uploadMedia";
+import { ThemePicker, TypesEditor } from "./AppearanceEditors";
 
 const label = "text-xs font-bold uppercase tracking-wider text-ink/60";
 const btn = "rounded bg-aqua-deep px-4 py-2 text-sm font-bold text-sand-card hover:bg-aqua-deep/90 disabled:opacity-60";
@@ -182,7 +183,7 @@ function BillingCard({ billing }) {
   );
 }
 
-export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath, billing }) {
+export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath, billing, appearance }) {
   const router = useRouter();
   const [message, setMessage] = useState(null); // { text, error }
   const [busy, setBusy] = useState(false);
@@ -360,6 +361,17 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
           </button>
         )}
       </Card>
+
+      {appearance && (
+        <>
+          <Card title="Couleur du cahier" hint="Le fond et la couleur du bouton « Écrire une consigne » pour toute l'équipe. Les palettes sont choisies pour rester lisibles à toute heure.">
+            <ThemePicker value={appearance.theme} busy={busy} onPick={(theme) => call({ action: "set_theme", theme }, "Couleur enregistrée.")} />
+          </Card>
+          <Card title="Types de consigne" hint="Ajoutez vos propres types (client VIP, lingerie, maintenance…) avec une icône et une couleur. Ils s'ajoutent aux quatre types d'origine.">
+            <TypesEditor initial={appearance.types} busy={busy} onSave={(types) => call({ action: "set_types", types }, "Types enregistrés.")} />
+          </Card>
+        </>
+      )}
 
       <Card title="Étiquettes" hint="Elles servent à dire à qui s'adresse une consigne (équipe du matin, du soir, de nuit, ou un poste).">
         <div className="flex flex-wrap gap-2">

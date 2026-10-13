@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
+import { cleanCustomTypes, THEMES } from "@/lib/hotelTheme";
 import { ACTIVATION_MINUTES, PENDING_LABEL, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE } from "@/lib/hotelAuth";
 
 const fail = (error, status = 400) => NextResponse.json({ error }, { status });
@@ -36,6 +37,21 @@ export async function POST(request) {
       if (typeof b.name === "string" && b.name.trim()) update.name = b.name.trim().slice(0, 120);
       if (b.logoUrl === null || typeof b.logoUrl === "string") update.logo_url = b.logoUrl;
       const { error } = await admin.from("hotels").update(update).eq("id", hotel.id);
+      return error ? fail("Impossible d'enregistrer.", 500) : ok();
+    }
+
+    // Couleur du cahier : uniquement les palettes validées (contraste).
+    case "set_theme": {
+      if (!THEMES.some((t) => t.id === b.theme)) return fail("Couleur inconnue.");
+      const { error } = await admin.from("hotels").update({ theme: b.theme === "sable" ? null : b.theme }).eq("id", hotel.id);
+      return error ? fail("Impossible d'enregistrer.", 500) : ok();
+    }
+
+    // Types de consigne propres à l'hôtel (jamais supprimés : désactivés, pour
+    // que les consignes déjà écrites gardent leur libellé).
+    case "set_types": {
+      const types = cleanCustomTypes(b.types);
+      const { error } = await admin.from("hotels").update({ consigne_types: types }).eq("id", hotel.id);
       return error ? fail("Impossible d'enregistrer.", 500) : ok();
     }
 

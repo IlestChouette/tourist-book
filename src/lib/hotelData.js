@@ -47,6 +47,7 @@ export async function loadDay(hotelId, day, showNames) {
       day: c.day,
       body: c.body,
       kind: c.kind,
+      typeId: c.type_id ?? null,
       placeName: c.place_name,
       tagIds: c.tag_ids,
       priority: c.priority,

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { csvResponse } from "@/lib/csv";
 import { getHotelContext } from "@/lib/hotelAuth";
-import { KIND_LABELS, loadDay, loadMeta } from "@/lib/hotelData";
+import { loadDay, loadMeta } from "@/lib/hotelData";
+import { typeOf } from "@/lib/hotelTheme";
 import { isDay, parisDate } from "@/lib/hotelTime";
 
 const timeFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
@@ -25,7 +26,7 @@ export async function GET(request) {
     const row = [
       c.day,
       timeFmt.format(new Date(c.createdAt)),
-      KIND_LABELS[c.kind],
+      typeOf(ctx.hotel.consigne_types, c.kind, c.typeId).short,
       c.placeName,
       c.body,
       c.tagIds.map((id) => tagName[id]).filter(Boolean).join(" / "),
