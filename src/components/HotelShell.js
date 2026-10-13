@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { themeById } from "@/lib/hotelTheme";
 
 const linkClass =
   "rounded-full bg-sand-card/85 px-4 py-2 text-xs font-bold uppercase tracking-widest text-ink/70 transition-colors hover:bg-sand-card print:hidden";
@@ -8,7 +9,7 @@ const linkClass =
 // `links` : [{ href, label }] affichés à droite de la barre.
 export function HotelHeader({ hotel, title, subtitle, links = [] }) {
   return (
-    <header className="relative bg-aqua print:hidden">
+    <header className="relative bg-aqua print:hidden" style={themeById(hotel.theme).band ? { backgroundColor: themeById(hotel.theme).band } : undefined}>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-4">
         <div className="flex min-w-0 items-center gap-4">
           {hotel.logo_url && (

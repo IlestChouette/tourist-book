@@ -4,13 +4,13 @@
 // Palettes validées pour le contraste : le personnel lit le cahier à toute heure,
 // pas de sélecteur de couleur libre.
 export const THEMES = [
-  { id: "sable", label: "Sable", bg: "", accent: "", accentText: "" },
-  { id: "aqua", label: "Turquoise", bg: "#e4f3f1", accent: "#0a8f87", accentText: "#ffffff" },
-  { id: "ciel", label: "Bleu ciel", bg: "#e3eefa", accent: "#2c6aa8", accentText: "#ffffff" },
-  { id: "ardoise", label: "Gris ardoise", bg: "#e6ebee", accent: "#35515c", accentText: "#ffffff" },
-  { id: "rose", label: "Rose poudré", bg: "#f8e9e6", accent: "#b04a5a", accentText: "#ffffff" },
-  { id: "olive", label: "Vert olive", bg: "#eef0e0", accent: "#5c6b2a", accentText: "#ffffff" },
-  { id: "lavande", label: "Lavande", bg: "#eceaf6", accent: "#5b4fa3", accentText: "#ffffff" },
+  { id: "sable", label: "Sable", bg: "", accent: "", accentText: "", band: "" },
+  { id: "aqua", label: "Turquoise", bg: "#e4f3f1", accent: "#0a8f87", accentText: "#ffffff", band: "#7fcfc6" },
+  { id: "ciel", label: "Bleu ciel", bg: "#e3eefa", accent: "#2c6aa8", accentText: "#ffffff", band: "#9cc3ea" },
+  { id: "ardoise", label: "Gris ardoise", bg: "#e6ebee", accent: "#35515c", accentText: "#ffffff", band: "#a9bcc4" },
+  { id: "rose", label: "Rose poudré", bg: "#f8e9e6", accent: "#b04a5a", accentText: "#ffffff", band: "#f0b9b6" },
+  { id: "olive", label: "Vert olive", bg: "#eef0e0", accent: "#5c6b2a", accentText: "#ffffff", band: "#c9d390" },
+  { id: "lavande", label: "Lavande", bg: "#eceaf6", accent: "#5b4fa3", accentText: "#ffffff", band: "#c6bdeb" },
 ];
 
 export function themeById(id) {
