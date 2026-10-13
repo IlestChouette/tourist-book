@@ -189,6 +189,7 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
   const [busy, setBusy] = useState(false);
   const [name, setName] = useState(hotel.name);
   const [emails, setEmails] = useState(hotel.emails.join("\n"));
+  const [replyTo, setReplyTo] = useState(hotel.replyTo ?? "");
   const [managerPin, setManagerPin] = useState("");
   const [newStaff, setNewStaff] = useState({ name: "", pin: "", roleIds: [] });
   const [placesText, setPlacesText] = useState("");
@@ -393,6 +394,16 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
           <textarea rows={3} value={emails} onChange={(e) => setEmails(e.target.value)} className="input" aria-label="Adresses email" />
           <button type="submit" disabled={busy} className={`${btn} w-fit`}>Enregistrer</button>
         </form>
+        {hotel.replyTo !== null && (
+          <form className="mt-5 grid gap-3 border-t border-sand-dim pt-4" onSubmit={(e) => { e.preventDefault(); call({ action: "set_reply_to", email: replyTo }, "Adresse enregistrée."); }}>
+            <label className="grid gap-1.5">
+              <span className={label}>Adresse de réponse (email officiel de l'hôtel)</span>
+              <input type="email" value={replyTo} onChange={(e) => setReplyTo(e.target.value)} placeholder="reception@votrehotel.com" className="input" />
+            </label>
+            <p className="text-xs text-ink/50">Les emails de relève s'affichent au nom de votre hôtel. Si quelqu'un y répond, la réponse arrive à cette adresse.</p>
+            <button type="submit" disabled={busy} className={`${btn} w-fit`}>Enregistrer</button>
+          </form>
+        )}
       </Card>
 
       {lostFound && (

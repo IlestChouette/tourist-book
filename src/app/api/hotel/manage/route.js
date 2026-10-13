@@ -132,6 +132,14 @@ export async function POST(request) {
       return ok();
     }
 
+    // Adresse officielle de l'hôtel : les réponses aux emails de relève y arrivent.
+    case "set_reply_to": {
+      const email = String(b.email ?? "").trim().toLowerCase();
+      if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail("Cette adresse n'est pas valide.");
+      const { error } = await admin.from("hotels").update({ reply_to: email || null }).eq("id", hotel.id);
+      return error ? fail("Impossible d'enregistrer.", 500) : ok();
+    }
+
     case "set_emails": {
       const emails = [...new Set(String(b.emails ?? "").split(/[\s,;]+/).map((e) => e.trim().toLowerCase()).filter(Boolean))];
       if (emails.length > 10) return fail("10 adresses au maximum.");

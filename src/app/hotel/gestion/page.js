@@ -32,7 +32,7 @@ export default async function GestionPage() {
       <section className="mx-auto max-w-3xl px-6 py-8">
         <GestionClient
           userId={ctx.user.id}
-          hotel={{ name: hotel.name, logoUrl: hotel.logo_url, emails: hotel.notification_emails }}
+          hotel={{ name: hotel.name, logoUrl: hotel.logo_url, emails: hotel.notification_emails, replyTo: hotel.reply_to === undefined ? null : hotel.reply_to ?? "" }}
           tags={meta.tags}
           places={meta.places}
           staff={(staff ?? []).map((s) => ({ ...s, hasPin: Boolean(s.pin_hash), pin_hash: undefined }))}
