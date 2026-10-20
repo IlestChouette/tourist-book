@@ -61,7 +61,8 @@ function LostFoundLink({ token, busy, onRegen }) {
 }
 
 // Le lien du cahier pour l'équipe et le code d'activation d'un nouvel appareil.
-function TeamLink({ cahierPath }) {
+function TeamLink({ cahierPath, services }) {
+  const [serviceId, setServiceId] = useState("");
   const [url, setUrl] = useState(cahierPath);
   const [qr, setQr] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -86,7 +87,7 @@ function TeamLink({ cahierPath }) {
   async function newCode() {
     setBusy(true);
     setError("");
-    const res = await fetch("/api/hotel/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "create_activation_code" }) });
+    const res = await fetch("/api/hotel/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "create_activation_code", serviceId: serviceId || undefined }) });
     const data = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) return setError(data.error || "Impossible de créer le code.");
@@ -99,6 +100,12 @@ function TeamLink({ cahierPath }) {
       <div className="mt-3 flex flex-wrap gap-2">
         <button type="button" onClick={copy} className={btnGhost}>{copied ? "Copié !" : "Copier le lien"}</button>
         <button type="button" onClick={showQr} className={btnGhost}>Afficher le QR code</button>
+        {services.length > 0 && (
+          <select value={serviceId} onChange={(e) => setServiceId(e.target.value)} aria-label="Service de l'appareil" className="input h-10">
+            <option value="">Tout l'hôtel (ancien mode)</option>
+            {services.map((s) => <option key={s.id} value={s.id}>Cahier : {s.name}</option>)}
+          </select>
+        )}
         <button type="button" disabled={busy} onClick={newCode} className={btn}>Ajouter un appareil (code)</button>
       </div>
       {error && <p className="mt-3 text-sm font-bold text-terracotta-deep" role="alert">{error}</p>}
@@ -192,7 +199,9 @@ function BillingCard({ billing }) {
   );
 }
 
-export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath, billing, appearance, servicesInfo }) {
+export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath, billing, appearance, servicesInfo, hotelServices = [] }) {
+  const [stationService, setStationService] = useState("");
+  const serviceNameById = Object.fromEntries(hotelServices.map((s) => [s.id, s.name]));
   const router = useRouter();
   const [message, setMessage] = useState(null); // { text, error }
   const [busy, setBusy] = useState(false);
@@ -435,22 +444,31 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
       )}
 
       <Card title="Le lien du cahier pour votre équipe" hint="Ce lien est propre à votre hôtel : mettez-le en favori sur chaque ordinateur ou tablette. Un nouvel appareil doit être activé une fois avec un code à 6 chiffres, que vous générez ici. Sans code, le lien ne montre rien.">
-        <TeamLink cahierPath={cahierPath} />
+        <TeamLink cahierPath={cahierPath} services={hotelServices} />
       </Card>
 
       <Card title="Postes de réception" hint="Appareils déjà activés. Vous pouvez aussi activer l'ordinateur sur lequel vous êtes connecté, sans code : puis déconnectez-vous du compte manager.">
-        <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); call({ action: "activate_station", label: stationLabel }, "Ce poste est activé. Déconnectez-vous du compte manager pour le laisser à l'équipe."); }}>
+        <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); call({ action: "activate_station", label: stationLabel, serviceId: stationService || undefined }, "Ce poste est activé. Déconnectez-vous du compte manager pour le laisser à l'équipe."); }}>
           <label className="grid gap-1.5">
             <span className={label}>Nom du poste</span>
             <input value={stationLabel} onChange={(e) => setStationLabel(e.target.value)} className="input" />
           </label>
+          {hotelServices.length > 0 && (
+            <label className="grid gap-1.5">
+              <span className={label}>Cahier</span>
+              <select value={stationService} onChange={(e) => setStationService(e.target.value)} className="input">
+                <option value="">Tout l'hôtel (ancien mode)</option>
+                {hotelServices.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </label>
+          )}
           <button type="submit" disabled={busy} className={btn}>Activer cet ordinateur</button>
         </form>
         {stations.length > 0 && (
           <ul className="mt-4 grid gap-2">
             {stations.map((s) => (
               <li key={s.id} className="flex items-center justify-between rounded border border-sand-dim p-3 text-sm">
-                <span><strong className="text-ink">{s.label}</strong> <span className="text-ink/50">· activé le {new Date(s.created_at).toLocaleDateString("fr-FR")}</span></span>
+                <span><strong className="text-ink">{s.label}</strong>{s.service_id && <span className="ml-2 rounded bg-ink px-2 py-0.5 text-xs font-bold uppercase text-sand">{serviceNameById[s.service_id] ?? "Service"}</span>} <span className="text-ink/50">· activé le {new Date(s.created_at).toLocaleDateString("fr-FR")}</span></span>
                 <button type="button" disabled={busy} className={btnGhost} onClick={() => window.confirm("Désactiver ce poste ? Il ne pourra plus ouvrir le cahier.") && call({ action: "delete_station", id: s.id })}>Désactiver</button>
               </li>
             ))}

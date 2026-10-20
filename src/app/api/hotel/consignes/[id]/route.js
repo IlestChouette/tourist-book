@@ -19,11 +19,17 @@ export async function PATCH(request, { params }) {
 
   const { data: consigne } = await admin
     .from("consignes")
-    .select("id, closed_at")
+    .select("id, closed_at, service_id")
     .eq("id", id)
     .eq("hotel_id", hotel.id)
     .maybeSingle();
   if (!consigne) return NextResponse.json({ error: "Consigne introuvable." }, { status: 404 });
+
+  // Un poste lié à un service ne touche qu'aux consignes de son service (et
+  // aux anciennes consignes sans service).
+  if (ctx.service && consigne.service_id && consigne.service_id !== ctx.service.id) {
+    return NextResponse.json({ error: "Cette consigne est celle d'un autre service." }, { status: 403 });
+  }
 
   if (b.action === "reopen" && ctx.mode !== "manager") {
     return NextResponse.json({ error: "Seul le manager peut rouvrir une consigne." }, { status: 403 });

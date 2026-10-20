@@ -1,9 +1,9 @@
 import { HotelFooter, HotelHeader } from "@/components/HotelShell";
-import { loadDay, loadMeta } from "@/lib/hotelData";
+import { listServices, loadDay, loadMeta, loadSent } from "@/lib/hotelData";
 import { parisDate } from "@/lib/hotelTime";
 import Link from "next/link";
 import { hotelHasAccess } from "@/lib/hotelBilling";
-import { cleanCustomTypes, selectableTypes, themeById, themeStyle } from "@/lib/hotelTheme";
+import { cleanCustomTypes, selectableTypes, serviceThemeId, themeById, themeStyle } from "@/lib/hotelTheme";
 import CahierClient from "./cahier/CahierClient";
 
 // Le cahier d'un hôtel (même contenu quelle que soit l'adresse d'entrée).
@@ -33,19 +33,28 @@ export default async function CahierView({ ctx }) {
     );
   }
 
-  const [items, meta] = await Promise.all([loadDay(ctx.hotel.id, today, isManager), loadMeta(ctx.hotel.id)]);
-  // Couleur choisie par l'hôtel (absente ou inconnue : thème sable d'origine).
-  const themeStyleVars = themeStyle(ctx.hotel.theme);
+  const [items, meta, allServices, sent] = await Promise.all([
+    loadDay(ctx.hotel.id, today, isManager, { serviceId: ctx.service?.id }),
+    loadMeta(ctx.hotel.id),
+    listServices(ctx.hotel.id),
+    ctx.service ? loadSent(ctx.hotel.id, ctx.service.id, today) : [],
+  ]);
+  // Un cahier de service prend la couleur de son service (bien reconnaissable) ;
+  // sinon la couleur choisie par l'hôtel (absente ou inconnue : sable d'origine).
+  const themeId = ctx.service ? serviceThemeId(ctx.service) : ctx.hotel.theme;
+  const themeStyleVars = themeStyle(themeId);
   const customTypes = cleanCustomTypes(ctx.hotel.consigne_types);
 
   return (
     <main
       className="flex-1 bg-sand-card/50"
-      style={themeStyleVars ? { ...themeStyleVars, backgroundColor: themeById(ctx.hotel.theme).bg } : undefined}
+      style={themeStyleVars ? { ...themeStyleVars, backgroundColor: themeById(themeId).bg } : undefined}
     >
       <HotelHeader
         hotel={ctx.hotel}
         logout={isManager}
+        themeId={themeId}
+        serviceName={ctx.service?.name}
         links={[
           ...(ctx.hotel.lost_found_enabled === true ? [{ href: "/hotel/objets-trouves", label: "Objets trouvés" }] : []),
           // Le personnel n'a pas besoin du lien « manager » : le manager y accède
@@ -59,7 +68,7 @@ export default async function CahierView({ ctx }) {
         ]}
       />
       <section className="mx-auto max-w-6xl px-6 py-8">
-        <CahierClient hotelName={ctx.hotel.name} mode={ctx.mode} today={today} initialItems={items} tags={meta.tags} places={meta.places} customTypes={customTypes} types={selectableTypes(customTypes)} />
+        <CahierClient hotelName={ctx.hotel.name} mode={ctx.mode} today={today} initialItems={items} initialSent={sent} service={ctx.service} deviceServices={ctx.services ?? []} allServices={allServices} tags={meta.tags} places={meta.places} customTypes={customTypes} types={selectableTypes(customTypes)} />
       </section>
       <HotelFooter />
     </main>

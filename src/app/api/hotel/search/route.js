@@ -15,6 +15,7 @@ export async function GET(request) {
   const result = await searchConsignes(ctx.hotel.id, q, {
     showNames: ctx.mode === "manager",
     customTypes: cleanCustomTypes(ctx.hotel.consigne_types),
+    serviceId: ctx.service?.id ?? null,
   });
   return NextResponse.json(result, { headers: { "Cache-Control": "private, no-store" } });
 }

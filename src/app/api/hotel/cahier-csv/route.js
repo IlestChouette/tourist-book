@@ -17,7 +17,7 @@ export async function GET(request) {
   if (!isDay(day)) return NextResponse.json({ error: "Date invalide" }, { status: 400 });
 
   const withNames = ctx.mode === "manager";
-  const [items, meta] = await Promise.all([loadDay(ctx.hotel.id, day, withNames), loadMeta(ctx.hotel.id)]);
+  const [items, meta] = await Promise.all([loadDay(ctx.hotel.id, day, withNames, { serviceId: ctx.service?.id }), loadMeta(ctx.hotel.id)]);
   const tagName = Object.fromEntries(meta.tags.map((t) => [t.id, t.name]));
 
   const head = ["Date de la consigne", "Heure", "Type", "Chambre ou lieu", "Consigne", "Équipes / postes", "Urgente", "Statut", "Ouverte depuis (jours)", "Épinglée", "Clôturée à"];

@@ -14,7 +14,7 @@ export async function GET(request) {
   if (!isDay(day)) return NextResponse.json({ error: "Date invalide" }, { status: 400 });
 
   const withNames = ctx.mode === "manager";
-  const [items, meta] = await Promise.all([loadDay(ctx.hotel.id, day, withNames), loadMeta(ctx.hotel.id)]);
+  const [items, meta] = await Promise.all([loadDay(ctx.hotel.id, day, withNames, { serviceId: ctx.service?.id }), loadMeta(ctx.hotel.id)]);
   const pdf = await buildDayPdf({
     hotelName: ctx.hotel.name,
     day,

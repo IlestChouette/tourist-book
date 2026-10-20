@@ -94,3 +94,12 @@ export function typeOf(custom, kind, typeId) {
   const b = BUILTIN_TYPES.find((t) => t.id === kind) ?? BUILTIN_TYPES[0];
   return { label: b.label, short: b.short, icon: b.icon, tone: b.tone, kind: b.kind };
 }
+
+// Couleur d'un service : sa couleur choisie si elle existe, sinon une palette
+// (hors "sable") selon sa position, pour que deux cahiers voisins se distinguent.
+export function serviceThemeId(service) {
+  if (!service) return null;
+  if (service.color && THEMES.some((t) => t.id === service.color)) return service.color;
+  const colored = THEMES.filter((t) => t.id !== "sable");
+  return colored[(Math.max(1, service.position ?? 1) - 1) % colored.length].id;
+}

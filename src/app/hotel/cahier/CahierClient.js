@@ -20,7 +20,7 @@ async function patch(id, body) {
 
 // Un écran, une action principale : écrire. Le reste se lit de haut en bas :
 // d'abord ce qui est important pour tous, puis ce qu'il reste à faire.
-export default function CahierClient({ hotelName, mode, today, initialItems, tags, places, customTypes, types }) {
+export default function CahierClient({ hotelName, mode, today, initialItems, initialSent = [], tags, places, customTypes, types, service = null, deviceServices = [], allServices = [] }) {
   const isManager = mode === "manager";
   const [day, setDay] = useState(today);
   const [items, setItems] = useState(initialItems);
@@ -34,18 +34,30 @@ export default function CahierClient({ hotelName, mode, today, initialItems, tag
   const [team, setTeam] = useState("");
   const [notice, setNotice] = useState("");
   const [searching, setSearching] = useState(false);
+  const [sent, setSent] = useState(initialSent);
+  const [filterService, setFilterService] = useState(""); // manager : filtrer par service
   const tagName = useMemo(() => Object.fromEntries(tags.map((t) => [t.id, t.name])), [tags]);
   const shifts = tags.filter((t) => t.kind === "shift");
 
   const load = useCallback(async (d) => {
-    const res = await fetch(`/api/hotel/cahier?day=${d}`, { cache: "no-store" });
-    if (res.ok) setItems((await res.json()).items);
-  }, []);
+    const res = await fetch(`/api/hotel/cahier?day=${d}${filterService ? `&service=${filterService}` : ""}`, { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      setItems(data.items);
+      setSent(data.sent ?? []);
+    }
+  }, [filterService]);
 
   useEffect(() => {
-    if (day === today) return;
+    if (day === today && !filterService) return;
     load(day);
-  }, [day, today, load]);
+  }, [day, today, filterService, load]);
+
+  async function switchService(id) {
+    await fetch("/api/hotel/service", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ serviceId: id }) });
+    window.location.reload();
+  }
+  const serviceName = Object.fromEntries(allServices.map((s) => [s.id, s.name]));
 
   // Le poste de réception reste ouvert toute la journée : la page se met à jour
   // toute seule pour que les messages des autres équipes apparaissent.
@@ -169,6 +181,38 @@ export default function CahierClient({ hotelName, mode, today, initialItems, tag
         </div>
       )}
 
+      {service && (
+        <div className="mb-5 print:hidden">
+          <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-ink px-5 py-3 text-sand">
+            <span className="text-sm font-bold uppercase tracking-widest text-sand/70">Cahier de</span>
+            <span className="text-2xl font-bold">{service.name}</span>
+          </div>
+          {deviceServices.length > 1 && (
+            <div className="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Services de cet appareil">
+              {deviceServices.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={s.id === service.id}
+                  onClick={() => s.id !== service.id && switchService(s.id)}
+                  className={`${bigBtn} border-2 ${s.id === service.id ? "border-ink bg-ink text-sand" : "border-sand-dim bg-sand text-ink hover:border-ink"}`}
+                >
+                  {s.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      {isManager && allServices.length > 0 && (
+        <div className="mb-5 flex flex-wrap gap-2 print:hidden" aria-label="Filtrer par service">
+          <button type="button" aria-pressed={filterService === ""} onClick={() => setFilterService("")} className={`${bigBtn} border-2 ${filterService === "" ? "border-ink bg-ink text-sand" : "border-sand-dim bg-sand text-ink"}`}>Tous les services</button>
+          {allServices.map((s) => (
+            <button key={s.id} type="button" aria-pressed={filterService === s.id} onClick={() => setFilterService(s.id)} className={`${bigBtn} border-2 ${filterService === s.id ? "border-ink bg-ink text-sand" : "border-sand-dim bg-sand text-ink"}`}>{s.name}</button>
+          ))}
+        </div>
+      )}
       <h1 className="text-2xl font-bold text-ink">{dayLabel ?? formatDayLong(day)}</h1>
       {dayLabel && <p className="mt-1 text-lg capitalize text-ink/70">{formatDayLong(day)}</p>}
       <p className="mt-3 text-lg font-bold text-ink">
@@ -224,6 +268,27 @@ export default function CahierClient({ hotelName, mode, today, initialItems, tag
 
       </div>
 
+      {sent.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-bold text-ink">Envoyées à d'autres services <span className="text-ink/50">({sent.length})</span></h2>
+          <ul className="mt-3 grid gap-3 lg:grid-cols-2 lg:items-start">
+            {sent.map((c) => (
+              <li key={c.id} className="rounded-2xl border-2 border-sand-dim bg-sand p-4 print:break-inside-avoid">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <span className="rounded-xl bg-ink px-3 py-1 text-lg font-bold tabular-nums text-sand">{c.placeName}</span>
+                  <span className="rounded-xl bg-aqua-deep/10 px-3 py-1 text-sm font-bold text-aqua-deep">→ {c.toServiceName}</span>
+                  <span className={`rounded-xl px-3 py-1 text-sm font-bold ${c.done ? "bg-aqua-deep text-sand-card" : "bg-terracotta/30 text-terracotta-deep"}`}>
+                    {c.done ? `Fait${c.closedAt ? ` à ${timeFmt.format(new Date(c.closedAt))}` : ""}` : "Pas encore fait"}
+                  </span>
+                </div>
+                <p className="mt-3 whitespace-pre-wrap break-words text-lg leading-snug text-ink">{c.body}</p>
+                {c.done && c.closedByName && <p className="mt-1 text-sm text-ink/60">Clôturé par {c.closedByName}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section className="mt-12 print:hidden">
         <button type="button" onClick={() => setShowTools((v) => !v)} aria-expanded={showTools} className={`${bigBtn} border-2 border-sand-dim bg-sand text-ink`}>
           <Icon name="print" className="h-6 w-6" /> Imprimer ou télécharger
@@ -256,6 +321,8 @@ export default function CahierClient({ hotelName, mode, today, initialItems, tag
           tags={tags}
           places={places}
           types={types}
+          services={allServices}
+          defaultServiceIds={service ? [service.id] : []}
           onClose={() => setCreating(false)}
           onCreated={() => { setCreating(false); setNotice("C'est enregistré !"); load(day); }}
         />

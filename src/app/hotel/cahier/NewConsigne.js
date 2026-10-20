@@ -19,10 +19,18 @@ const SHIFTS = [
 // Une seule question par écran, des gros boutons, des mots simples : on peut
 // y arriver sans jamais avoir utilisé un ordinateur. Aucune étape n'oblige à
 // comprendre ce qui précède ou ce qui suit.
-export default function NewConsigne({ isManager, today, defaultDay, tags, places, types, onClose, onCreated }) {
-  const steps = isManager ? ["kind", "place", "message", "who"] : ["kind", "place", "message", "who", "pin"];
+export default function NewConsigne({ isManager, today, defaultDay, tags, places, types, services = [], defaultServiceIds = [], onClose, onCreated }) {
+  // Hôtel avec des services : une étape « pour quel service ? » avant « pour qui ? ».
+  const steps = [
+    "kind",
+    "place",
+    "message",
+    ...(services.length > 0 ? ["service"] : []),
+    "who",
+    ...(isManager ? [] : ["pin"]),
+  ];
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState({ kind: null, typeId: null, placeName: "", body: "", shift: "", roleIds: [], urgent: false, day: defaultDay, pinDays: 0 });
+  const [form, setForm] = useState({ serviceIds: defaultServiceIds, kind: null, typeId: null, placeName: "", body: "", shift: "", roleIds: [], urgent: false, day: defaultDay, pinDays: 0 });
   const [showMore, setShowMore] = useState(false);
   const [showRoles, setShowRoles] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -48,6 +56,7 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
     (current === "kind" && form.kind) ||
     (current === "place" && place) ||
     (current === "message" && form.body.trim().length > 0) ||
+    (current === "service" && form.serviceIds.length > 0) ||
     current === "who";
 
   async function send(pin) {
@@ -65,6 +74,7 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
         kind: form.kind,
         typeId: form.typeId && form.typeId !== form.kind ? form.typeId : undefined,
         placeId: place.id,
+        serviceIds: services.length > 0 ? form.serviceIds : undefined,
         tagIds,
         priority: form.urgent,
         day: form.day,
@@ -185,6 +195,32 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
                 placeholder="Ex : Le client demande une serviette en plus avant 18 h."
               />
               <p className="mt-2 text-base text-ink/60">Astuce : sur un téléphone ou une tablette, le micro du clavier écrit à votre place.</p>
+            </>
+          )}
+
+          {!saved && current === "service" && (
+            <>
+              <h2 className="text-3xl font-bold text-ink">Pour quel service ?</h2>
+              <p className="mt-2 text-xl text-ink/70">La consigne apparaît dans le cahier de chaque service choisi.</p>
+              <div className="mt-6 grid gap-3">
+                {services.map((s) => {
+                  const on = form.serviceIds.includes(s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => set({ serviceIds: on ? form.serviceIds.filter((x) => x !== s.id) : [...form.serviceIds, s.id] })}
+                      className={tile(on)}
+                    >
+                      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 ${on ? "border-sand-card bg-sand-card text-aqua-deep" : "border-sand-dim"}`}>
+                        {on && <Icon name="check" className="h-6 w-6" />}
+                      </span>
+                      {s.name}
+                    </button>
+                  );
+                })}
+              </div>
             </>
           )}
 

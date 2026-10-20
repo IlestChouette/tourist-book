@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { getHotelContext, resolveActor } from "@/lib/hotelAuth";
 import { hotelHasAccess } from "@/lib/hotelBilling";
 import { addDays, isDay, parisDate } from "@/lib/hotelTime";
+import crypto from "crypto";
 import { cleanCustomTypes } from "@/lib/hotelTheme";
+import { listServices } from "@/lib/hotelData";
 
 const KINDS = ["info", "tache", "probleme", "plainte"];
 
@@ -61,7 +63,22 @@ export async function POST(request) {
   const actor = await resolveActor(ctx, b.pin);
   if (actor.error) return NextResponse.json({ error: actor.error }, { status: actor.status });
 
-  const { error } = await admin.from("consignes").insert({
+  // Services destinataires : un poste lié à un service écrit par défaut pour
+  // son service ; on peut en viser d'autres (la consigne apparaît chez eux).
+  // Une ligne par service, même group_id : chaque service ferme la sienne.
+  // Hôtel sans services définis : comportement d'avant (une ligne, sans service).
+  const services = await listServices(hotel.id);
+  let targets = [];
+  if (services.length > 0) {
+    const asked = Array.isArray(b.serviceIds) ? b.serviceIds : [];
+    targets = services.filter((s) => asked.includes(s.id)).map((s) => s.id);
+    if (targets.length === 0 && ctx.service) targets = [ctx.service.id];
+    if (targets.length === 0) {
+      return NextResponse.json({ error: "Choisissez pour quel service est cette consigne." }, { status: 400 });
+    }
+  }
+  const groupId = targets.length > 0 ? crypto.randomUUID() : null;
+  const base = {
     hotel_id: hotel.id,
     day,
     body,
@@ -76,7 +93,12 @@ export async function POST(request) {
     created_by_name: actor.staff.name,
     pinned: Boolean(pinnedUntil),
     pinned_until: pinnedUntil,
-  });
+  };
+  const rows =
+    targets.length > 0
+      ? targets.map((serviceId) => ({ ...base, service_id: serviceId, from_service_id: ctx.service?.id ?? null, group_id: groupId }))
+      : [base];
+  const { error } = await admin.from("consignes").insert(rows);
   if (error) {
     console.error("consigne insert failed:", error);
     return NextResponse.json({ error: "Impossible d'enregistrer la consigne." }, { status: 500 });

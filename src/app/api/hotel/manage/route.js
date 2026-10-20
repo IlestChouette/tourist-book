@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { cleanCustomTypes, THEMES } from "@/lib/hotelTheme";
 import { SERVICES, cleanServices } from "@/lib/hotelServices";
 import { stripe } from "@/lib/stripe";
-import { ACTIVATION_MINUTES, PENDING_LABEL, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE } from "@/lib/hotelAuth";
+import { ACTIVATION_MINUTES, MAX_SERVICES_PER_DEVICE, PENDING_LABEL, SERVICE_COOKIE, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE, stationTokens } from "@/lib/hotelAuth";
 
 const fail = (error, status = 400) => NextResponse.json({ error }, { status });
 const PIN_TAKEN = "Ce PIN est déjà utilisé par une autre personne : choisissez-en un autre.";
@@ -68,6 +68,16 @@ export async function POST(request) {
       await admin
         .from("hotel_tags")
         .upsert(SERVICES.filter((s) => ids.includes(s.id)).map((s) => ({ hotel_id: hotel.id, name: s.tag, kind: "role" })), { onConflict: "hotel_id,name", ignoreDuplicates: true });
+      // Les services du cahier suivent : on crée les nouveaux, on désactive les retirés
+      // (jamais supprimés : leurs consignes gardent leur service).
+      const { data: current } = await admin.from("hotel_services").select("id, key, active").eq("hotel_id", hotel.id);
+      const have = new Map((current ?? []).map((r) => [r.key, r]));
+      for (const [i, s] of SERVICES.entries()) {
+        const row = have.get(s.id);
+        const wanted = ids.includes(s.id);
+        if (row && row.active !== wanted) await admin.from("hotel_services").update({ active: wanted }).eq("id", row.id);
+        if (!row && wanted) await admin.from("hotel_services").insert({ hotel_id: hotel.id, key: s.id, name: s.label, position: i + 1 });
+      }
       if (hotel.stripe_subscription_id && ["active", "past_due"].includes(hotel.billing_status) && !hotel.billing_exempt) {
         try {
           const sub = await stripe.subscriptions.retrieve(hotel.stripe_subscription_id);
@@ -179,18 +189,26 @@ export async function POST(request) {
     case "activate_station": {
       const token = crypto.randomBytes(32).toString("hex");
       const label = typeof b.label === "string" && b.label.trim() ? b.label.trim().slice(0, 60) : "Réception";
+      // Avec un service : ce poste ouvre le cahier de ce service (3 services au plus
+      // par appareil). Sans service : ancien mode, tout l'hôtel.
+      let serviceId = null;
+      if (typeof b.serviceId === "string" && b.serviceId) {
+        const { data: svc } = await admin.from("hotel_services").select("id").eq("id", b.serviceId).eq("hotel_id", hotel.id).eq("active", true).maybeSingle();
+        if (!svc) return fail("Service introuvable.", 404);
+        serviceId = svc.id;
+      }
+      const existing = stationTokens(request.cookies.get(STATION_COOKIE)?.value);
+      if (serviceId && existing.length >= MAX_SERVICES_PER_DEVICE) {
+        return fail(`Cet appareil porte déjà ${MAX_SERVICES_PER_DEVICE} services.`, 409);
+      }
       const { error } = await admin
         .from("hotel_stations")
-        .insert({ hotel_id: hotel.id, token_hash: sha256(token), label });
+        .insert({ hotel_id: hotel.id, token_hash: sha256(token), label, service_id: serviceId });
       if (error) return fail("Impossible d'activer ce poste.", 500);
       const res = ok();
-      res.cookies.set(STATION_COOKIE, token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 365,
-      });
+      const cookieOptions = { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365 };
+      res.cookies.set(STATION_COOKIE, serviceId ? [...existing, token].join(".") : token, cookieOptions);
+      if (serviceId) res.cookies.set(SERVICE_COOKIE, serviceId, cookieOptions);
       return res;
     }
     // Code d'activation d'un nouveau poste (6 chiffres, 10 minutes, une fois).
@@ -202,11 +220,18 @@ export async function POST(request) {
         .eq("hotel_id", hotel.id)
         .eq("label", PENDING_LABEL)
         .lt("created_at", new Date(Date.now() - ACTIVATION_MINUTES * 60 * 1000).toISOString());
+      // Code lié à un service : l'appareil qui l'utilise ouvre le cahier de ce service.
+      let serviceId = null;
+      if (typeof b.serviceId === "string" && b.serviceId) {
+        const { data: svc } = await admin.from("hotel_services").select("id").eq("id", b.serviceId).eq("hotel_id", hotel.id).eq("active", true).maybeSingle();
+        if (!svc) return fail("Service introuvable.", 404);
+        serviceId = svc.id;
+      }
       for (let attempt = 0; attempt < 3; attempt++) {
         const code = String(crypto.randomInt(100000, 1000000));
         const { error } = await admin
           .from("hotel_stations")
-          .insert({ hotel_id: hotel.id, token_hash: activationHash(hotel.id, code), label: PENDING_LABEL });
+          .insert({ hotel_id: hotel.id, token_hash: activationHash(hotel.id, code), label: PENDING_LABEL, service_id: serviceId });
         if (!error) return ok({ code, expiresInMinutes: ACTIVATION_MINUTES });
       }
       return fail("Impossible de créer le code.", 500);

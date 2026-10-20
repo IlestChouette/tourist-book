@@ -8,9 +8,10 @@ const linkClass =
 // Habillage des pages de l'application hôtelière : le logo et le nom de
 // l'hôtel, pas ceux de Tourist Book (seulement une mention discrète en bas).
 // `links` : [{ href, label }] affichés à droite de la barre.
-export function HotelHeader({ hotel, title, subtitle, links = [], logout = false }) {
+export function HotelHeader({ hotel, title, subtitle, links = [], logout = false, themeId, serviceName }) {
+  const band = themeById(themeId ?? hotel.theme).band;
   return (
-    <header className="relative bg-aqua print:hidden" style={themeById(hotel.theme).band ? { backgroundColor: themeById(hotel.theme).band } : undefined}>
+    <header className="relative bg-aqua print:hidden" style={band ? { backgroundColor: band } : undefined}>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-4">
         <div className="flex min-w-0 items-center gap-4">
           {hotel.logo_url && (
@@ -20,6 +21,7 @@ export function HotelHeader({ hotel, title, subtitle, links = [], logout = false
             </span>
           )}
           <span className="truncate font-display italic text-xl text-ink sm:text-2xl">{hotel.name}</span>
+          {serviceName && <span className="shrink-0 rounded-md bg-ink px-3 py-1.5 text-sm font-bold uppercase tracking-widest text-sand">{serviceName}</span>}
         </div>
         <nav className="flex flex-wrap gap-2">
           {links.map((l) => (

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { HotelFooter, HotelHeader } from "@/components/HotelShell";
 import { getHotelContext } from "@/lib/hotelAuth";
-import { loadMeta } from "@/lib/hotelData";
+import { listServices, loadMeta } from "@/lib/hotelData";
 import { PENDING_LABEL } from "@/lib/hotelAuth";
 import { slugForHotel } from "@/lib/hotelSlug";
 import { cleanCustomTypes } from "@/lib/hotelTheme";
@@ -30,15 +30,16 @@ export default async function GestionPage() {
   if (ctx.mode !== "manager") redirect("/hotel/cahier");
 
   const { admin, hotel } = ctx;
-  const [meta, { data: staff }, { data: stations }, slug] = await Promise.all([
+  const [meta, { data: staff }, { data: stations }, slug, hotelServices] = await Promise.all([
     loadMeta(hotel.id),
     admin
       .from("hotel_staff")
       .select("id, name, role_ids, is_manager, active, pin_hash")
       .eq("hotel_id", hotel.id)
       .order("created_at", { ascending: true }),
-    admin.from("hotel_stations").select("id, label, created_at").eq("hotel_id", hotel.id).neq("label", PENDING_LABEL).order("created_at"),
+    admin.from("hotel_stations").select("id, label, created_at, service_id").eq("hotel_id", hotel.id).neq("label", PENDING_LABEL).order("created_at"),
     slugForHotel(hotel.id, admin),
+    listServices(hotel.id),
   ]);
 
   // Services facturés : choix de l'hôtel, sinon ceux dont l'étiquette existe déjà.
@@ -57,6 +58,7 @@ export default async function GestionPage() {
           places={meta.places}
           staff={(staff ?? []).map((s) => ({ ...s, hasPin: Boolean(s.pin_hash), pin_hash: undefined }))}
           stations={stations ?? []}
+          hotelServices={hotelServices}
           cahierPath={slug ? `/hotel/${slug}/cahier` : "/hotel/cahier"}
           billing={
             hotel.billing_status === undefined

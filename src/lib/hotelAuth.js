@@ -4,6 +4,19 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const STATION_COOKIE = "tb_hotel_station";
+// Service affiché sur un poste qui en porte plusieurs (id du service, pas un secret :
+// il est revérifié contre les services réellement activés sur le poste).
+export const SERVICE_COOKIE = "tb_hotel_service";
+export const MAX_SERVICES_PER_DEVICE = 3;
+
+// Le cookie du poste porte 1 à 3 jetons séparés par un point (un par service).
+// Un ancien cookie, avec un seul jeton, reste valable tel quel.
+export function stationTokens(raw) {
+  return String(raw ?? "")
+    .split(".")
+    .filter((t) => /^[0-9a-f]{64}$/.test(t))
+    .slice(0, MAX_SERVICES_PER_DEVICE);
+}
 const MAX_PIN_FAILURES = 8;
 const PIN_LOCK_MINUTES = 10;
 
@@ -42,17 +55,34 @@ export async function getHotelContext() {
   } = await supabase.auth.getUser();
   if (user) {
     const { data: hotel } = await admin.from("hotels").select("*").eq("owner_id", user.id).maybeSingle();
-    if (hotel) return { mode: "manager", hotel, user, admin };
+    if (hotel) return { mode: "manager", hotel, user, service: null, services: null, admin };
   }
 
-  const token = (await cookies()).get(STATION_COOKIE)?.value;
-  if (token) {
-    const { data: station } = await admin
+  const jar = await cookies();
+  const tokens = stationTokens(jar.get(STATION_COOKIE)?.value);
+  if (tokens.length) {
+    const { data: rows } = await admin
       .from("hotel_stations")
-      .select("id, label, hotels(*)")
-      .eq("token_hash", sha256(token))
-      .maybeSingle();
-    if (station?.hotels) return { mode: "station", hotel: station.hotels, station, admin };
+      .select("id, label, service_id, hotels(*), hotel_services(id, key, name, color, position, active)")
+      .in("token_hash", tokens.map(sha256));
+    const valid = (rows ?? []).filter((r) => r.hotels);
+    if (valid.length) {
+      const hotel = valid[0].hotels;
+      const same = valid.filter((r) => r.hotels.id === hotel.id);
+      // Ancien poste (sans service) : il voit tout l'hôtel, comme avant.
+      const legacy = same.find((r) => !r.service_id);
+      if (legacy) return { mode: "station", hotel, station: legacy, service: null, services: [], admin };
+
+      const services = same
+        .filter((r) => r.hotel_services?.active)
+        .map((r) => ({ ...r.hotel_services, stationId: r.id }))
+        .sort((a, b) => a.position - b.position);
+      // Tous les services de ce poste ont été désactivés : plus d'accès.
+      if (services.length === 0) return null;
+      const wanted = jar.get(SERVICE_COOKIE)?.value;
+      const service = services.find((s) => s.id === wanted) ?? services[0];
+      return { mode: "station", hotel, station: { id: service.stationId }, service, services, admin };
+    }
   }
   return null;
 }
