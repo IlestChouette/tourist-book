@@ -6,13 +6,27 @@ import { PENDING_LABEL } from "@/lib/hotelAuth";
 import { slugForHotel } from "@/lib/hotelSlug";
 import { cleanCustomTypes } from "@/lib/hotelTheme";
 import { cleanServices, servicesFromTags } from "@/lib/hotelServices";
+import { createClient } from "@/lib/supabase/server";
+import CreateHotel from "./CreateHotel";
 import GestionClient from "./GestionClient";
 
 export const metadata = { title: "Gestion du cahier", robots: { index: false, follow: false } };
 
 export default async function GestionPage() {
   const ctx = await getHotelContext();
-  if (!ctx) redirect("/hotel/connexion");
+  if (!ctx) {
+    // Connecté mais sans hôtel (compte de livrets) : on propose d'en créer un.
+    const {
+      data: { user },
+    } = await (await createClient()).auth.getUser();
+    if (!user) redirect("/hotel/connexion");
+    return (
+      <main className="flex-1 bg-sand-card/50">
+        <CreateHotel email={user.email} />
+        <HotelFooter />
+      </main>
+    );
+  }
   if (ctx.mode !== "manager") redirect("/hotel/cahier");
 
   const { admin, hotel } = ctx;
