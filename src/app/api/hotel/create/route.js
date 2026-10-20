@@ -12,6 +12,11 @@ export async function POST(request) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Connectez-vous d'abord." }, { status: 401 });
 
+  // Un accès de service sert uniquement à activer un appareil : jamais à créer un hôtel.
+  if (user.user_metadata?.account_type === "hotel_service") {
+    return NextResponse.json({ error: "Cet accès est celui d'un service : il ne peut pas créer d'hôtel." }, { status: 403 });
+  }
+
   const b = await request.json().catch(() => ({}));
   const name = typeof b.name === "string" ? b.name.trim() : "";
   if (name.length < 2 || name.length > 120) {

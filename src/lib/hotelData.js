@@ -79,7 +79,8 @@ export async function loadSent(hotelId, fromServiceId, day) {
     closedAt: c.closed_at ?? progress.get(c.id)?.lastAt ?? null,
     closedByName: c.closed_by_name ?? null,
     requireAll: Boolean(c.require_all),
-    ack: progress.get(c.id) ? { expected: progress.get(c.id).expected, acked: progress.get(c.id).acked, missingNames: progress.get(c.id).missingNames } : null,
+    // Un poste ne voit que les chiffres, jamais les noms : seul le manager les voit.
+    ack: progress.get(c.id) ? { expected: progress.get(c.id).expected, acked: progress.get(c.id).acked } : null,
   }));
 }
 

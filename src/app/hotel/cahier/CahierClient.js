@@ -301,7 +301,7 @@ export default function CahierClient({ hotelName, mode, today, initialItems, ini
                   </span>
                 </div>
                 <p className="mt-3 whitespace-pre-wrap break-words text-lg leading-snug text-ink">{c.body}</p>
-                {c.requireAll && c.ack && <p className="mt-1 text-sm text-ink/60">{c.ack.acked} sur {c.ack.expected} ont validé{c.ack.missingNames?.length ? ` · il manque : ${c.ack.missingNames.join(", ")}` : ""}</p>}
+                {c.requireAll && c.ack && <p className="mt-1 text-sm text-ink/60">{c.ack.acked} sur {c.ack.expected} ont validé</p>}
                 {c.done && c.closedByName && <p className="mt-1 text-sm text-ink/60">Clôturé par {c.closedByName}</p>}
               </li>
             ))}

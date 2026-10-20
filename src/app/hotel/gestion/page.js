@@ -19,7 +19,7 @@ export default async function GestionPage() {
     const {
       data: { user },
     } = await (await createClient()).auth.getUser();
-    if (!user) redirect("/hotel/connexion");
+    if (!user || user.user_metadata?.account_type === "hotel_service") redirect("/hotel/connexion");
     return (
       <main className="flex-1 bg-sand-card/50">
         <CreateHotel email={user.email} />

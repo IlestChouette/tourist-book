@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getHotelContext } from "@/lib/hotelAuth";
+import { hotelHasAccess } from "@/lib/hotelBilling";
 import { loadDay, loadMeta } from "@/lib/hotelData";
 import { buildDayPdf } from "@/lib/hotelPdf";
 import { isDay, parisDate } from "@/lib/hotelTime";
@@ -9,6 +10,11 @@ import { isDay, parisDate } from "@/lib/hotelTime";
 export async function GET(request) {
   const ctx = await getHotelContext();
   if (!ctx) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+
+  // Abonnement en pause : les postes ne lisent plus rien (le manager garde accès pour régler).
+  if (ctx.mode !== "manager" && !hotelHasAccess(ctx.hotel)) {
+    return NextResponse.json({ error: "L'accès au cahier est suspendu. Prévenez votre manager." }, { status: 402 });
+  }
 
   const day = new URL(request.url).searchParams.get("day") || parisDate();
   if (!isDay(day)) return NextResponse.json({ error: "Date invalide" }, { status: 400 });
