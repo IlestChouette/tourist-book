@@ -174,6 +174,10 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
                 autoFocus
                 rows={6}
                 maxLength={2000}
+                spellCheck
+                lang="fr"
+                autoCorrect="on"
+                autoCapitalize="sentences"
                 value={form.body}
                 onChange={(e) => set({ body: e.target.value })}
                 aria-label="Votre message"

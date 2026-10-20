@@ -1,5 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { addDays, daysBetween, parisDate } from "@/lib/hotelTime";
+import { normalize, searchTerms } from "@/lib/hotelSearch";
+import { typeOf } from "@/lib/hotelTheme";
 
 export const KIND_LABELS = { info: "Info", tache: "Tâche", probleme: "Problème", plainte: "Plainte" };
 
@@ -72,4 +74,50 @@ export async function loadPending(hotelId, today) {
   return items
     .filter((i) => !i.done)
     .sort((a, b) => Number(b.priority || b.carried) - Number(a.priority || a.carried) || a.createdAt.localeCompare(b.createdAt));
+}
+
+// Recherche par mots-clés dans toutes les consignes conservées (les plus
+// récentes d'abord) : « colis 405 » trouve ce qui parle de colis ET de la 405.
+// Les noms (qui a écrit / clôturé) ne sont donnés qu'au manager.
+const SEARCH_SCAN_LIMIT = 5000;
+const SEARCH_RESULT_LIMIT = 40;
+
+export async function searchConsignes(hotelId, query, { showNames, customTypes }) {
+  const terms = searchTerms(query);
+  if (terms.length === 0) return { items: [], total: 0 };
+
+  const admin = createAdminClient();
+  const [{ data }, meta] = await Promise.all([
+    admin
+      .from("consignes")
+      .select("*")
+      .eq("hotel_id", hotelId)
+      .order("day", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(SEARCH_SCAN_LIMIT),
+    loadMeta(hotelId),
+  ]);
+  const tagName = Object.fromEntries(meta.tags.map((t) => [t.id, t.name]));
+
+  const found = (data ?? []).filter((c) => {
+    const haystack = normalize(
+      [c.body, c.place_name, (c.tag_ids ?? []).map((id) => tagName[id]).join(" "), typeOf(customTypes, c.kind, c.type_id).short].join(" ")
+    );
+    return terms.every((t) => haystack.includes(t));
+  });
+
+  const items = found.slice(0, SEARCH_RESULT_LIMIT).map((c) => ({
+    id: c.id,
+    day: c.day,
+    body: c.body,
+    kind: c.kind,
+    typeId: c.type_id ?? null,
+    placeName: c.place_name,
+    tagIds: c.tag_ids ?? [],
+    createdAt: c.created_at,
+    done: Boolean(c.closed_at),
+    closedAt: c.closed_at,
+    ...(showNames ? { createdByName: c.created_by_name, closedByName: c.closed_by_name } : {}),
+  }));
+  return { items, total: found.length };
 }

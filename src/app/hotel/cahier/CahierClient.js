@@ -5,6 +5,7 @@ import { addDays, formatDayLong } from "@/lib/hotelTime";
 import { Icon } from "./CahierIcons";
 import NewConsigne from "./NewConsigne";
 import PinPad from "./PinPad";
+import SearchPanel from "./SearchPanel";
 import { TONES, typeOf } from "@/lib/hotelTheme";
 
 const focus = "focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-aqua-deep";
@@ -32,6 +33,7 @@ export default function CahierClient({ hotelName, mode, today, initialItems, tag
   const [showDate, setShowDate] = useState(false);
   const [team, setTeam] = useState("");
   const [notice, setNotice] = useState("");
+  const [searching, setSearching] = useState(false);
   const tagName = useMemo(() => Object.fromEntries(tags.map((t) => [t.id, t.name])), [tags]);
   const shifts = tags.filter((t) => t.kind === "shift");
 
@@ -181,6 +183,9 @@ export default function CahierClient({ hotelName, mode, today, initialItems, tag
         <Icon name="plus" className="h-6 w-6" /> Écrire une consigne
       </button>
 
+      <SearchPanel customTypes={customTypes} tagName={tagName} onActive={setSearching} />
+
+      <div className={searching ? "hidden" : undefined}>
       <div className="mt-4 flex flex-wrap gap-3 print:hidden">
         <button type="button" onClick={() => setDay(addDays(day, -1))} className={`${bigBtn} border-2 border-sand-dim bg-sand text-ink`}><Icon name="back" className="h-6 w-6" /> Hier</button>
         {day !== today && <button type="button" onClick={() => setDay(today)} className={`${bigBtn} border-2 border-aqua-deep bg-sand text-aqua-deep`}>Aujourd'hui</button>}
@@ -216,6 +221,8 @@ export default function CahierClient({ hotelName, mode, today, initialItems, tag
           <ul className={`mt-3 grid gap-3 lg:grid-cols-2 lg:items-start ${showDone ? "" : "hidden print:grid"}`}>{done.map(card)}</ul>
         </section>
       )}
+
+      </div>
 
       <section className="mt-12 print:hidden">
         <button type="button" onClick={() => setShowTools((v) => !v)} aria-expanded={showTools} className={`${bigBtn} border-2 border-sand-dim bg-sand text-ink`}>
