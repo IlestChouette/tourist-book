@@ -523,12 +523,12 @@ export default async function AdminPage() {
           </Link>
           <span className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70">Admin</span>
         </div>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <div className="flex flex-wrap items-center gap-2">
           <a
             href="https://analytics.google.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+            className="rounded-full bg-[#f7f1e4]/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.analytics}
           </a>
@@ -536,25 +536,25 @@ export default async function AdminPage() {
             href="https://search.google.com/search-console?resource_id=sc-domain:tourist-book.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+            className="rounded-full bg-[#f7f1e4]/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.searchConsole}
           </a>
           <Link
             href="/admin/identidad"
-            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+            className="rounded-full bg-[#f7f1e4]/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.identityLookup}
           </Link>
           <Link
             href="/admin/tarifas"
-            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+            className="rounded-full bg-[#f7f1e4]/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.transferRates}
           </Link>
           <Link
             href="/admin/estadisticas"
-            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+            className="rounded-full bg-[#f7f1e4]/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.livretStats}
           </Link>
@@ -562,11 +562,11 @@ export default async function AdminPage() {
             href="/transfer-independiente"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+            className="rounded-full bg-[#f7f1e4]/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.independentTransfer}
           </Link>
-          <LogoutButton className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]" />
+          <LogoutButton className="rounded-full border border-[#f7f1e4]/60 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]" />
         </div>
       </div>
 
