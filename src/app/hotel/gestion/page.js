@@ -52,7 +52,7 @@ export default async function GestionPage() {
 
   return (
     <main className="flex-1 bg-sand-card/50">
-      <HotelHeader hotel={hotel} logout title="Gestion" subtitle="Équipe, chambres, étiquettes et emails du cahier de consignes." links={[{ href: "/hotel/cahier", label: "Cahier" }, ...(hotel.lost_found_enabled === true ? [{ href: "/hotel/objets-trouves", label: "Objets trouvés" }] : []), { href: "/hotel/statistiques", label: "Statistiques" }]} />
+      <HotelHeader hotel={hotel} logout title="Gestion" subtitle="Équipe, chambres, étiquettes et emails du cahier de consignes." links={[{ href: "/hotel/cahier", label: "Cahier" }, ...(hotel.lost_found_enabled === true ? [{ href: "/hotel/objets-trouves", label: "Objets trouvés" }] : []), { href: "/hotel/suivi", label: "Suivi" }, { href: "/hotel/statistiques", label: "Statistiques" }]} />
       <section className="mx-auto max-w-3xl px-6 py-8">
         <GestionClient
           userId={ctx.user.id}

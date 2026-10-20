@@ -19,7 +19,7 @@ const SHIFTS = [
 // Une seule question par écran, des gros boutons, des mots simples : on peut
 // y arriver sans jamais avoir utilisé un ordinateur. Aucune étape n'oblige à
 // comprendre ce qui précède ou ce qui suit.
-export default function NewConsigne({ isManager, today, defaultDay, tags, places, types, services = [], defaultServiceIds = [], onClose, onCreated }) {
+export default function NewConsigne({ isManager, managerHasPin = false, today, defaultDay, tags, places, types, services = [], defaultServiceIds = [], onClose, onCreated }) {
   // Hôtel avec des services : une étape « pour quel service ? » avant « pour qui ? ».
   const steps = [
     "kind",
@@ -27,7 +27,7 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
     "message",
     ...(services.length > 0 ? ["service"] : []),
     "who",
-    ...(isManager ? [] : ["pin"]),
+    ...(isManager && !managerHasPin ? [] : ["pin"]),
   ];
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({ requireAll: false, serviceIds: defaultServiceIds, kind: null, typeId: null, placeName: "", body: "", shift: "", roleIds: [], urgent: false, day: defaultDay, pinDays: 0 });
@@ -325,7 +325,7 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
       {!saved && current !== "kind" && current !== "pin" && (
         <div className="border-t-2 border-sand-dim bg-sand px-5 py-4">
           <div className="mx-auto max-w-xl">
-            {current === "who" && isManager ? (
+            {current === "who" && isManager && !managerHasPin ? (
               <button type="button" disabled={busy} onClick={() => send("")} className={`flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-terracotta text-2xl font-bold text-ink hover:bg-terracotta-deep disabled:opacity-60 ${focus}`}>
                 <Icon name="check" className="h-8 w-8" /> {busy ? "Envoi…" : "Envoyer"}
               </button>

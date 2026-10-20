@@ -60,7 +60,7 @@ export async function POST(request) {
     pinnedUntil = `${b.pinnedUntil}T21:59:59Z`;
   }
 
-  const actor = await resolveActor(ctx, b.pin);
+  const actor = await resolveActor(ctx, b.pin, { managerPin: true });
   if (actor.error) return NextResponse.json({ error: actor.error }, { status: actor.status });
 
   // Services destinataires : un poste lié à un service écrit par défaut pour

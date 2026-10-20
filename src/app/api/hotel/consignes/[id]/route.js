@@ -41,7 +41,7 @@ export async function PATCH(request, { params }) {
     if (!consigne.require_all) return NextResponse.json({ error: "Action invalide." }, { status: 400 });
     if (consigne.closed_at) return NextResponse.json({ ok: true, complete: true });
 
-    const who = await resolveActor(ctx, b.pin);
+    const who = await resolveActor(ctx, b.pin, { managerPin: true });
     if (who.error) return NextResponse.json({ error: who.error }, { status: who.status });
     const { data: person } = await admin.from("hotel_staff").select("service_ids").eq("id", who.staff.id).maybeSingle();
     if (!(person?.service_ids ?? []).includes(consigne.service_id)) {
@@ -72,7 +72,7 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: "Seul le manager peut rouvrir une consigne." }, { status: 403 });
   }
 
-  const actor = await resolveActor(ctx, b.pin);
+  const actor = await resolveActor(ctx, b.pin, { managerPin: b.action === "close" || b.action === "reopen" });
   if (actor.error) return NextResponse.json({ error: actor.error }, { status: actor.status });
 
   let update;

@@ -22,7 +22,7 @@ async function patch(id, body) {
 
 // Un écran, une action principale : écrire. Le reste se lit de haut en bas :
 // d'abord ce qui est important pour tous, puis ce qu'il reste à faire.
-export default function CahierClient({ hotelName, mode, today, initialItems, initialSent = [], tags, places, customTypes, types, service = null, deviceServices = [], allServices = [] }) {
+export default function CahierClient({ hotelName, mode, today, initialItems, initialSent = [], managerHasPin = false, tags, places, customTypes, types, service = null, deviceServices = [], allServices = [] }) {
   const isManager = mode === "manager";
   const [day, setDay] = useState(today);
   const [items, setItems] = useState(initialItems);
@@ -101,7 +101,9 @@ export default function CahierClient({ hotelName, mode, today, initialItems, ini
   // Le manager est identifié d'office ; sur le poste de réception, on demande
   // le code à 4 chiffres, une fois par action.
   async function request(id, action, extra = {}) {
-    if (isManager && !(action === "pin" && !extra.until)) {
+    // Le code personnel est demandé à tous, manager compris (sauf épingler / désépingler).
+    const skipPin = isManager && (!managerHasPin || action === "pin" || action === "unpin");
+    if (skipPin && !(action === "pin" && !extra.until)) {
       const ok = await run(id, { action, ...extra });
       if (ok) setNotice(action === "close" ? "C'est noté, merci !" : "C'est fait.");
       return;
@@ -334,6 +336,7 @@ export default function CahierClient({ hotelName, mode, today, initialItems, ini
       {creating && (
         <NewConsigne
           isManager={isManager}
+          managerHasPin={managerHasPin}
           today={today}
           defaultDay={day < today ? today : day}
           tags={tags}

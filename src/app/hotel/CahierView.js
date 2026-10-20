@@ -33,6 +33,10 @@ export default async function CahierView({ ctx }) {
     );
   }
 
+  // Le manager a-t-il défini son code personnel ? Alors il le tape aussi (publier, valider).
+  const managerHasPin = isManager
+    ? Boolean((await ctx.admin.from("hotel_staff").select("id").eq("hotel_id", ctx.hotel.id).eq("is_manager", true).not("pin_hash", "is", null).maybeSingle()).data)
+    : false;
   const [items, meta, allServices, sent] = await Promise.all([
     loadDay(ctx.hotel.id, today, isManager, { serviceId: ctx.service?.id }),
     loadMeta(ctx.hotel.id),
@@ -61,6 +65,7 @@ export default async function CahierView({ ctx }) {
           // par /hotel/connexion. Moins de boutons, moins de questions.
           ...(isManager
             ? [
+                { href: "/hotel/suivi", label: "Suivi" },
                 { href: "/hotel/statistiques", label: "Statistiques" },
                 { href: "/hotel/gestion", label: "Gestion" },
               ]
@@ -68,7 +73,7 @@ export default async function CahierView({ ctx }) {
         ]}
       />
       <section className="mx-auto max-w-6xl px-6 py-8">
-        <CahierClient hotelName={ctx.hotel.name} mode={ctx.mode} today={today} initialItems={items} initialSent={sent} service={ctx.service} deviceServices={ctx.services ?? []} allServices={allServices} tags={meta.tags} places={meta.places} customTypes={customTypes} types={selectableTypes(customTypes)} />
+        <CahierClient hotelName={ctx.hotel.name} mode={ctx.mode} today={today} initialItems={items} initialSent={sent} managerHasPin={managerHasPin} service={ctx.service} deviceServices={ctx.services ?? []} allServices={allServices} tags={meta.tags} places={meta.places} customTypes={customTypes} types={selectableTypes(customTypes)} />
       </section>
       <HotelFooter />
     </main>

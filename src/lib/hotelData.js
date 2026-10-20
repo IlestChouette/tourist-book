@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { addDays, daysBetween, parisDate } from "@/lib/hotelTime";
+import { addDays, daysBetween, isDay, parisDate } from "@/lib/hotelTime";
 import { normalize, searchTerms } from "@/lib/hotelSearch";
 import { typeOf } from "@/lib/hotelTheme";
 
@@ -207,4 +207,66 @@ export async function searchConsignes(hotelId, query, { showNames, customTypes, 
     ...(showNames ? { createdByName: c.created_by_name, closedByName: c.closed_by_name } : {}),
   }));
   return { items, total: found.length };
+}
+
+// Suivi du manager : toutes les consignes de tous les services, avec qui les a
+// écrites, pour qui, si elles sont faites et par qui (ou, pour une consigne à
+// valider par tous, qui a validé et qui manque). Filtres : mots-clés (sans
+// accents, tous les mots), service (écrit ou reçu par), état, période.
+const OVERVIEW_SCAN_LIMIT = 5000;
+
+export async function overviewConsignes(hotelId, { q = "", serviceId, status = "all", from, to, limit = 40, offset = 0, customTypes } = {}) {
+  const terms = searchTerms(q);
+  const admin = createAdminClient();
+  let query = admin.from("consignes").select("*").eq("hotel_id", hotelId);
+  if (isDay(from)) query = query.gte("day", from);
+  if (isDay(to)) query = query.lte("day", to);
+  if (isUuid(serviceId)) query = query.or(`service_id.eq.${serviceId},from_service_id.eq.${serviceId}`);
+  if (status === "open") query = query.is("closed_at", null);
+  if (status === "done") query = query.not("closed_at", "is", null);
+  const [{ data }, services] = await Promise.all([
+    query.order("day", { ascending: false }).order("created_at", { ascending: false }).limit(OVERVIEW_SCAN_LIMIT),
+    listServices(hotelId),
+  ]);
+  const name = Object.fromEntries(services.map((s) => [s.id, s.name]));
+  const progress = await ackProgress(admin, hotelId, data ?? []);
+
+  let items = (data ?? []).map((c) => {
+    const pr = progress.get(c.id);
+    const done = Boolean(c.closed_at) || Boolean(c.require_all && pr?.complete);
+    return {
+      id: c.id,
+      day: c.day,
+      body: c.body,
+      kind: c.kind,
+      typeId: c.type_id ?? null,
+      placeName: c.place_name,
+      priority: Boolean(c.priority),
+      createdAt: c.created_at,
+      createdByName: c.created_by_name,
+      fromServiceName: c.from_service_id ? name[c.from_service_id] ?? null : null,
+      toServiceName: c.service_id ? name[c.service_id] ?? null : null,
+      done,
+      closedAt: c.closed_at ?? pr?.lastAt ?? null,
+      closedByName: c.closed_by_name ?? null,
+      requireAll: Boolean(c.require_all),
+      ack: pr ? { expected: pr.expected, acked: pr.acked, ackNames: pr.ackNames, missingNames: pr.missingNames } : null,
+    };
+  });
+  if (status === "open") items = items.filter((i) => !i.done);
+  if (terms.length > 0) {
+    items = items.filter((i) => {
+      const haystack = normalize(
+        [i.body, i.placeName, i.fromServiceName, i.toServiceName, i.createdByName, i.closedByName, (i.ack?.ackNames ?? []).join(" "), (i.ack?.missingNames ?? []).join(" "), typeOf(customTypes, i.kind, i.typeId).short].join(" ")
+      );
+      return terms.every((t) => haystack.includes(t));
+    });
+  }
+  return {
+    total: items.length,
+    open: items.filter((i) => !i.done).length,
+    done: items.filter((i) => i.done).length,
+    items: items.slice(offset, offset + limit),
+    all: items,
+  };
 }

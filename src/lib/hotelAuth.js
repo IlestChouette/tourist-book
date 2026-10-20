@@ -90,10 +90,33 @@ export async function getHotelContext() {
 // Identifie la personne qui agit. Manager connecté : sa fiche d'équipe, sans
 // PIN. Poste de réception : le PIN saisi, avec blocage temporaire après trop
 // d'essais ratés (4 chiffres se devineraient vite sinon).
-export async function resolveActor(ctx, pin) {
+export async function resolveActor(ctx, pin, { managerPin = false } = {}) {
   const { admin, hotel } = ctx;
 
   if (ctx.mode === "manager") {
+    // Publier ou valider : le code personnel est demandé à tout le monde, manager
+    // compris (une personne peut valider depuis le poste du manager : le nom
+    // enregistré est celui du code). Sans code défini, le manager reste identifié d'office.
+    if (managerPin) {
+      const { data: managerRow } = await admin
+        .from("hotel_staff")
+        .select("id, name, pin_hash")
+        .eq("hotel_id", hotel.id)
+        .eq("is_manager", true)
+        .maybeSingle();
+      if (isPin(pin)) {
+        const { data: person } = await admin
+          .from("hotel_staff")
+          .select("id, name")
+          .eq("hotel_id", hotel.id)
+          .eq("pin_hash", pinHash(hotel.id, pin))
+          .eq("active", true)
+          .maybeSingle();
+        if (!person) return { error: "PIN incorrect.", status: 403 };
+        return { staff: person };
+      }
+      if (managerRow?.pin_hash) return { error: "Saisissez votre code personnel à 4 chiffres.", status: 400 };
+    }
     let { data: staff } = await admin
       .from("hotel_staff")
       .select("id, name")
