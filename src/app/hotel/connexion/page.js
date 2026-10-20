@@ -38,13 +38,30 @@ export default function HotelConnexionPage() {
       setSending(false);
       return setError(message);
     }
+    // Compte d'un service : l'appareil est activé pour ce service et on ouvre son cahier.
+    try {
+      const res = await fetch("/api/hotel/service-login", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        await fetch("/api/hotel/logout", { method: "POST" }).catch(() => {});
+        setSending(false);
+        return setError(data.error || "Impossible d'ouvrir le cahier. Réessayez.");
+      }
+      if (data.service) {
+        window.location.href = data.slug ? `/hotel/${data.slug}/cahier` : "/hotel/cahier";
+        return;
+      }
+    } catch {
+      // Hors ligne ou erreur réseau : on suit le chemin du manager.
+    }
     window.location.href = "/hotel/gestion";
   }
 
   return (
     <main className="flex-1">
-      <Hero backHref="/hotel" backLabel="Espace hôtels" eyebrow="Espace hôtels" title="Connexion manager" />
+      <Hero backHref="/hotel" backLabel="Espace hôtels" eyebrow="Espace hôtels" title="Connexion" />
       <section className="mx-auto max-w-sm px-6 py-10">
+        <p className="mb-5 text-sm text-ink/70">Manager de l'hôtel, ou accès d'un service (réception, conciergerie…) créé par votre manager.</p>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <label className="grid gap-1.5">
             <span className="text-xs font-bold uppercase tracking-wider text-ink/60">Email</span>

@@ -7,6 +7,7 @@ import QRCode from "qrcode";
 import { uploadMedia } from "@/lib/uploadMedia";
 import { ThemePicker, TypesEditor } from "./AppearanceEditors";
 import { ServicesEditor } from "./ServicesEditor";
+import ServiceAccounts from "./ServiceAccounts";
 
 const label = "text-xs font-bold uppercase tracking-wider text-ink/60";
 const btn = "rounded bg-aqua-deep px-4 py-2 text-sm font-bold text-sand-card hover:bg-aqua-deep/90 disabled:opacity-60";
@@ -199,7 +200,7 @@ function BillingCard({ billing }) {
   );
 }
 
-export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath, billing, appearance, servicesInfo, hotelServices = [] }) {
+export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath, billing, appearance, servicesInfo, hotelServices = [], serviceAccounts = null }) {
   const [stationService, setStationService] = useState("");
   const serviceNameById = Object.fromEntries(hotelServices.map((s) => [s.id, s.name]));
   const router = useRouter();
@@ -415,6 +416,12 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
             busy={busy}
             onSave={(services) => call({ action: "set_services", services }, "Services enregistrés.")}
           />
+        </Card>
+      )}
+
+      {serviceAccounts && hotelServices.length > 0 && (
+        <Card title="Accès des services" hint="Un email et un mot de passe par service. La personne se connecte sur la page de connexion de l'hôtel et l'ordinateur ouvre directement le cahier de son service (jusqu'à 3 services par ordinateur, sans retaper le mot de passe). Chacun signe ensuite avec son code personnel. L'email doit être nouveau : il ne peut pas déjà avoir un compte Tourist Book.">
+          <ServiceAccounts services={hotelServices} accounts={serviceAccounts} busy={busy} call={call} />
         </Card>
       )}
 

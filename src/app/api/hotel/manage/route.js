@@ -99,6 +99,56 @@ export async function POST(request) {
       return ok({ count: ids.length });
     }
 
+    // Accès d'un service (email + mot de passe) : sert à activer un appareil pour
+    // ce service. Le compte est confirmé d'office (aucun email n'est envoyé).
+    case "create_service_account": {
+      const email = String(b.email ?? "").trim().toLowerCase();
+      const password = String(b.password ?? "");
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail("Cette adresse email n'est pas valide.");
+      if (password.length < 8) return fail("Le mot de passe doit avoir au moins 8 caractères.");
+      const { data: svc } = await admin.from("hotel_services").select("id, account_user_id").eq("id", b.serviceId ?? "").eq("hotel_id", hotel.id).eq("active", true).maybeSingle();
+      if (!svc) return fail("Service introuvable.", 404);
+      if (svc.account_user_id) return fail("Ce service a déjà un accès. Changez son mot de passe ou supprimez-le d'abord.");
+      const { data: created, error: createError } = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { account_type: "hotel_service", hotel_id: hotel.id },
+      });
+      if (createError || !created?.user) {
+        const taken = /already|registered|exists/i.test(createError?.message ?? "");
+        return fail(taken ? "Cet email est déjà utilisé par un autre compte : choisissez-en un autre." : "Impossible de créer l'accès.", taken ? 409 : 500);
+      }
+      const { error: linkError } = await admin.from("hotel_services").update({ account_user_id: created.user.id, account_email: email }).eq("id", svc.id);
+      if (linkError) {
+        await admin.auth.admin.deleteUser(created.user.id);
+        return fail("Impossible de créer l'accès.", 500);
+      }
+      return ok();
+    }
+    case "set_service_password": {
+      const password = String(b.password ?? "");
+      if (password.length < 8) return fail("Le mot de passe doit avoir au moins 8 caractères.");
+      const { data: svc } = await admin.from("hotel_services").select("account_user_id").eq("id", b.serviceId ?? "").eq("hotel_id", hotel.id).maybeSingle();
+      if (!svc?.account_user_id) return fail("Ce service n'a pas d'accès.", 404);
+      const { error: updateError } = await admin.auth.admin.updateUserById(svc.account_user_id, { password });
+      return updateError ? fail("Impossible de changer le mot de passe.", 500) : ok();
+    }
+    case "delete_service_account": {
+      const { data: svc } = await admin.from("hotel_services").select("id, account_user_id").eq("id", b.serviceId ?? "").eq("hotel_id", hotel.id).maybeSingle();
+      if (!svc?.account_user_id) return fail("Ce service n'a pas d'accès.", 404);
+      await admin.from("hotel_services").update({ account_user_id: null, account_email: null }).eq("id", svc.id);
+      await admin.auth.admin.deleteUser(svc.account_user_id);
+      return ok();
+    }
+    // Déconnecte tous les appareils d'un service (départ d'un employé, appareil perdu).
+    case "revoke_service_devices": {
+      const { data: svc } = await admin.from("hotel_services").select("id").eq("id", b.serviceId ?? "").eq("hotel_id", hotel.id).maybeSingle();
+      if (!svc) return fail("Service introuvable.", 404);
+      await admin.from("hotel_stations").delete().eq("hotel_id", hotel.id).eq("service_id", svc.id);
+      return ok();
+    }
+
     case "set_manager_pin": {
       if (!isPin(b.pin)) return fail("Le PIN doit avoir 4 chiffres.");
       const { data: staff } = await admin

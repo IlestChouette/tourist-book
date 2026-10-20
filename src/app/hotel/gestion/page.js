@@ -45,6 +45,9 @@ export default async function GestionPage() {
   // Services facturés : choix de l'hôtel, sinon ceux dont l'étiquette existe déjà.
   const servicesManaged = hotel.services !== undefined;
   const savedServices = servicesManaged ? cleanServices(hotel.services) : [];
+  // Accès email + mot de passe des services : colonne absente tant que le SQL n'est pas passé.
+  const { data: accountRows, error: accountError } = await admin.from("hotel_services").select("id, account_email").eq("hotel_id", hotel.id);
+  const serviceAccounts = accountError ? null : Object.fromEntries((accountRows ?? []).map((r) => [r.id, r.account_email ?? null]));
   const selectedServices = savedServices.length ? savedServices : servicesFromTags(meta.tags);
 
   return (
@@ -59,6 +62,7 @@ export default async function GestionPage() {
           staff={(staff ?? []).map((s) => ({ ...s, hasPin: Boolean(s.pin_hash), pin_hash: undefined }))}
           stations={stations ?? []}
           hotelServices={hotelServices}
+          serviceAccounts={serviceAccounts}
           cahierPath={slug ? `/hotel/${slug}/cahier` : "/hotel/cahier"}
           billing={
             hotel.billing_status === undefined

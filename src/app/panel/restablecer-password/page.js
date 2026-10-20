@@ -82,7 +82,8 @@ export default function RestablecerPasswordPage() {
     }
     setDone(true);
     // Un compte hôtel (créé depuis l'espace hôtels) n'a pas de profil hôtelier : retour à son espace.
-    const home = updated?.user?.user_metadata?.account_type === "hotel" ? "/hotel/gestion" : "/panel";
+    const accountType = updated?.user?.user_metadata?.account_type;
+    const home = accountType === "hotel" ? "/hotel/gestion" : accountType === "hotel_service" ? "/hotel/connexion" : "/panel";
     setTimeout(() => router.push(home), 2000);
   }
 

@@ -58,6 +58,11 @@ export async function GET(request) {
     return NextResponse.redirect(new URL(type === "recovery" ? next : "/hotel/gestion", origin));
   }
 
+  // Accès d'un service (compte créé par le manager) : jamais de profil hôtelier.
+  if (user?.user_metadata?.account_type === "hotel_service") {
+    return NextResponse.redirect(new URL(type === "recovery" ? next : "/hotel/connexion", origin));
+  }
+
   if (user) await ensureHostProfile(user);
 
   return NextResponse.redirect(new URL(next, origin));
