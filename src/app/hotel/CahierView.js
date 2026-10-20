@@ -16,7 +16,7 @@ export default async function CahierView({ ctx }) {
   if (!hotelHasAccess(ctx.hotel)) {
     return (
       <main className="flex-1 bg-sand-card/50">
-        <HotelHeader hotel={ctx.hotel} links={isManager ? [{ href: "/hotel/gestion", label: "Gestion" }] : []} />
+        <HotelHeader hotel={ctx.hotel} logout={isManager} links={isManager ? [{ href: "/hotel/gestion", label: "Gestion" }] : []} />
         <section className="mx-auto max-w-xl px-6 py-14 text-center">
           <h1 className="text-3xl font-bold text-ink">Le cahier est en pause</h1>
           {isManager ? (
@@ -45,6 +45,7 @@ export default async function CahierView({ ctx }) {
     >
       <HotelHeader
         hotel={ctx.hotel}
+        logout={isManager}
         links={[
           ...(ctx.hotel.lost_found_enabled === true ? [{ href: "/hotel/objets-trouves", label: "Objets trouvés" }] : []),
           // Le personnel n'a pas besoin du lien « manager » : le manager y accède

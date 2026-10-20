@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import QRCode from "qrcode";
 import { uploadMedia } from "@/lib/uploadMedia";
 import { ThemePicker, TypesEditor } from "./AppearanceEditors";
@@ -240,7 +239,8 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
   }
 
   async function logout() {
-    await createClient().auth.signOut();
+    // Côté serveur : fiable même si le navigateur ne peut pas effacer la session.
+    await fetch("/api/hotel/logout", { method: "POST" }).catch(() => {});
     window.location.href = "/hotel";
   }
 

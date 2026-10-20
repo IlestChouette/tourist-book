@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HotelLogoutButton from "./HotelLogoutButton";
 import { themeById } from "@/lib/hotelTheme";
 
 const linkClass =
@@ -7,7 +8,7 @@ const linkClass =
 // Habillage des pages de l'application hôtelière : le logo et le nom de
 // l'hôtel, pas ceux de Tourist Book (seulement une mention discrète en bas).
 // `links` : [{ href, label }] affichés à droite de la barre.
-export function HotelHeader({ hotel, title, subtitle, links = [] }) {
+export function HotelHeader({ hotel, title, subtitle, links = [], logout = false }) {
   return (
     <header className="relative bg-aqua print:hidden" style={themeById(hotel.theme).band ? { backgroundColor: themeById(hotel.theme).band } : undefined}>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-4">
@@ -26,6 +27,7 @@ export function HotelHeader({ hotel, title, subtitle, links = [] }) {
               {l.label}
             </Link>
           ))}
+          {logout && <HotelLogoutButton />}
         </nav>
       </div>
       {title && (

@@ -200,7 +200,7 @@ export default async function StatistiquesPage({ searchParams }) {
 
   return (
     <main className="flex-1 bg-sand-card/50">
-      <HotelHeader hotel={ctx.hotel} title="Statistiques" links={[{ href: "/hotel/cahier", label: "Cahier" }, { href: "/hotel/gestion", label: "Gestion" }]} />
+      <HotelHeader hotel={ctx.hotel} logout title="Statistiques" links={[{ href: "/hotel/cahier", label: "Cahier" }, { href: "/hotel/gestion", label: "Gestion" }]} />
       <section className="mx-auto max-w-6xl px-6 py-8">
         <StatsFilters params={f} tags={meta.tags} places={meta.places} today={today} />
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
