@@ -352,18 +352,18 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <header className="bg-[#2f7d76]">
-        <div className="flex items-center justify-between px-6 py-6">
-          <Link href="/" className="inline-flex items-center">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3 px-4 py-4 sm:px-6 sm:py-6">
+          <Link href="/" className="inline-flex shrink-0 items-center">
             <Image
               src="/tourist book long.png"
               alt="Tourist Book"
               width={278}
               height={106}
-              className="h-20 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] sm:h-24"
+              className="h-14 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] sm:h-24"
               priority
             />
           </Link>
-          <nav className="flex items-center gap-5">
+          <nav className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start sm:gap-5">
             <LanguageSwitcher
               locale={locale}
               className="[&_button]:text-[#f7f1e4]/60 [&_button:disabled]:text-[#f7f1e4] [&_button:hover]:text-[#f7f1e4] [&_span]:text-[#f7f1e4]/40"
@@ -376,7 +376,7 @@ export default async function Home() {
             </Link>
             <Link
               href="/panel/registro"
-              className="rounded bg-terracotta px-4 py-2 text-sm font-bold text-ink transition-colors hover:bg-terracotta-deep"
+              className="whitespace-nowrap rounded bg-terracotta px-3 py-2 text-sm font-bold text-ink transition-colors hover:bg-terracotta-deep sm:px-4"
             >
               {t.createAccount}
             </Link>

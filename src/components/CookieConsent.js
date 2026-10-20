@@ -68,9 +68,9 @@ export default function CookieConsent({ locale }) {
       {GA_ID && consent === "accepted" && <GoogleAnalytics gaId={GA_ID} />}
 
       {consent === null && (
-        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-sand-dim bg-sand-card p-4 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] sm:p-5">
-          <div className="mx-auto flex max-w-4xl flex-col items-center gap-3 sm:flex-row sm:justify-between">
-            <p className="text-sm text-ink/80">
+        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-sand-dim bg-sand-card p-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] sm:p-5">
+          <div className="mx-auto flex max-w-4xl flex-col items-center gap-2 sm:flex-row sm:justify-between sm:gap-3">
+            <p className="text-xs leading-snug text-ink/80 sm:text-sm sm:leading-normal">
               {t.text}{" "}
               <Link href="/privacidad#cookies" className="font-bold text-aqua-deep underline">
                 {t.learnMore}
@@ -80,14 +80,14 @@ export default function CookieConsent({ locale }) {
               <button
                 type="button"
                 onClick={() => choose("rejected")}
-                className="rounded border border-sand-dim px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink/70 transition-colors hover:border-ink/40"
+                className="rounded border border-sand-dim px-4 py-1.5 text-xs sm:py-2 font-bold uppercase tracking-wider text-ink/70 transition-colors hover:border-ink/40"
               >
                 {t.reject}
               </button>
               <button
                 type="button"
                 onClick={() => choose("accepted")}
-                className="rounded bg-terracotta px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink transition-colors hover:bg-terracotta-deep"
+                className="rounded bg-terracotta px-4 py-1.5 text-xs sm:py-2 font-bold uppercase tracking-wider text-ink transition-colors hover:bg-terracotta-deep"
               >
                 {t.accept}
               </button>
