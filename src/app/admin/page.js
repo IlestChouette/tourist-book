@@ -510,8 +510,8 @@ export default async function AdminPage() {
 
   return (
     <main className="flex-1 bg-sand">
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 bg-[#2f7d76] px-6 py-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-8 gap-y-4 bg-[#2f7d76] px-6 py-4">
+        <div className="flex shrink-0 items-center gap-4">
           <Link href="/" className="inline-flex shrink-0">
             <Image
               src="/tourist book long.png"
@@ -521,14 +521,14 @@ export default async function AdminPage() {
               className="h-14 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] sm:h-20 md:h-24"
             />
           </Link>
-          <span className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70">Admin</span>
+          <span className="rounded-md bg-[#f7f1e4] px-3 py-1.5 text-sm font-bold uppercase tracking-widest text-[#2f7d76]">Admin</span>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <nav className="flex basis-full flex-wrap items-center gap-2 sm:min-w-0 sm:flex-1 sm:basis-0 sm:justify-end">
           <a
             href="https://analytics.google.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full bg-[#f7f1e4]/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.analytics}
           </a>
@@ -536,25 +536,25 @@ export default async function AdminPage() {
             href="https://search.google.com/search-console?resource_id=sc-domain:tourist-book.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full bg-[#f7f1e4]/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.searchConsole}
           </a>
           <Link
             href="/admin/identidad"
-            className="rounded-full bg-[#f7f1e4]/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.identityLookup}
           </Link>
           <Link
             href="/admin/tarifas"
-            className="rounded-full bg-[#f7f1e4]/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.transferRates}
           </Link>
           <Link
             href="/admin/estadisticas"
-            className="rounded-full bg-[#f7f1e4]/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.livretStats}
           </Link>
@@ -562,12 +562,12 @@ export default async function AdminPage() {
             href="/transfer-independiente"
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full bg-[#f7f1e4]/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.independentTransfer}
           </Link>
-          <LogoutButton className="rounded-full border border-[#f7f1e4]/60 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]" />
-        </div>
+          <LogoutButton className="rounded-full border border-[#f7f1e4]/60 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]" />
+        </nav>
       </div>
 
       <section className="mx-auto max-w-5xl px-6 py-10">
