@@ -5,6 +5,12 @@ import { SERVICES, cleanServices } from "@/lib/hotelServices";
 import { stripe } from "@/lib/stripe";
 import { ACTIVATION_MINUTES, MAX_SERVICES_PER_DEVICE, PENDING_LABEL, SERVICE_COOKIE, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE, stationTokens } from "@/lib/hotelAuth";
 
+// Identifiants de services qui appartiennent bien à cet hôtel.
+async function ownServiceIds(admin, hotelId, ids) {
+  const { data } = await admin.from("hotel_services").select("id").eq("hotel_id", hotelId).in("id", ids);
+  return (data ?? []).map((s) => s.id);
+}
+
 const fail = (error, status = 400) => NextResponse.json({ error }, { status });
 const PIN_TAKEN = "Ce PIN est déjà utilisé par une autre personne : choisissez-en un autre.";
 
@@ -119,6 +125,7 @@ export async function POST(request) {
         name,
         pin_hash: pinHash(hotel.id, b.pin),
         role_ids: (roles ?? []).map((r) => r.id),
+        ...(Array.isArray(b.serviceIds) ? { service_ids: await ownServiceIds(admin, hotel.id, b.serviceIds) } : {}),
       });
       if (error) return fail(error.code === "23505" ? PIN_TAKEN : "Impossible d'ajouter.", error.code === "23505" ? 409 : 500);
       return ok();
@@ -142,6 +149,7 @@ export async function POST(request) {
         const { data: roles } = await admin.from("hotel_tags").select("id").eq("hotel_id", hotel.id).in("id", b.roleIds);
         update.role_ids = (roles ?? []).map((r) => r.id);
       }
+      if (Array.isArray(b.serviceIds)) update.service_ids = await ownServiceIds(admin, hotel.id, b.serviceIds);
       if (typeof b.active === "boolean" && !staff.is_manager) update.active = b.active;
       const { error } = await admin.from("hotel_staff").update(update).eq("id", staff.id);
       if (error) return fail(error.code === "23505" ? PIN_TAKEN : "Impossible d'enregistrer.", error.code === "23505" ? 409 : 500);

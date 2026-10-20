@@ -77,6 +77,18 @@ export async function POST(request) {
       return NextResponse.json({ error: "Choisissez pour quel service est cette consigne." }, { status: 400 });
     }
   }
+  // « Chaque personne doit valider » : réservé au manager, et le service doit
+  // avoir des personnes rattachées (sinon personne ne pourrait jamais valider).
+  const requireAll = ctx.mode === "manager" && Boolean(b.requireAll) && targets.length > 0;
+  if (requireAll) {
+    const { data: staff } = await admin.from("hotel_staff").select("service_ids").eq("hotel_id", hotel.id).eq("active", true).eq("is_manager", false);
+    for (const t of targets) {
+      if (!(staff ?? []).some((s) => (s.service_ids ?? []).includes(t))) {
+        const name = services.find((s) => s.id === t)?.name ?? "ce service";
+        return NextResponse.json({ error: `Aucune personne n'est rattachée au service « ${name} ». Ajoutez des personnes à ce service dans Gestion.` }, { status: 400 });
+      }
+    }
+  }
   const groupId = targets.length > 0 ? crypto.randomUUID() : null;
   const base = {
     hotel_id: hotel.id,
@@ -96,7 +108,7 @@ export async function POST(request) {
   };
   const rows =
     targets.length > 0
-      ? targets.map((serviceId) => ({ ...base, service_id: serviceId, from_service_id: ctx.service?.id ?? null, group_id: groupId }))
+      ? targets.map((serviceId) => ({ ...base, service_id: serviceId, from_service_id: ctx.service?.id ?? null, group_id: groupId, ...(requireAll ? { require_all: true } : {}) }))
       : [base];
   const { error } = await admin.from("consignes").insert(rows);
   if (error) {

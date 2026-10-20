@@ -15,7 +15,9 @@ const timeFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-d
 async function patch(id, body) {
   const res = await fetch(`/api/hotel/consignes/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   const data = await res.json().catch(() => ({}));
-  return res.ok ? { ok: true } : { error: res.status === 403 ? "Ce code n'est pas bon. Essayez encore." : data.error || "Une erreur est survenue. Réessayez." };
+  if (res.ok) return { ok: true, ...data };
+  // « PIN incorrect » : message simple ; les autres refus gardent leur explication.
+  return { error: res.status === 403 && data.error === "PIN incorrect." ? "Ce code n'est pas bon. Essayez encore." : data.error || "Une erreur est survenue. Réessayez." };
 }
 
 // Un écran, une action principale : écrire. Le reste se lit de haut en bas :
@@ -93,7 +95,7 @@ export default function CahierClient({ hotelName, mode, today, initialItems, ini
       return false;
     }
     await load(day);
-    return true;
+    return result;
   }
 
   // Le manager est identifié d'office ; sur le poste de réception, on demande
@@ -109,9 +111,13 @@ export default function CahierClient({ hotelName, mode, today, initialItems, ini
   }
 
   async function confirmWithPin(pin) {
-    const ok = await run(sheet.id, { action: sheet.action, until: sheet.until, pin });
-    if (ok) {
-      setNotice(sheet.action === "close" ? "C'est noté, merci !" : "C'est fait.");
+    const result = await run(sheet.id, { action: sheet.action, until: sheet.until, pin });
+    if (result) {
+      if (sheet.action === "ack") {
+        setNotice(result.already ? "Vous aviez déjà validé cette consigne." : result.complete ? "Merci ! Tout le service a validé." : "Merci, votre validation est enregistrée.");
+      } else {
+        setNotice(sheet.action === "close" ? "C'est noté, merci !" : "C'est fait.");
+      }
       setSheet(null);
     }
   }
@@ -147,8 +153,19 @@ export default function CahierClient({ hotelName, mode, today, initialItems, ini
           {c.closedByName ? ` · terminé par ${c.closedByName}` : ""}
         </p>
       )}
+      {c.requireAll && c.ack && (
+        <div className="mt-3 rounded-xl bg-ink/[0.06] px-4 py-3 text-base text-ink">
+          <p className="font-bold">À valider par chaque personne · {c.ack.acked} sur {c.ack.expected} ont validé</p>
+          {isManager && c.ack.missingNames?.length > 0 && <p className="mt-1 text-ink/70">Il manque : {c.ack.missingNames.join(", ")}</p>}
+          {isManager && c.ack.ackNames?.length > 0 && <p className="mt-1 text-ink/70">Ont validé : {c.ack.ackNames.join(", ")}</p>}
+        </div>
+      )}
       <div className="mt-4 flex flex-wrap gap-3 print:hidden">
-        {!c.done ? (
+        {!c.done && c.requireAll && !isManager ? (
+          <button type="button" onClick={() => request(c.id, "ack")} className={`${bigBtn} w-full bg-aqua-deep text-sand-card hover:bg-aqua-deep/90 sm:w-auto`}>
+            <Icon name="check" className="h-5 w-5" /> Je valide (avec mon code)
+          </button>
+        ) : !c.done ? (
           <button type="button" onClick={() => request(c.id, "close")} className={`${bigBtn} w-full bg-aqua-deep text-sand-card hover:bg-aqua-deep/90 sm:w-auto`}>
             <Icon name="check" className="h-5 w-5" /> C'est fait
           </button>
@@ -282,6 +299,7 @@ export default function CahierClient({ hotelName, mode, today, initialItems, ini
                   </span>
                 </div>
                 <p className="mt-3 whitespace-pre-wrap break-words text-lg leading-snug text-ink">{c.body}</p>
+                {c.requireAll && c.ack && <p className="mt-1 text-sm text-ink/60">{c.ack.acked} sur {c.ack.expected} ont validé{c.ack.missingNames?.length ? ` · il manque : ${c.ack.missingNames.join(", ")}` : ""}</p>}
                 {c.done && c.closedByName && <p className="mt-1 text-sm text-ink/60">Clôturé par {c.closedByName}</p>}
               </li>
             ))}
@@ -343,7 +361,7 @@ export default function CahierClient({ hotelName, mode, today, initialItems, ini
             ) : (
               <>
                 <h2 className="text-center text-xl font-bold text-ink">
-                  {sheet.action === "close" ? "Qui a fait ça ?" : "Votre code personnel"}
+                  {sheet.action === "close" ? "Qui a fait ça ?" : sheet.action === "ack" ? "Qui valide ?" : "Votre code personnel"}
                 </h2>
                 <p className="mt-2 text-center text-base text-ink/70">Essayez avec votre code de la badgeuse : celui de votre arrivée et de votre départ.</p>
                 <p className="mb-5 mt-1 text-center text-sm text-ink/60">4 chiffres.</p>

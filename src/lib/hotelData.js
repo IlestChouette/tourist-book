@@ -5,6 +5,34 @@ import { typeOf } from "@/lib/hotelTheme";
 
 export const isUuid = (v) => typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 
+// Validation par tous : pour les consignes « à valider par chaque personne »,
+// qui doit valider (personnes actives rattachées au service, hors manager) et
+// qui l'a fait. Renvoie une Map id → { expected, acked, ackNames, missingNames, complete, lastAt }.
+export async function ackProgress(admin, hotelId, rows) {
+  const wanted = (rows ?? []).filter((r) => r.require_all);
+  if (wanted.length === 0) return new Map();
+  const [{ data: acks }, { data: staff }] = await Promise.all([
+    admin.from("consigne_acks").select("consigne_id, staff_id, created_at").in("consigne_id", wanted.map((r) => r.id)),
+    admin.from("hotel_staff").select("id, name, service_ids").eq("hotel_id", hotelId).eq("active", true).eq("is_manager", false),
+  ]);
+  const out = new Map();
+  for (const r of wanted) {
+    const expected = (staff ?? []).filter((s) => (s.service_ids ?? []).includes(r.service_id));
+    const done = new Map((acks ?? []).filter((a) => a.consigne_id === r.id).map((a) => [a.staff_id, a.created_at]));
+    const acked = expected.filter((s) => done.has(s.id));
+    const missing = expected.filter((s) => !done.has(s.id));
+    out.set(r.id, {
+      expected: expected.length,
+      acked: acked.length,
+      ackNames: acked.map((s) => s.name),
+      missingNames: missing.map((s) => s.name),
+      complete: expected.length > 0 && missing.length === 0,
+      lastAt: acked.map((s) => done.get(s.id)).sort().pop() ?? null,
+    });
+  }
+  return out;
+}
+
 // Services actifs d'un hôtel (vide si la table n'existe pas encore).
 export async function listServices(hotelId) {
   const { data } = await createAdminClient()
@@ -24,7 +52,7 @@ export async function loadSent(hotelId, fromServiceId, day) {
   const [{ data }, services] = await Promise.all([
     admin
       .from("consignes")
-      .select("id, day, body, kind, type_id, place_name, service_id, created_at, closed_at, closed_by_name")
+      .select("id, day, body, kind, type_id, place_name, service_id, created_at, closed_at, closed_by_name, require_all")
       .eq("hotel_id", hotelId)
       .eq("from_service_id", fromServiceId)
       .neq("service_id", fromServiceId)
@@ -36,6 +64,7 @@ export async function loadSent(hotelId, fromServiceId, day) {
     listServices(hotelId),
   ]);
   const name = Object.fromEntries(services.map((s) => [s.id, s.name]));
+  const progress = await ackProgress(admin, hotelId, data ?? []);
   return (data ?? []).map((c) => ({
     id: c.id,
     day: c.day,
@@ -46,9 +75,11 @@ export async function loadSent(hotelId, fromServiceId, day) {
     createdAt: c.created_at,
     toServiceId: c.service_id,
     toServiceName: name[c.service_id] ?? "Service",
-    done: Boolean(c.closed_at),
-    closedAt: c.closed_at,
+    done: Boolean(c.closed_at) || Boolean(c.require_all && progress.get(c.id)?.complete),
+    closedAt: c.closed_at ?? progress.get(c.id)?.lastAt ?? null,
     closedByName: c.closed_by_name ?? null,
+    requireAll: Boolean(c.require_all),
+    ack: progress.get(c.id) ? { expected: progress.get(c.id).expected, acked: progress.get(c.id).acked, missingNames: progress.get(c.id).missingNames } : null,
   }));
 }
 
@@ -86,11 +117,14 @@ export async function loadDay(hotelId, day, showNames, scope = {}) {
   // service (visibles de tous les services jusqu'à leur clôture).
   if (isUuid(scope.serviceId)) query = query.or(`service_id.eq.${scope.serviceId},service_id.is.null`);
   const { data } = await query.order("created_at", { ascending: true });
+  const progress = await ackProgress(admin, hotelId, data ?? []);
 
   const items = [];
   for (const c of data ?? []) {
     const closedDay = c.closed_at ? parisDate(new Date(c.closed_at)) : null;
-    const done = closedDay !== null && closedDay <= day;
+    const pr = progress.get(c.id);
+    // « À valider par tous » : terminée dès que la dernière personne a validé.
+    const done = (closedDay !== null && closedDay <= day) || Boolean(c.require_all && !c.closed_at && pr?.complete);
     const carried = c.day < day;
     if (carried && closedDay !== null && closedDay < day) continue;
 
@@ -114,7 +148,9 @@ export async function loadDay(hotelId, day, showNames, scope = {}) {
       daysOpen: carried && !done && !pinnedToday ? daysBetween(c.day, day) : 0,
       pinned: pinnedToday,
       pinnedUntil: c.pinned_until,
-      closedAt: done ? c.closed_at : null,
+      closedAt: done ? c.closed_at ?? pr?.lastAt ?? null : null,
+      requireAll: Boolean(c.require_all),
+      ack: pr ? { expected: pr.expected, acked: pr.acked, ...(showNames ? { ackNames: pr.ackNames, missingNames: pr.missingNames } : {}) } : null,
       ...(showNames ? { createdByName: c.created_by_name, closedByName: done ? c.closed_by_name : null } : {}),
     });
   }

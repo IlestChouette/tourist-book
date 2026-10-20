@@ -209,7 +209,7 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
   const [emails, setEmails] = useState(hotel.emails.join("\n"));
   const [replyTo, setReplyTo] = useState(hotel.replyTo ?? "");
   const [managerPin, setManagerPin] = useState("");
-  const [newStaff, setNewStaff] = useState({ name: "", pin: "", roleIds: [] });
+  const [newStaff, setNewStaff] = useState({ name: "", pin: "", roleIds: [], serviceIds: [] });
   const [placesText, setPlacesText] = useState("");
   const [newTag, setNewTag] = useState("");
   const [stationLabel, setStationLabel] = useState("Réception");
@@ -328,12 +328,27 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
                   </button>
                 ))}
               </div>
+              {hotelServices.length > 0 && (
+                <div className="mt-3 border-t border-sand-dim pt-3">
+                  <span className={label}>Services (consignes à valider par tous)</span>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {hotelServices.map((sv) => {
+                      const on = (s.service_ids ?? []).includes(sv.id);
+                      return (
+                        <button key={sv.id} type="button" disabled={busy} aria-pressed={on} onClick={() => call({ action: "update_staff", id: s.id, serviceIds: toggleRole(s.service_ids ?? [], sv.id) })} className={`rounded-full border px-3 py-1 text-sm font-bold ${on ? "border-ink bg-ink text-sand" : "border-sand-dim text-ink/60"}`}>
+                          {sv.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </li>
           ))}
           {staff.filter((s) => !s.is_manager).length === 0 && <li className="text-sm text-ink/60">Personne pour l'instant.</li>}
         </ul>
 
-        <form className="mt-5 grid gap-3 border-t border-sand-dim pt-4" onSubmit={(e) => { e.preventDefault(); call({ action: "add_staff", ...newStaff }, "Personne ajoutée.").then((ok) => ok && setNewStaff({ name: "", pin: "", roleIds: [] })); }}>
+        <form className="mt-5 grid gap-3 border-t border-sand-dim pt-4" onSubmit={(e) => { e.preventDefault(); call({ action: "add_staff", ...newStaff }, "Personne ajoutée.").then((ok) => ok && setNewStaff({ name: "", pin: "", roleIds: [], serviceIds: [] })); }}>
           <div className="flex flex-wrap gap-3">
             <label className="grid gap-1.5">
               <span className={label}>Nom</span>
@@ -351,6 +366,15 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
               </button>
             ))}
           </div>
+          {hotelServices.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {hotelServices.map((sv) => (
+                <button key={sv.id} type="button" aria-pressed={newStaff.serviceIds.includes(sv.id)} onClick={() => setNewStaff({ ...newStaff, serviceIds: toggleRole(newStaff.serviceIds, sv.id) })} className={`rounded-full border px-3 py-1 text-sm font-bold ${newStaff.serviceIds.includes(sv.id) ? "border-ink bg-ink text-sand" : "border-sand-dim text-ink/60"}`}>
+                  Service : {sv.name}
+                </button>
+              ))}
+            </div>
+          )}
           <button type="submit" disabled={busy || newStaff.pin.length !== 4} className={`${btn} w-fit`}>Ajouter la personne</button>
         </form>
       </Card>

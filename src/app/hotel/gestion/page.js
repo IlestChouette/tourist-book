@@ -34,7 +34,7 @@ export default async function GestionPage() {
     loadMeta(hotel.id),
     admin
       .from("hotel_staff")
-      .select("id, name, role_ids, is_manager, active, pin_hash")
+      .select("id, name, role_ids, service_ids, is_manager, active, pin_hash")
       .eq("hotel_id", hotel.id)
       .order("created_at", { ascending: true }),
     admin.from("hotel_stations").select("id, label, created_at, service_id").eq("hotel_id", hotel.id).neq("label", PENDING_LABEL).order("created_at"),

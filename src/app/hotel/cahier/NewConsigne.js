@@ -30,7 +30,7 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
     ...(isManager ? [] : ["pin"]),
   ];
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState({ serviceIds: defaultServiceIds, kind: null, typeId: null, placeName: "", body: "", shift: "", roleIds: [], urgent: false, day: defaultDay, pinDays: 0 });
+  const [form, setForm] = useState({ requireAll: false, serviceIds: defaultServiceIds, kind: null, typeId: null, placeName: "", body: "", shift: "", roleIds: [], urgent: false, day: defaultDay, pinDays: 0 });
   const [showMore, setShowMore] = useState(false);
   const [showRoles, setShowRoles] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -75,6 +75,7 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
         typeId: form.typeId && form.typeId !== form.kind ? form.typeId : undefined,
         placeId: place.id,
         serviceIds: services.length > 0 ? form.serviceIds : undefined,
+        requireAll: isManager && form.requireAll ? true : undefined,
         tagIds,
         priority: form.urgent,
         day: form.day,
@@ -221,6 +222,22 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
                   );
                 })}
               </div>
+              {isManager && (
+                <button
+                  type="button"
+                  aria-pressed={form.requireAll}
+                  onClick={() => set({ requireAll: !form.requireAll })}
+                  className={`mt-5 ${tile(form.requireAll)}`}
+                >
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 ${form.requireAll ? "border-sand-card bg-sand-card text-aqua-deep" : "border-sand-dim"}`}>
+                    {form.requireAll && <Icon name="check" className="h-6 w-6" />}
+                  </span>
+                  <span>
+                    Chaque personne doit valider
+                    <span className={`block text-base font-normal ${form.requireAll ? "text-sand-card/85" : "text-ink/60"}`}>Reste affichée tant que tout le service n'a pas validé avec son code.</span>
+                  </span>
+                </button>
+              )}
             </>
           )}
 
