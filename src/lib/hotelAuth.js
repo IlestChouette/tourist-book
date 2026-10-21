@@ -20,6 +20,16 @@ export function stationTokens(raw) {
     .filter((t) => /^[0-9a-f]{64}$/.test(t))
     .slice(0, MAX_SERVICES_PER_DEVICE);
 }
+// Parmi les jetons du cookie, ceux qui correspondent encore à un poste activé de cet hôtel.
+// Un poste désactivé dans Gestion laisse son jeton dans le cookie : il ne doit pas compter
+// dans la limite de 3 services par appareil.
+export async function liveStationTokens(admin, hotelId, tokens) {
+  if (!tokens.length) return [];
+  const { data } = await admin.from("hotel_stations").select("token_hash").eq("hotel_id", hotelId).in("token_hash", tokens.map(sha256));
+  const live = new Set((data ?? []).map((r) => r.token_hash));
+  return tokens.filter((t) => live.has(sha256(t)));
+}
+
 const MAX_PIN_FAILURES = 8;
 const PIN_LOCK_MINUTES = 10;
 

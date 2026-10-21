@@ -5,7 +5,7 @@ import { SERVICES, cleanServices, cleanCustomServices, isCustomServiceId } from 
 import { stripe } from "@/lib/stripe";
 import { slugForHotel } from "@/lib/hotelSlug";
 import { sendHotelActivationLink } from "@/lib/email";
-import { ACTIVATION_MINUTES, LINK_HOURS, MAX_SERVICES_PER_DEVICE, PENDING_LABEL, SERVICE_COOKIE, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE, stationTokens } from "@/lib/hotelAuth";
+import { ACTIVATION_MINUTES, LINK_HOURS, MAX_SERVICES_PER_DEVICE, liveStationTokens, PENDING_LABEL, SERVICE_COOKIE, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE, stationTokens } from "@/lib/hotelAuth";
 
 // Identifiants de services qui appartiennent bien à cet hôtel.
 async function ownServiceIds(admin, hotelId, ids) {
@@ -305,9 +305,9 @@ export async function POST(request) {
         if (!label) label = svc.name;
       }
       if (!label) label = "Poste";
-      const existing = stationTokens(request.cookies.get(STATION_COOKIE)?.value);
+      const existing = await liveStationTokens(admin, hotel.id, stationTokens(request.cookies.get(STATION_COOKIE)?.value));
       if (serviceId && existing.length >= MAX_SERVICES_PER_DEVICE) {
-        return fail(`Cet appareil porte déjà ${MAX_SERVICES_PER_DEVICE} services.`, 409);
+        return fail(`Cet appareil porte déjà ${MAX_SERVICES_PER_DEVICE} services. Désactivez-en un dans la liste ci-dessous avant d'en ajouter un autre.`, 409);
       }
       const { error } = await admin
         .from("hotel_stations")

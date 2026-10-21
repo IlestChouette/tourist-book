@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ACTIVATION_MINUTES, LINK_HOURS, MAX_SERVICES_PER_DEVICE, PENDING_LABEL, SERVICE_COOKIE, STATION_COOKIE, activationHash, sha256, stationTokens } from "@/lib/hotelAuth";
+import { ACTIVATION_MINUTES, LINK_HOURS, MAX_SERVICES_PER_DEVICE, liveStationTokens, PENDING_LABEL, SERVICE_COOKIE, STATION_COOKIE, activationHash, sha256, stationTokens } from "@/lib/hotelAuth";
 import { listHotelSlugs } from "@/lib/hotelSlug";
 
 // Active un appareil avec le code donné par le manager. Le code est lié à
@@ -53,7 +53,7 @@ export async function POST(request) {
   if (!pending) return fail(notValid, 404);
 
   // Un appareil porte jusqu'à 3 services ; les jetons déjà présents sont gardés.
-  const existing = stationTokens(request.cookies.get(STATION_COOKIE)?.value);
+  const existing = await liveStationTokens(admin, hotel.id, stationTokens(request.cookies.get(STATION_COOKIE)?.value));
   if (pending.service_id && existing.length >= MAX_SERVICES_PER_DEVICE) {
     return fail(`Cet appareil porte déjà ${MAX_SERVICES_PER_DEVICE} services. Désactivez-en un dans Gestion avant d'en ajouter un autre.`, 409);
   }

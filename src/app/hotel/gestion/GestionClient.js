@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
@@ -236,6 +236,12 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
   const roles = tags.filter((t) => t.kind === "role" || t.kind === "custom");
   const rooms = places.filter((p) => p.kind === "room");
 
+  useEffect(() => {
+    if (!message) return;
+    const t = setTimeout(() => setMessage(null), message.error ? 12000 : 6000);
+    return () => clearTimeout(t);
+  }, [message]);
+
   async function call(body, okText) {
     setBusy(true);
     setMessage(null);
@@ -287,7 +293,8 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
       </div>
 
       {message && (
-        <p className={`mt-4 rounded border p-3 text-sm font-bold ${message.error ? "border-terracotta-deep text-terracotta-deep" : "border-aqua-deep text-aqua-deep"}`} role="status">
+        // Toujours visible, où que l'on soit dans la page (les actions sont souvent bien plus bas).
+        <p className={`fixed inset-x-4 top-4 z-50 mx-auto max-w-xl rounded border bg-sand-card p-3 text-sm font-bold shadow-lg ${message.error ? "border-terracotta-deep text-terracotta-deep" : "border-aqua-deep text-aqua-deep"}`} role={message.error ? "alert" : "status"}>
           {message.text}
         </p>
       )}
