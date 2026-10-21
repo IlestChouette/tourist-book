@@ -4,6 +4,32 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const STATION_COOKIE = "tb_hotel_station";
+// Service affiché sur un poste qui en porte plusieurs (id du service, pas un secret :
+// il est revérifié contre les services réellement activés sur le poste).
+export const SERVICE_COOKIE = "tb_hotel_service";
+export const MAX_SERVICES_PER_DEVICE = 3;
+// Vue « responsable » : cookie signé (personne + expiration), revérifié en base à chaque requête.
+export const SUPERVISOR_COOKIE = "tb_hotel_sup";
+export const SUPERVISOR_HOURS = 8;
+
+// Le cookie du poste porte 1 à 3 jetons séparés par un point (un par service).
+// Un ancien cookie, avec un seul jeton, reste valable tel quel.
+export function stationTokens(raw) {
+  return String(raw ?? "")
+    .split(".")
+    .filter((t) => /^[0-9a-f]{64}$/.test(t))
+    .slice(0, MAX_SERVICES_PER_DEVICE);
+}
+// Parmi les jetons du cookie, ceux qui correspondent encore à un poste activé de cet hôtel.
+// Un poste désactivé dans Gestion laisse son jeton dans le cookie : il ne doit pas compter
+// dans la limite de 3 services par appareil.
+export async function liveStationTokens(admin, hotelId, tokens) {
+  if (!tokens.length) return [];
+  const { data } = await admin.from("hotel_stations").select("token_hash").eq("hotel_id", hotelId).in("token_hash", tokens.map(sha256));
+  const live = new Set((data ?? []).map((r) => r.token_hash));
+  return tokens.filter((t) => live.has(sha256(t)));
+}
+
 const MAX_PIN_FAILURES = 8;
 const PIN_LOCK_MINUTES = 10;
 
@@ -26,7 +52,44 @@ export function pinHash(hotelId, pin) {
 // du poste à l'utilisation.
 export const PENDING_LABEL = "__pending__";
 export const ACTIVATION_MINUTES = 10;
+// Lien d'activation envoyé par email : 32 caractères secrets, 24 h, une seule utilisation.
+export const LINK_HOURS = 24;
 export const activationHash = (hotelId, code) => sha256(`code:${hotelId}:${code}`);
+
+function supSignature(staffId, exp) {
+  return crypto.createHmac("sha256", process.env.SUPABASE_SERVICE_ROLE_KEY).update(`sup:${staffId}:${exp}`).digest("hex");
+}
+export function signSupervisor(staffId) {
+  const exp = Date.now() + SUPERVISOR_HOURS * 3600 * 1000;
+  return `${staffId}.${exp}.${supSignature(staffId, exp)}`;
+}
+
+// La personne de la vue « responsable », si le cookie est valable et si elle l'est
+// toujours en base (active, responsable, avec au moins un service). Sinon null.
+async function readSupervisor(admin, hotelId, raw) {
+  const [staffId, exp, sig] = String(raw ?? "").split(".");
+  if (!staffId || !/^\d+$/.test(exp ?? "") || Number(exp) < Date.now() || !/^[0-9a-f]{64}$/.test(sig ?? "")) return null;
+  const good = Buffer.from(supSignature(staffId, exp), "hex");
+  const given = Buffer.from(sig, "hex");
+  if (good.length !== given.length || !crypto.timingSafeEqual(good, given)) return null;
+  const { data: staff, error } = await admin
+    .from("hotel_staff")
+    .select("id, name, service_ids")
+    .eq("id", staffId)
+    .eq("hotel_id", hotelId)
+    .eq("active", true)
+    .eq("is_supervisor", true)
+    .maybeSingle();
+  if (error || !staff || !(staff.service_ids ?? []).length) return null;
+  return { staffId: staff.id, name: staff.name, serviceIds: staff.service_ids };
+}
+
+// Les noms (qui a écrit, qui a validé) : le manager voit tout, un responsable
+// seulement les services dont il a la charge, le personnel jamais.
+export function canSeeNames(ctx, serviceId) {
+  if (ctx?.mode === "manager") return true;
+  return Boolean(serviceId && ctx?.supervisor?.serviceIds?.includes(serviceId));
+}
 
 export const isPin = (value) => typeof value === "string" && /^\d{4}$/.test(value);
 
@@ -42,17 +105,35 @@ export async function getHotelContext() {
   } = await supabase.auth.getUser();
   if (user) {
     const { data: hotel } = await admin.from("hotels").select("*").eq("owner_id", user.id).maybeSingle();
-    if (hotel) return { mode: "manager", hotel, user, admin };
+    if (hotel) return { mode: "manager", hotel, user, service: null, services: null, admin };
   }
 
-  const token = (await cookies()).get(STATION_COOKIE)?.value;
-  if (token) {
-    const { data: station } = await admin
+  const jar = await cookies();
+  const tokens = stationTokens(jar.get(STATION_COOKIE)?.value);
+  if (tokens.length) {
+    const { data: rows } = await admin
       .from("hotel_stations")
-      .select("id, label, hotels(*)")
-      .eq("token_hash", sha256(token))
-      .maybeSingle();
-    if (station?.hotels) return { mode: "station", hotel: station.hotels, station, admin };
+      .select("id, label, service_id, hotels(*), hotel_services(id, key, name, color, position, active)")
+      .in("token_hash", tokens.map(sha256));
+    const valid = (rows ?? []).filter((r) => r.hotels);
+    if (valid.length) {
+      const hotel = valid[0].hotels;
+      const same = valid.filter((r) => r.hotels.id === hotel.id);
+      // Ancien poste (sans service) : il voit tout l'hôtel, comme avant.
+      const legacy = same.find((r) => !r.service_id);
+      if (legacy) return { mode: "station", hotel, station: legacy, service: null, services: [], admin };
+
+      const services = same
+        .filter((r) => r.hotel_services?.active)
+        .map((r) => ({ ...r.hotel_services, stationId: r.id }))
+        .sort((a, b) => a.position - b.position);
+      // Tous les services de ce poste ont été désactivés : plus d'accès.
+      if (services.length === 0) return null;
+      const wanted = jar.get(SERVICE_COOKIE)?.value;
+      const service = services.find((s) => s.id === wanted) ?? services[0];
+      const supervisor = await readSupervisor(admin, hotel.id, jar.get(SUPERVISOR_COOKIE)?.value);
+      return { mode: "station", hotel, station: { id: service.stationId }, service, services, supervisor, admin };
+    }
   }
   return null;
 }
@@ -60,10 +141,33 @@ export async function getHotelContext() {
 // Identifie la personne qui agit. Manager connecté : sa fiche d'équipe, sans
 // PIN. Poste de réception : le PIN saisi, avec blocage temporaire après trop
 // d'essais ratés (4 chiffres se devineraient vite sinon).
-export async function resolveActor(ctx, pin) {
+export async function resolveActor(ctx, pin, { managerPin = false } = {}) {
   const { admin, hotel } = ctx;
 
   if (ctx.mode === "manager") {
+    // Publier ou valider : le code personnel est demandé à tout le monde, manager
+    // compris (une personne peut valider depuis le poste du manager : le nom
+    // enregistré est celui du code). Sans code défini, le manager reste identifié d'office.
+    if (managerPin) {
+      const { data: managerRow } = await admin
+        .from("hotel_staff")
+        .select("id, name, pin_hash")
+        .eq("hotel_id", hotel.id)
+        .eq("is_manager", true)
+        .maybeSingle();
+      if (isPin(pin)) {
+        const { data: person } = await admin
+          .from("hotel_staff")
+          .select("id, name")
+          .eq("hotel_id", hotel.id)
+          .eq("pin_hash", pinHash(hotel.id, pin))
+          .eq("active", true)
+          .maybeSingle();
+        if (!person) return { error: "PIN incorrect.", status: 403 };
+        return { staff: person };
+      }
+      if (managerRow?.pin_hash) return { error: "Saisissez votre code personnel à 4 chiffres.", status: 400 };
+    }
     let { data: staff } = await admin
       .from("hotel_staff")
       .select("id, name")

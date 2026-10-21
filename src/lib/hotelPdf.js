@@ -1,5 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
-import { KIND_LABELS } from "@/lib/hotelData";
+import { typeOf } from "@/lib/hotelTheme";
 import { formatDayLong } from "@/lib/hotelTime";
 
 // Les polices PDF standard ne couvrent que le latin de base : tout autre
@@ -27,7 +27,7 @@ function wrap(font, text, size, maxWidth) {
 
 // PDF d'une journée du cahier : mêmes consignes que l'écran, prêtes à
 // imprimer ou à archiver (consignes-AAAA-MM-JJ.pdf).
-export async function buildDayPdf({ hotelName, day, items, tagNames, withNames }) {
+export async function buildDayPdf({ hotelName, day, items, tagNames, withNames, types }) {
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -68,7 +68,7 @@ export async function buildDayPdf({ hotelName, day, items, tagNames, withNames }
         c.done ? "[x]" : "[ ]",
         c.priority || c.carried ? "PRIORITAIRE" : null,
         c.carried ? `reportée depuis ${c.daysOpen} j` : null,
-        KIND_LABELS[c.kind],
+        typeOf(types, c.kind, c.typeId).short,
         c.placeName,
       ].filter(Boolean);
       write(flags.join("  ·  "), { size: 9, f: bold });

@@ -45,6 +45,18 @@ export async function POST(request) {
       if (session.metadata?.hotel_id) {
         const subscription = await stripe.subscriptions.retrieve(session.subscription);
         const { update } = await syncHotelSubscription(admin, session.metadata.hotel_id, subscription);
+        // Données de facturation de l'hôtel (raison sociale, SIREN), à part : une
+        // colonne absente ne doit jamais bloquer le statut de l'abonnement.
+        try {
+          const siren = session.custom_fields?.find((f) => f.key === "siren")?.text?.value?.replace(/\s/g, "") ?? "";
+          const company = session.customer_details?.business_name || session.customer_details?.name || "";
+          if (/^\d{9}$/.test(siren) || company) {
+            await admin.from("hotels").update({ billing_siren: /^\d{9}$/.test(siren) ? siren : null, billing_company: company || null }).eq("id", session.metadata.hotel_id);
+            if (session.customer && /^\d{9}$/.test(siren)) await stripe.customers.update(session.customer, { metadata: { siren } });
+          }
+        } catch (err) {
+          console.error("hotel billing details save failed:", err);
+        }
         try {
           const { data: hotel } = await admin.from("hotels").select("name").eq("id", session.metadata.hotel_id).maybeSingle();
           await sendHotelSubscriptionNotification({ hotelName: hotel?.name, services: update.services_count });

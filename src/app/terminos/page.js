@@ -35,7 +35,14 @@ const content = {
     s5Title: "5. Protection des données",
     s5Body1: "Consultez le détail dans notre",
     privacyLink: "Politique de confidentialité",
-    s6Title: "6. Contact",
+    cahierTitle: "6. Cahier de consignes (hôtels)",
+    cahierItems: [
+      "Tarif : 15 € par mois et par service (réception, conciergerie, technique, etc.), sans période d'essai, facturation mensuelle récurrente. TVA non applicable, art. 293 B du CGI. Les factures sont émises par Il est chouette.",
+      "Changement de services : ajouter ou retirer un service est possible à tout moment depuis Gestion ; le montant est ajusté au prorata sur la prochaine facture.",
+      "Résiliation : à tout moment, depuis Gestion > « Gérer mon abonnement, résilier ». Le cahier reste accessible jusqu'à la fin du mois déjà payé ; le mois entamé n'est pas remboursé. Faites une copie de vos consignes avant de résilier : trois mois après la fin de l'abonnement, toutes les données du cahier sont supprimées définitivement (email d'avertissement un mois avant).",
+      "Responsabilités : l'hôtel est responsable du contenu de ses consignes et des droits d'accès donnés à son équipe (voir la Politique de confidentialité, section Cahier de consignes).",
+    ],
+    s6Title: "7. Contact",
     s6Body: "Pour toute question sur ces conditions : allo@ilestchouette.fr.",
   },
   en: {
@@ -71,7 +78,14 @@ const content = {
     s5Title: "5. Data protection",
     s5Body1: "See the detail in our",
     privacyLink: "Privacy policy",
-    s6Title: "6. Contact",
+    cahierTitle: "6. Hotel instruction logbook",
+    cahierItems: [
+      "Price: €15 per month per service (reception, concierge, technical, etc.), no trial period, recurring monthly billing. VAT not applicable, art. 293 B of the French General Tax Code. Invoices are issued by Il est chouette.",
+      "Changing services: you can add or remove a service at any time from Management; the amount is adjusted pro rata on the next invoice.",
+      "Cancellation: at any time, from Management > \"Manage my subscription, cancel\". The logbook stays accessible until the end of the month already paid; the month in progress is not refunded. Make a copy of your instructions before cancelling: three months after the subscription ends, all logbook data is permanently deleted (warning email one month before).",
+      "Responsibilities: the hotel is responsible for the content of its instructions and for the access rights it gives its team (see the Privacy Policy, logbook section).",
+    ],
+    s6Title: "7. Contact",
     s6Body: "For any question about these terms: allo@ilestchouette.fr.",
   },
   es: {
@@ -107,7 +121,14 @@ const content = {
     s5Title: "5. Protección de datos",
     s5Body1: "Consulta el detalle en nuestra",
     privacyLink: "Política de Privacidad",
-    s6Title: "6. Contacto",
+    cahierTitle: "6. Cuaderno de consignas de hoteles",
+    cahierItems: [
+      "Precio: 15 € al mes por servicio (recepción, conserjería, técnico, etc.), sin periodo de prueba, facturación mensual recurrente. IVA no aplicable, art. 293 B del CGI francés. Las facturas las emite Il est chouette.",
+      "Cambio de servicios: puedes añadir o quitar un servicio en cualquier momento desde Gestión; el importe se ajusta de forma proporcional en la próxima factura.",
+      "Cancelación: en cualquier momento, desde Gestión > «Gérer mon abonnement, résilier». El cuaderno sigue accesible hasta el final del mes ya pagado; el mes en curso no se reembolsa. Haz una copia de tus consignas antes de cancelar: tres meses después de terminar la suscripción, todos los datos del cuaderno se eliminan definitivamente (correo de aviso un mes antes).",
+      "Responsabilidades: el hotel es responsable del contenido de sus consignas y de los permisos de acceso que da a su equipo (ver la Política de privacidad, sección del cuaderno).",
+    ],
+    s6Title: "7. Contacto",
     s6Body: "Para cualquier duda sobre estas condiciones: allo@ilestchouette.fr.",
   },
 };
@@ -172,6 +193,15 @@ export default async function TerminosPage() {
               </a>
               .
             </p>
+          </div>
+
+          <div>
+            <h2 className="font-display italic text-2xl text-ink">{t.cahierTitle}</h2>
+            <ul className="mt-2 grid gap-1">
+              {t.cahierItems.map((x) => (
+                <li key={x}>• {x}</li>
+              ))}
+            </ul>
           </div>
 
           <div>

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getHotelContext, resolveActor } from "@/lib/hotelAuth";
 import { hotelHasAccess } from "@/lib/hotelBilling";
 import { addDays, isDay, parisDate } from "@/lib/hotelTime";
+import crypto from "crypto";
+import { cleanCustomTypes } from "@/lib/hotelTheme";
+import { listServices } from "@/lib/hotelData";
 
 const KINDS = ["info", "tache", "probleme", "plainte"];
 
@@ -19,7 +22,16 @@ export async function POST(request) {
   if (!body || body.length > 2000) {
     return NextResponse.json({ error: "Écrivez la consigne (2000 caractères maximum)." }, { status: 400 });
   }
-  if (!KINDS.includes(b.kind)) return NextResponse.json({ error: "Type invalide." }, { status: 400 });
+  // Type propre à l'hôtel : on retient son type de base (statistiques) et son id.
+  let kind = b.kind;
+  let typeId = null;
+  if (typeof b.typeId === "string" && b.typeId) {
+    const custom = cleanCustomTypes(ctx.hotel.consigne_types).find((t) => t.id === b.typeId && t.active);
+    if (!custom) return NextResponse.json({ error: "Type invalide." }, { status: 400 });
+    kind = custom.kind;
+    typeId = custom.id;
+  }
+  if (!KINDS.includes(kind)) return NextResponse.json({ error: "Type invalide." }, { status: 400 });
 
   const today = parisDate();
   const day = b.day || today;
@@ -48,14 +60,43 @@ export async function POST(request) {
     pinnedUntil = `${b.pinnedUntil}T21:59:59Z`;
   }
 
-  const actor = await resolveActor(ctx, b.pin);
+  const actor = await resolveActor(ctx, b.pin, { managerPin: true });
   if (actor.error) return NextResponse.json({ error: actor.error }, { status: actor.status });
 
-  const { error } = await admin.from("consignes").insert({
+  // Services destinataires : un poste lié à un service écrit par défaut pour
+  // son service ; on peut en viser d'autres (la consigne apparaît chez eux).
+  // Une ligne par service, même group_id : chaque service ferme la sienne.
+  // Hôtel sans services définis : comportement d'avant (une ligne, sans service).
+  const services = await listServices(hotel.id);
+  let targets = [];
+  if (services.length > 0) {
+    const asked = Array.isArray(b.serviceIds) ? b.serviceIds : [];
+    targets = services.filter((s) => asked.includes(s.id)).map((s) => s.id);
+    if (targets.length === 0 && ctx.service) targets = [ctx.service.id];
+    if (targets.length === 0) {
+      return NextResponse.json({ error: "Choisissez pour quel service est cette consigne." }, { status: 400 });
+    }
+  }
+  // « Chaque personne doit valider » : réservé au manager, et le service doit
+  // avoir des personnes rattachées (sinon personne ne pourrait jamais valider).
+  const requireAll = ctx.mode === "manager" && Boolean(b.requireAll) && targets.length > 0;
+  if (requireAll) {
+    const { data: staff } = await admin.from("hotel_staff").select("service_ids").eq("hotel_id", hotel.id).eq("active", true).eq("is_manager", false);
+    for (const t of targets) {
+      if (!(staff ?? []).some((s) => (s.service_ids ?? []).includes(t))) {
+        const name = services.find((s) => s.id === t)?.name ?? "ce service";
+        return NextResponse.json({ error: `Aucune personne n'est rattachée au service « ${name} ». Ajoutez des personnes à ce service dans Gestion.` }, { status: 400 });
+      }
+    }
+  }
+  const groupId = targets.length > 0 ? crypto.randomUUID() : null;
+  const base = {
     hotel_id: hotel.id,
     day,
     body,
-    kind: b.kind,
+    kind,
+    // Colonne absente avant la migration : on ne l'envoie que si utile.
+    ...(typeId ? { type_id: typeId } : {}),
     place_id: place.id,
     place_name: place.name,
     tag_ids: tagIds,
@@ -64,7 +105,12 @@ export async function POST(request) {
     created_by_name: actor.staff.name,
     pinned: Boolean(pinnedUntil),
     pinned_until: pinnedUntil,
-  });
+  };
+  const rows =
+    targets.length > 0
+      ? targets.map((serviceId) => ({ ...base, service_id: serviceId, from_service_id: ctx.service?.id ?? null, group_id: groupId, ...(requireAll ? { require_all: true } : {}) }))
+      : [base];
+  const { error } = await admin.from("consignes").insert(rows);
   if (error) {
     console.error("consigne insert failed:", error);
     return NextResponse.json({ error: "Impossible d'enregistrer la consigne." }, { status: 500 });

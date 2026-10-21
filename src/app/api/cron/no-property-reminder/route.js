@@ -16,7 +16,7 @@ export async function GET(request) {
 
   const { data: hosts, error } = await admin
     .from("hosts")
-    .select("id, name, email")
+    .select("*")
     .eq("is_admin", false)
     .is("no_property_reminder_sent_at", null)
     .lt("created_at", cutoff);
@@ -27,13 +27,13 @@ export async function GET(request) {
 
   const { data: properties } = await admin.from("properties").select("host_id");
   const hostsWithProperty = new Set((properties ?? []).map((p) => p.host_id));
-  const targets = (hosts ?? []).filter((h) => !hostsWithProperty.has(h.id));
+  const targets = (hosts ?? []).filter((h) => !hostsWithProperty.has(h.id) && h.email_optout !== true);
 
   const results = [];
   const sentTo = [];
   for (const host of targets) {
     try {
-      await sendNoPropertyReminder({ name: host.name, email: host.email });
+      await sendNoPropertyReminder({ name: host.name, email: host.email, hostId: host.id });
       await admin.from("hosts").update({ no_property_reminder_sent_at: new Date().toISOString() }).eq("id", host.id);
       results.push({ email: host.email, sent: true });
       sentTo.push({ name: host.name, email: host.email });

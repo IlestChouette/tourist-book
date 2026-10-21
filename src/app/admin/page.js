@@ -52,6 +52,7 @@ const EMAIL_TEMPLATE_ORDER = [
   "profile_phone_request",
   "hotel_digest",
   "hotel_signup_notification",
+  "assistant_usage_alert",
   "lost_item_guest",
   "lost_item_choice",
   "hotel_subscription_notification",
@@ -76,6 +77,7 @@ const emailTemplateLabels = {
     profile_phone_request: "Invitation à ajouter son téléphone",
     hotel_digest: "Relève cahier de consignes (hôtel)",
     hotel_signup_notification: "Nouvel hôtel inscrit",
+    assistant_usage_alert: "Alerte usage de l'assistant",
     lost_item_guest: "Objet trouvé — email au client",
     lost_item_choice: "Objet trouvé — choix du client",
     hotel_subscription_notification: "Nouvel abonnement hôtel",
@@ -98,6 +100,7 @@ const emailTemplateLabels = {
     profile_phone_request: "Invitation to add phone number",
     hotel_digest: "Hotel shift digest",
     hotel_signup_notification: "New hotel signed up",
+    assistant_usage_alert: "Assistant usage alert",
     lost_item_guest: "Lost item — guest email",
     lost_item_choice: "Lost item — guest choice",
     hotel_subscription_notification: "New hotel subscription",
@@ -120,6 +123,7 @@ const emailTemplateLabels = {
     profile_phone_request: "Invitación a añadir el teléfono",
     hotel_digest: "Relevo del cuaderno (hotel)",
     hotel_signup_notification: "Nuevo hotel registrado",
+    assistant_usage_alert: "Alerta de uso del asistente",
     lost_item_guest: "Objeto encontrado — email al cliente",
     lost_item_choice: "Objeto encontrado — elección del cliente",
     hotel_subscription_notification: "Nueva suscripción de hotel",
@@ -506,8 +510,8 @@ export default async function AdminPage() {
 
   return (
     <main className="flex-1 bg-sand">
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 bg-[#2f7d76] px-6 py-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-8 gap-y-4 bg-[#2f7d76] px-6 py-4">
+        <div className="flex shrink-0 items-center gap-4">
           <Link href="/" className="inline-flex shrink-0">
             <Image
               src="/tourist book long.png"
@@ -517,14 +521,14 @@ export default async function AdminPage() {
               className="h-14 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] sm:h-20 md:h-24"
             />
           </Link>
-          <span className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70">Admin</span>
+          <span className="rounded-md bg-[#f7f1e4] px-3 py-1.5 text-sm font-bold uppercase tracking-widest text-[#2f7d76]">Admin</span>
         </div>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <nav className="flex basis-full flex-wrap items-center gap-2 sm:min-w-0 sm:flex-1 sm:basis-0 sm:justify-end">
           <a
             href="https://analytics.google.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.analytics}
           </a>
@@ -532,25 +536,25 @@ export default async function AdminPage() {
             href="https://search.google.com/search-console?resource_id=sc-domain:tourist-book.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.searchConsole}
           </a>
           <Link
             href="/admin/identidad"
-            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.identityLookup}
           </Link>
           <Link
             href="/admin/tarifas"
-            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.transferRates}
           </Link>
           <Link
             href="/admin/estadisticas"
-            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.livretStats}
           </Link>
@@ -558,12 +562,12 @@ export default async function AdminPage() {
             href="/transfer-independiente"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
           >
             {t.independentTransfer}
           </Link>
-          <LogoutButton className="text-xs font-bold uppercase tracking-wider text-[#f7f1e4]/70 hover:text-[#f7f1e4]" />
-        </div>
+          <LogoutButton className="rounded-full border border-[#f7f1e4]/60 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]" />
+        </nav>
       </div>
 
       <section className="mx-auto max-w-5xl px-6 py-10">

@@ -122,6 +122,7 @@ export default function HotelInscriptionPage() {
             <span className={label}>Mot de passe</span>
             <input required type="password" minLength={6} value={form.password} onChange={update("password")} className="input" />
           </label>
+          <p className="text-sm text-ink/60">Les consignes sont conservées 36 mois, puis supprimées automatiquement (vous êtes prévenu 3 mois avant, avec un lien pour les télécharger). Résiliable à tout moment.</p>
           <p className="text-sm text-ink/60">Vous ajouterez le logo de l'hôtel juste après la confirmation de votre email.</p>
           <label className="flex items-start gap-2 text-sm text-ink/80">
             <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-1" />

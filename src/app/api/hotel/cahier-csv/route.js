@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { csvResponse } from "@/lib/csv";
 import { getHotelContext } from "@/lib/hotelAuth";
-import { KIND_LABELS, loadDay, loadMeta } from "@/lib/hotelData";
+import { hotelHasAccess } from "@/lib/hotelBilling";
+import { loadDay, loadMeta } from "@/lib/hotelData";
+import { typeOf } from "@/lib/hotelTheme";
 import { isDay, parisDate } from "@/lib/hotelTime";
 
 const timeFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
@@ -12,11 +14,16 @@ export async function GET(request) {
   const ctx = await getHotelContext();
   if (!ctx) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
+  // Abonnement en pause : les postes ne lisent plus rien (le manager garde accès pour régler).
+  if (ctx.mode !== "manager" && !hotelHasAccess(ctx.hotel)) {
+    return NextResponse.json({ error: "L'accès au cahier est suspendu. Prévenez votre manager." }, { status: 402 });
+  }
+
   const day = new URL(request.url).searchParams.get("day") || parisDate();
   if (!isDay(day)) return NextResponse.json({ error: "Date invalide" }, { status: 400 });
 
   const withNames = ctx.mode === "manager";
-  const [items, meta] = await Promise.all([loadDay(ctx.hotel.id, day, withNames), loadMeta(ctx.hotel.id)]);
+  const [items, meta] = await Promise.all([loadDay(ctx.hotel.id, day, withNames, { serviceId: ctx.service?.id }), loadMeta(ctx.hotel.id)]);
   const tagName = Object.fromEntries(meta.tags.map((t) => [t.id, t.name]));
 
   const head = ["Date de la consigne", "Heure", "Type", "Chambre ou lieu", "Consigne", "Équipes / postes", "Urgente", "Statut", "Ouverte depuis (jours)", "Épinglée", "Clôturée à"];
@@ -25,7 +32,7 @@ export async function GET(request) {
     const row = [
       c.day,
       timeFmt.format(new Date(c.createdAt)),
-      KIND_LABELS[c.kind],
+      typeOf(ctx.hotel.consigne_types, c.kind, c.typeId).short,
       c.placeName,
       c.body,
       c.tagIds.map((id) => tagName[id]).filter(Boolean).join(" / "),

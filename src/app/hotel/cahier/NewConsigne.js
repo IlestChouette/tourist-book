@@ -5,12 +5,6 @@ import { addDays } from "@/lib/hotelTime";
 import { Icon } from "./CahierIcons";
 import PinPad from "./PinPad";
 
-const KINDS = [
-  { id: "info", label: "Une information", hint: "À savoir, à transmettre" },
-  { id: "tache", label: "Quelque chose à faire", hint: "Une tâche pour un collègue" },
-  { id: "probleme", label: "Un problème", hint: "Panne, fuite, objet cassé…" },
-  { id: "plainte", label: "Une plainte client", hint: "Un client n'est pas content" },
-];
 const focus = "focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-aqua-deep";
 const big = `flex min-h-16 w-full items-center gap-4 rounded-2xl border-2 px-5 py-3 text-left text-xl font-bold transition active:scale-[0.98] ${focus}`;
 const tile = (on) => `${big} ${on ? "border-aqua-deep bg-aqua-deep text-sand-card" : "border-sand-dim bg-sand text-ink hover:border-aqua-deep"}`;
@@ -25,10 +19,18 @@ const SHIFTS = [
 // Une seule question par écran, des gros boutons, des mots simples : on peut
 // y arriver sans jamais avoir utilisé un ordinateur. Aucune étape n'oblige à
 // comprendre ce qui précède ou ce qui suit.
-export default function NewConsigne({ isManager, today, defaultDay, tags, places, onClose, onCreated }) {
-  const steps = isManager ? ["kind", "place", "message", "who"] : ["kind", "place", "message", "who", "pin"];
+export default function NewConsigne({ isManager, managerHasPin = false, today, defaultDay, tags, places, types, services = [], defaultServiceIds = [], onClose, onCreated }) {
+  // Hôtel avec des services : une étape « pour quel service ? » avant « pour qui ? ».
+  const steps = [
+    "kind",
+    "place",
+    "message",
+    ...(services.length > 0 ? ["service"] : []),
+    "who",
+    ...(isManager && !managerHasPin ? [] : ["pin"]),
+  ];
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState({ kind: null, placeName: "", body: "", shift: "", roleIds: [], urgent: false, day: defaultDay, pinDays: 0 });
+  const [form, setForm] = useState({ requireAll: false, serviceIds: defaultServiceIds, kind: null, typeId: null, placeName: "", body: "", shift: "", roleIds: [], urgent: false, day: defaultDay, pinDays: 0 });
   const [showMore, setShowMore] = useState(false);
   const [showRoles, setShowRoles] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -54,6 +56,7 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
     (current === "kind" && form.kind) ||
     (current === "place" && place) ||
     (current === "message" && form.body.trim().length > 0) ||
+    (current === "service" && form.serviceIds.length > 0) ||
     current === "who";
 
   async function send(pin) {
@@ -69,7 +72,10 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
       body: JSON.stringify({
         body: form.body.trim(),
         kind: form.kind,
+        typeId: form.typeId && form.typeId !== form.kind ? form.typeId : undefined,
         placeId: place.id,
+        serviceIds: services.length > 0 ? form.serviceIds : undefined,
+        requireAll: isManager && form.requireAll ? true : undefined,
         tagIds,
         priority: form.urgent,
         day: form.day,
@@ -118,12 +124,12 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
             <>
               <h2 className="text-3xl font-bold text-ink">Que voulez-vous signaler ?</h2>
               <div className="mt-6 grid gap-3">
-                {KINDS.map((k) => (
-                  <button key={k.id} type="button" aria-pressed={form.kind === k.id} onClick={() => { set({ kind: k.id }); setStep(1); }} className={tile(form.kind === k.id)}>
-                    <Icon name={k.id} className="h-9 w-9 shrink-0" />
+                {types.map((k) => (
+                  <button key={k.id} type="button" aria-pressed={form.typeId === k.id} onClick={() => { set({ kind: k.kind, typeId: k.id }); setStep(1); }} className={tile(form.typeId === k.id)}>
+                    <Icon name={k.icon} className="h-9 w-9 shrink-0" />
                     <span>
                       {k.label}
-                      <span className={`block text-base font-normal ${form.kind === k.id ? "text-sand-card/85" : "text-ink/60"}`}>{k.hint}</span>
+                      <span className={`block text-base font-normal ${form.typeId === k.id ? "text-sand-card/85" : "text-ink/60"}`}>{k.hint}</span>
                     </span>
                   </button>
                 ))}
@@ -179,6 +185,10 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
                 autoFocus
                 rows={6}
                 maxLength={2000}
+                spellCheck
+                lang="fr"
+                autoCorrect="on"
+                autoCapitalize="sentences"
                 value={form.body}
                 onChange={(e) => set({ body: e.target.value })}
                 aria-label="Votre message"
@@ -186,6 +196,48 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
                 placeholder="Ex : Le client demande une serviette en plus avant 18 h."
               />
               <p className="mt-2 text-base text-ink/60">Astuce : sur un téléphone ou une tablette, le micro du clavier écrit à votre place.</p>
+            </>
+          )}
+
+          {!saved && current === "service" && (
+            <>
+              <h2 className="text-3xl font-bold text-ink">Pour quel service ?</h2>
+              <p className="mt-2 text-xl text-ink/70">La consigne apparaît dans le cahier de chaque service choisi.</p>
+              <div className="mt-6 grid gap-3">
+                {services.map((s) => {
+                  const on = form.serviceIds.includes(s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => set({ serviceIds: on ? form.serviceIds.filter((x) => x !== s.id) : [...form.serviceIds, s.id] })}
+                      className={tile(on)}
+                    >
+                      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 ${on ? "border-sand-card bg-sand-card text-aqua-deep" : "border-sand-dim"}`}>
+                        {on && <Icon name="check" className="h-6 w-6" />}
+                      </span>
+                      {s.name}
+                    </button>
+                  );
+                })}
+              </div>
+              {isManager && (
+                <button
+                  type="button"
+                  aria-pressed={form.requireAll}
+                  onClick={() => set({ requireAll: !form.requireAll })}
+                  className={`mt-5 ${tile(form.requireAll)}`}
+                >
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 ${form.requireAll ? "border-sand-card bg-sand-card text-aqua-deep" : "border-sand-dim"}`}>
+                    {form.requireAll && <Icon name="check" className="h-6 w-6" />}
+                  </span>
+                  <span>
+                    Chaque personne doit valider
+                    <span className={`block text-base font-normal ${form.requireAll ? "text-sand-card/85" : "text-ink/60"}`}>Reste affichée tant que tout le service n'a pas validé avec son code.</span>
+                  </span>
+                </button>
+              )}
             </>
           )}
 
@@ -260,7 +312,7 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
           {!saved && current === "pin" && (
             <>
               <h2 className="text-center text-3xl font-bold text-ink">Votre code personnel</h2>
-              <p className="mt-2 text-center text-xl text-ink/70">Essayez avec votre code de la badgeuse : celui de votre arrivée et de votre départ.</p>
+              <p className="mt-2 text-center text-xl text-ink/70">Essayez avec votre code de badgeuse ou de contrôle d'accès : celui de votre arrivée et de votre départ.</p>
               <p className="mb-6 mt-1 text-center text-lg text-ink/60">4 chiffres. Le message part tout seul.</p>
               <PinPad busy={busy} message={error} onComplete={send} />
             </>
@@ -273,7 +325,7 @@ export default function NewConsigne({ isManager, today, defaultDay, tags, places
       {!saved && current !== "kind" && current !== "pin" && (
         <div className="border-t-2 border-sand-dim bg-sand px-5 py-4">
           <div className="mx-auto max-w-xl">
-            {current === "who" && isManager ? (
+            {current === "who" && isManager && !managerHasPin ? (
               <button type="button" disabled={busy} onClick={() => send("")} className={`flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-terracotta text-2xl font-bold text-ink hover:bg-terracotta-deep disabled:opacity-60 ${focus}`}>
                 <Icon name="check" className="h-8 w-8" /> {busy ? "Envoi…" : "Envoyer"}
               </button>

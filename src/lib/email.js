@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 import { formatTransferWhatsAppMessage } from "./transferMessage";
 import { createAdminClient } from "./supabase/admin";
+import { typeOf } from "./hotelTheme";
+import { expiringExportUrl, unsubscribeHeaders, unsubscribeUrl } from "./unsubscribe";
 
 // Journalise chaque tentative d'envoi (succès ou échec) pour que l'admin
 // puisse voir l'historique complet depuis /admin, sans devoir aller chercher
@@ -230,11 +232,12 @@ export async function sendSubscriptionActivatedNotification({ hostEmail, propert
 // envoyée aux hôteliers inscrits depuis plus de 48h qui n'ont encore créé
 // aucun logement — pour qu'ils voient à quoi ressemble le livret avant
 // d'oublier le projet.
-export async function sendNoPropertyReminder({ name, email }) {
+export async function sendNoPropertyReminder({ name, email, hostId }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return { sent: false, reason: "not_configured" };
 
   const resend = new Resend(apiKey);
+  const unsub = hostId ? unsubscribeUrl("host", hostId) : null;
   const greeting = name?.trim() ? `Bonjour ${name.trim()},` : "Bonjour,";
 
   const text = `${greeting}
@@ -253,7 +256,7 @@ Petit rappel : vous avez 30 jours d'essai gratuit pour tester tranquillement, sa
 Une question, un doute ? Répondez directement à cet email, on est là pour vous aider.
 
 À très vite,
-L'équipe Tourist Book`;
+L'équipe Tourist Book${unsub ? `\n\n—\nPour ne plus recevoir ces emails : ${unsub}` : ""}`;
 
   const subject = "Bienvenue sur Tourist Book — créez votre premier livret";
   const { error: sendError } = await resend.emails.send({
@@ -262,6 +265,7 @@ L'équipe Tourist Book`;
     replyTo: CONTACT_NOTIFICATION_EMAIL,
     subject,
     text,
+    ...(unsub ? { headers: unsubscribeHeaders(unsub) } : {}),
   });
 
   if (sendError) {
@@ -309,11 +313,12 @@ export async function sendReminderBatchNotification({ sentTo }) {
 // aux hôteliers qui ont déjà créé au moins un logement — les encourage à
 // remplir les sections facultatives et à choisir leur couleur, avec un
 // exemple complet en référence.
-export async function sendListingTipsEmail({ name, email }) {
+export async function sendListingTipsEmail({ name, email, hostId }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return { sent: false, reason: "not_configured" };
 
   const resend = new Resend(apiKey);
+  const unsub = hostId ? unsubscribeUrl("host", hostId) : null;
   const greeting = name?.trim() ? `Bonjour ${name.trim()},` : "Bonjour,";
 
   const text = `${greeting}
@@ -328,7 +333,7 @@ https://tourist-book.com/logement/exemple-premium/entrer?code=0000
 N'hésitez pas à nous écrire si vous avez la moindre question, on est là pour vous aider à en tirer le meilleur.
 
 Merci encore, et à très vite,
-L'équipe Tourist Book`;
+L'équipe Tourist Book${unsub ? `\n\n—\nPour ne plus recevoir ces emails : ${unsub}` : ""}`;
 
   const subject = "Merci de faire partie de l'aventure Tourist Book";
   const { error: sendError } = await resend.emails.send({
@@ -337,6 +342,7 @@ L'équipe Tourist Book`;
     replyTo: CONTACT_NOTIFICATION_EMAIL,
     subject,
     text,
+    ...(unsub ? { headers: unsubscribeHeaders(unsub) } : {}),
   });
 
   if (sendError) {
@@ -572,12 +578,14 @@ export async function sendProfilePhoneRequestEmail({ to, name }) {
 }
 
 const SITE_URL = "https://tourist-book.com";
-const DIGEST_KIND_LABELS = { info: "Info", tache: "Tâche", probleme: "Problème", plainte: "Plainte" };
 
 // Relève du cahier de consignes (6h55, 14h55, 22h55) : les consignes encore
 // ouvertes, prioritaires et reportées d'abord. À 6h55, le PDF de la veille
 // est joint. Un email par destinataire, chacun journalisé.
-export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, pdf, cahierPath = "/hotel/cahier" }) {
+// Nom d'expéditeur affiché : le nom de l'hôtel (sans caractères qui casseraient l'en-tête From).
+const senderName = (name) => String(name).replace(/["<>,;:\\\r\n]/g, " ").replace(/\s+/g, " ").trim().slice(0, 60);
+
+export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, pdf, cahierPath = "/hotel/cahier", replyTo, types, hotelId }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return { sent: false, reason: "not_configured" };
 
@@ -590,7 +598,7 @@ export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, 
       const flags = [
         c.priority || c.carried ? "PRIORITAIRE" : null,
         c.carried ? `ouverte depuis ${c.daysOpen} j` : null,
-        DIGEST_KIND_LABELS[c.kind],
+        typeOf(types, c.kind, c.typeId).short,
         c.placeName,
       ].filter(Boolean);
       lines.push(`• [${flags.join(" · ")}]`, `  ${c.body.replace(/\n+/g, " ")}`, "");
@@ -598,15 +606,19 @@ export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, 
   }
   lines.push(`Ouvrir le cahier : ${SITE_URL}${cahierPath}`);
   if (pdf) lines.push("", "Le PDF des consignes d'hier est joint à ce message.");
+  const unsub = hotelId ? unsubscribeUrl("digest", hotelId, String(to).toLowerCase()) : null;
+  lines.push("", "—", "Les consignes sont conservées 36 mois, puis supprimées automatiquement (vous êtes prévenu 3 mois avant, avec un lien pour les télécharger).");
+  if (unsub) lines.push(`Ne plus recevoir cette relève à cette adresse : ${unsub}`);
 
   const subject = `Cahier de consignes — ${hotelName} — relève de ${slotLabel} : ${pending.length} en attente`;
   const resend = new Resend(apiKey);
   const { error } = await resend.emails.send({
-    from: "Tourist Book <notifications@tourist-book.com>",
+    from: `${senderName(hotelName) || "Cahier de consignes"} <notifications@tourist-book.com>`,
     to,
-    replyTo: CONTACT_NOTIFICATION_EMAIL,
+    replyTo: replyTo || CONTACT_NOTIFICATION_EMAIL,
     subject,
     text: lines.join("\n"),
+    ...(unsub ? { headers: unsubscribeHeaders(unsub) } : {}),
     ...(pdf ? { attachments: [{ filename: pdf.filename, content: pdf.content }] } : {}),
   });
   if (error) {
@@ -614,6 +626,113 @@ export async function sendHotelDigestEmail({ to, hotelName, slotLabel, pending, 
     throw new Error(`Resend API error: ${error.name} — ${error.message}`);
   }
   await logEmail({ recipient: to, subject, template: "hotel_digest", status: "sent" });
+  return { sent: true };
+}
+
+// Prévient l'hôtel, 3 mois avant, que des consignes vont être supprimées (36 mois de
+// conservation), avec un lien pour les télécharger.
+export async function sendHotelRetentionWarning({ to, hotelId, hotelName, count, deleteFrom, months = 36, replyTo }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+  const fmt = (d) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
+  const unsub = unsubscribeUrl("digest", hotelId, String(to).toLowerCase());
+  const text = `Cahier de consignes — ${hotelName}
+
+Les consignes sont conservées ${months} mois, puis supprimées automatiquement et définitivement.
+
+${count} consigne${count > 1 ? "s" : ""} de votre cahier seront supprimées dans les 3 mois à venir, à partir du ${fmt(deleteFrom)}.
+
+Pour les garder, téléchargez-les maintenant (fichier Excel, lien valable 30 jours) :
+${expiringExportUrl(hotelId)}
+
+Vous pouvez aussi les exporter à tout moment depuis votre espace : ${SITE_URL}/hotel/suivi
+
+—
+Ne plus recevoir les emails du cahier à cette adresse : ${unsub}`;
+  const subject = `Cahier de consignes — ${count} consigne${count > 1 ? "s" : ""} seront supprimées dans 3 mois`;
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: `${senderName(hotelName) || "Cahier de consignes"} <notifications@tourist-book.com>`,
+    to,
+    replyTo: replyTo || CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text,
+    headers: unsubscribeHeaders(unsub),
+  });
+  if (error) {
+    await logEmail({ recipient: to, subject, template: "hotel_retention_warning", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+  await logEmail({ recipient: to, subject, template: "hotel_retention_warning", status: "sent" });
+  return { sent: true };
+}
+
+// Abonnement terminé : prévient l'hôtel, un mois avant, que ses données du cahier vont
+// être supprimées (3 mois après la fin), avec un lien pour tout télécharger.
+export async function sendHotelEndedWarning({ to, hotelId, hotelName, endedOn, deleteOn, replyTo }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+  const fmt = (d) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
+  const unsub = unsubscribeUrl("digest", hotelId, String(to).toLowerCase());
+  const text = `Cahier de consignes — ${hotelName}
+
+Votre abonnement s'est terminé le ${fmt(endedOn)}. Trois mois après la fin d'un abonnement, toutes les données du cahier sont supprimées définitivement (consignes, équipe, services, accès).
+
+Les vôtres seront supprimées le ${fmt(deleteOn)}, dans environ un mois.
+
+Pour en garder une copie, téléchargez vos consignes maintenant (fichier Excel, lien valable 30 jours) :
+${expiringExportUrl(hotelId, { all: true })}
+
+Si vous reprenez un abonnement avant cette date, rien n'est supprimé : ${SITE_URL}/hotel/gestion
+
+—
+Ne plus recevoir les emails du cahier à cette adresse : ${unsub}`;
+  const subject = `Cahier de consignes — vos données seront supprimées le ${fmt(deleteOn)}`;
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: `${senderName(hotelName) || "Cahier de consignes"} <notifications@tourist-book.com>`,
+    to,
+    replyTo: replyTo || CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text,
+    headers: unsubscribeHeaders(unsub),
+  });
+  if (error) {
+    await logEmail({ recipient: to, subject, template: "hotel_ended_warning", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+  await logEmail({ recipient: to, subject, template: "hotel_ended_warning", status: "sent" });
+  return { sent: true };
+}
+
+// Lien d'activation d'un ordinateur pour un service du cahier (24 h, une seule utilisation).
+export async function sendHotelActivationLink({ to, hotelName, serviceName, link, replyTo }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+  const text = `Cahier de consignes — ${hotelName}
+
+Le manager de ${hotelName} vous invite à ouvrir le cahier de consignes du service « ${serviceName} ».
+
+Ouvrez ce lien sur l'ordinateur ou la tablette du service, puis appuyez sur « Activer cet ordinateur » :
+${link}
+
+Le lien est valable 24 heures et ne peut servir qu'une seule fois. Aucun mot de passe n'est nécessaire : ensuite, chacun signe ses consignes avec son code personnel.
+
+Si vous n'attendiez pas ce message, ignorez-le : sans appuyer sur le bouton, rien ne se passe.`;
+  const subject = `Cahier de consignes — ${hotelName} : activer le service ${serviceName}`;
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: `${senderName(hotelName) || "Cahier de consignes"} <notifications@tourist-book.com>`,
+    to,
+    replyTo: replyTo || CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text,
+  });
+  if (error) {
+    await logEmail({ recipient: to, subject, template: "hotel_activation_link", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+  await logEmail({ recipient: to, subject, template: "hotel_activation_link", status: "sent" });
   return { sent: true };
 }
 
@@ -634,6 +753,41 @@ export async function sendHotelSignupNotification({ hotelName, name, email }) {
     throw new Error(`Resend API error: ${error.name} — ${error.message}`);
   }
   await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "hotel_signup_notification", status: "sent" });
+  return { sent: true };
+}
+
+// Alerte à l'équipe Tourist Book (pas à l'hôte) : l'assistant d'un logement
+// approche ou atteint sa limite d'usage, ou un visiteur atteint son quota du jour.
+export async function sendAssistantUsageAlert({ propertyName, slug, kind, count, limit }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const what = {
+    monthly80: `80 % du quota mensuel atteint (${count}/${limit} questions ce mois-ci)`,
+    monthly100: `Quota mensuel atteint (${limit} questions) : l'assistant renvoie désormais vers l'hôte`,
+    visitor: `Un visiteur a atteint ${limit} questions aujourd'hui : l'assistant le renvoie vers l'hôte`,
+  }[kind];
+  const subject = `Assistant — ${propertyName} : ${what.split(" (")[0].split(" :")[0]}`;
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text: [
+      "Usage de l'assistant du livret",
+      "",
+      `Logement : ${propertyName}`,
+      `Livret : ${SITE_URL}/logement/${slug}`,
+      what,
+      "",
+      "Si c'est un abus, les quotas (30 questions/jour/visiteur, 500/mois/logement) protègent déjà le coût. Pour les modifier : src/app/api/assistant/route.js.",
+    ].join("\n"),
+  });
+  if (error) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "assistant_usage_alert", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "assistant_usage_alert", status: "sent" });
   return { sent: true };
 }
 

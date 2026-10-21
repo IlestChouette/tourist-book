@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getHotelContext } from "@/lib/hotelAuth";
+import { hotelHasAccess } from "@/lib/hotelBilling";
 import { loadDay, loadMeta } from "@/lib/hotelData";
 import { buildDayPdf } from "@/lib/hotelPdf";
 import { isDay, parisDate } from "@/lib/hotelTime";
@@ -10,17 +11,23 @@ export async function GET(request) {
   const ctx = await getHotelContext();
   if (!ctx) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
+  // Abonnement en pause : les postes ne lisent plus rien (le manager garde accès pour régler).
+  if (ctx.mode !== "manager" && !hotelHasAccess(ctx.hotel)) {
+    return NextResponse.json({ error: "L'accès au cahier est suspendu. Prévenez votre manager." }, { status: 402 });
+  }
+
   const day = new URL(request.url).searchParams.get("day") || parisDate();
   if (!isDay(day)) return NextResponse.json({ error: "Date invalide" }, { status: 400 });
 
   const withNames = ctx.mode === "manager";
-  const [items, meta] = await Promise.all([loadDay(ctx.hotel.id, day, withNames), loadMeta(ctx.hotel.id)]);
+  const [items, meta] = await Promise.all([loadDay(ctx.hotel.id, day, withNames, { serviceId: ctx.service?.id }), loadMeta(ctx.hotel.id)]);
   const pdf = await buildDayPdf({
     hotelName: ctx.hotel.name,
     day,
     items,
     tagNames: Object.fromEntries(meta.tags.map((t) => [t.id, t.name])),
     withNames,
+    types: ctx.hotel.consigne_types,
   });
   return new NextResponse(pdf, {
     headers: {

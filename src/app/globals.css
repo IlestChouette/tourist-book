@@ -36,6 +36,14 @@
   }
 }
 
+/* Espace hôtel : toujours clair (voir src/app/hotel/layout.js). */
+.hotel-light {
+  --sand: #ffffff;
+  --sand-card: #f7f1e4;
+  --ink: #223339;
+  color-scheme: light;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

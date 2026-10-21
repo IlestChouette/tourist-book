@@ -26,6 +26,7 @@ export default async function ObjetsTrouvesPage() {
     <main className="flex-1 bg-sand-card/50">
       <HotelHeader
         hotel={ctx.hotel}
+        logout={isManager}
         links={[
           { href: "/hotel/cahier", label: "Cahier" },
           ...(isManager ? [{ href: "/hotel/statistiques", label: "Statistiques" }, { href: "/hotel/gestion", label: "Gestion" }] : []),

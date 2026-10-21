@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendHostSignupNotification, sendHotelSignupNotification } from "@/lib/email";
+import { sendHostSignupNotification } from "@/lib/email";
+import { ensureHotel } from "@/lib/hotelCreate";
 
 // Lien du mail de confirmation. Il valide l'adresse, ouvre la session (l'hôtelier
 // arrive connecté, sans retaper son mot de passe) et crée son profil : avant la
@@ -57,6 +58,11 @@ export async function GET(request) {
     return NextResponse.redirect(new URL(type === "recovery" ? next : "/hotel/gestion", origin));
   }
 
+  // Accès d'un service (compte créé par le manager) : jamais de profil hôtelier.
+  if (user?.user_metadata?.account_type === "hotel_service") {
+    return NextResponse.redirect(new URL(type === "recovery" ? next : "/hotel/connexion", origin));
+  }
+
   if (user) await ensureHostProfile(user);
 
   return NextResponse.redirect(new URL(next, origin));
@@ -85,47 +91,5 @@ async function ensureHostProfile(user) {
   } catch (err) {
     // Best-effort : le profil est déjà créé même si l'email d'alerte échoue.
     console.error("sendHostSignupNotification failed:", err);
-  }
-}
-
-const SHIFT_TAGS = ["matin", "soir", "nuit"];
-const ROLE_TAGS = [
-  "réception",
-  "conciergerie",
-  "technique",
-  "housekeeping",
-  "gouvernante",
-  "réservation",
-  "bagagiste",
-  "voiturier",
-];
-
-async function ensureHotel(user) {
-  const admin = createAdminClient();
-  const { data: existing } = await admin.from("hotels").select("id").eq("owner_id", user.id).maybeSingle();
-  if (existing) return;
-
-  const meta = user.user_metadata ?? {};
-  const hotelName = (meta.hotel_name || "Mon hôtel").slice(0, 120);
-  const { data: hotel, error } = await admin
-    .from("hotels")
-    .insert({ owner_id: user.id, name: hotelName, notification_emails: [user.email] })
-    .select("id")
-    .single();
-  if (error) {
-    console.error("ensureHotel failed:", error);
-    return;
-  }
-
-  await admin.from("hotel_staff").insert({ hotel_id: hotel.id, name: meta.name || "Manager", is_manager: true });
-  await admin.from("hotel_tags").insert([
-    ...SHIFT_TAGS.map((name) => ({ hotel_id: hotel.id, name, kind: "shift" })),
-    ...ROLE_TAGS.map((name) => ({ hotel_id: hotel.id, name, kind: "role" })),
-  ]);
-
-  try {
-    await sendHotelSignupNotification({ hotelName, name: meta.name, email: user.email });
-  } catch (err) {
-    console.error("sendHotelSignupNotification failed:", err);
   }
 }

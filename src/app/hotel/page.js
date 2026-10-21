@@ -34,7 +34,11 @@ const faq = [
   },
   {
     q: "Tout le monde voit qui a écrit quoi ?",
-    a: "Non. Les employés voient les consignes et leur état ; seuls le manager et la direction voient qui les a écrites ou validées.",
+    a: "Non. Les employés voient les consignes et leur état ; seuls le manager et les responsables de service qu'il désigne voient qui les a écrites ou validées.",
+  },
+  {
+    q: "Combien de temps garde-t-on mes consignes ?",
+    a: "36 mois, puis elles sont supprimées automatiquement et définitivement. Trois mois avant, vous recevez un email avec un lien pour télécharger celles qui vont disparaître. Vous pouvez aussi tout exporter à tout moment (PDF ou Excel). Si vous résiliez, les données sont gardées 3 mois puis supprimées (email un mois avant) : faites une copie avant de résilier.",
   },
   {
     q: "Et si internet tombe ?",
