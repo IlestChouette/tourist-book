@@ -293,15 +293,18 @@ export async function POST(request) {
 
     case "activate_station": {
       const token = crypto.randomBytes(32).toString("hex");
-      const label = typeof b.label === "string" && b.label.trim() ? b.label.trim().slice(0, 60) : "Réception";
+      let label = typeof b.label === "string" && b.label.trim() ? b.label.trim().slice(0, 60) : "";
       // Avec un service : ce poste ouvre le cahier de ce service (3 services au plus
       // par appareil). Sans service : ancien mode, tout l'hôtel.
       let serviceId = null;
       if (typeof b.serviceId === "string" && b.serviceId) {
-        const { data: svc } = await admin.from("hotel_services").select("id").eq("id", b.serviceId).eq("hotel_id", hotel.id).eq("active", true).maybeSingle();
+        const { data: svc } = await admin.from("hotel_services").select("id, name").eq("id", b.serviceId).eq("hotel_id", hotel.id).eq("active", true).maybeSingle();
         if (!svc) return fail("Service introuvable.", 404);
         serviceId = svc.id;
+        // Sans nom donné, le poste porte le nom du service.
+        if (!label) label = svc.name;
       }
+      if (!label) label = "Poste";
       const existing = stationTokens(request.cookies.get(STATION_COOKIE)?.value);
       if (serviceId && existing.length >= MAX_SERVICES_PER_DEVICE) {
         return fail(`Cet appareil porte déjà ${MAX_SERVICES_PER_DEVICE} services.`, 409);

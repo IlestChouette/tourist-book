@@ -231,7 +231,6 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
   const [placesText, setPlacesText] = useState("");
   const [newTag, setNewTag] = useState("");
   const [newRole, setNewRole] = useState("");
-  const [stationLabel, setStationLabel] = useState("Réception");
 
   const manager = staff.find((s) => s.is_manager);
   const roles = tags.filter((t) => t.kind === "role" || t.kind === "custom");
@@ -512,21 +511,18 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
         <TeamLink cahierPath={cahierPath} services={hotelServices} />
       </Card>
 
-      <Card title="Postes de réception" hint="Appareils déjà activés. Vous pouvez aussi activer l'ordinateur sur lequel vous êtes connecté, sans code : puis déconnectez-vous du compte manager.">
-        <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); call({ action: "activate_station", label: stationLabel, serviceId: stationService }, "Ce poste est activé. Déconnectez-vous du compte manager pour le laisser à l'équipe."); }}>
-          <label className="grid gap-1.5">
-            <span className={label}>Nom du poste</span>
-            <input value={stationLabel} onChange={(e) => setStationLabel(e.target.value)} className="input" />
-          </label>
+      <Card title="Postes activés" hint="Les ordinateurs et tablettes déjà activés, un par service. Vous pouvez aussi activer l'ordinateur sur lequel vous êtes connecté, sans code : choisissez le service, puis déconnectez-vous du compte manager.">
+        <form className="grid gap-3" onSubmit={(e) => { e.preventDefault(); call({ action: "activate_station", serviceId: stationService }, "Ce poste est activé. Déconnectez-vous du compte manager pour le laisser à l'équipe."); }}>
           {hotelServices.length > 0 && (
-            <label className="grid gap-1.5">
-              <span className={label}>Cahier</span>
+            <label className="grid max-w-sm gap-1.5">
+              <span className={label}>Quel service utilise ce poste ?</span>
               <select value={stationService} onChange={(e) => setStationService(e.target.value)} className="input">
                 {hotelServices.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </label>
           )}
-          <button type="submit" disabled={busy || hotelServices.length === 0} className={btn}>Activer cet ordinateur</button>
+          <button type="submit" disabled={busy || hotelServices.length === 0} className={`${btn} w-fit`}>Activer ce poste</button>
+          {hotelServices.length === 0 && <p className="text-sm text-ink/60">Choisissez d'abord vos services (carte « Services »).</p>}
         </form>
         {stations.length > 0 && (
           <ul className="mt-4 grid gap-2">
