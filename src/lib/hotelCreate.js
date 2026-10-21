@@ -11,6 +11,10 @@ const ROLE_TAGS = [
   "réservation",
   "bagagiste",
   "voiturier",
+  "manager",
+  "directeur",
+  "chef de service",
+  "premier de réception",
 ];
 
 // Crée l'hôtel d'un compte (une seule fois par compte) avec ses équipes et

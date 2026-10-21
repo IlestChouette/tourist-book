@@ -64,7 +64,9 @@ function LostFoundLink({ token, busy, onRegen }) {
 
 // Le lien du cahier pour l'équipe et le code d'activation d'un nouvel appareil.
 function TeamLink({ cahierPath, services }) {
-  const [serviceId, setServiceId] = useState("");
+  const [pickedService, setServiceId] = useState("");
+  // Toujours un service choisi (le premier par défaut) : plus de poste « tout l'hôtel ».
+  const serviceId = services.some((s) => s.id === pickedService) ? pickedService : services[0]?.id ?? "";
   const [url, setUrl] = useState(cahierPath);
   const [qr, setQr] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -89,7 +91,7 @@ function TeamLink({ cahierPath, services }) {
   async function newCode() {
     setBusy(true);
     setError("");
-    const res = await fetch("/api/hotel/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "create_activation_code", serviceId: serviceId || undefined }) });
+    const res = await fetch("/api/hotel/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "create_activation_code", serviceId }) });
     const data = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) return setError(data.error || "Impossible de créer le code.");
@@ -104,11 +106,11 @@ function TeamLink({ cahierPath, services }) {
         <button type="button" onClick={showQr} className={btnGhost}>Afficher le QR code</button>
         {services.length > 0 && (
           <select value={serviceId} onChange={(e) => setServiceId(e.target.value)} aria-label="Service de l'appareil" className="input h-10">
-            <option value="">Tout l'hôtel (ancien mode)</option>
             {services.map((s) => <option key={s.id} value={s.id}>Cahier : {s.name}</option>)}
           </select>
         )}
-        <button type="button" disabled={busy} onClick={newCode} className={btn}>Ajouter un appareil (code)</button>
+        <button type="button" disabled={busy || services.length === 0} onClick={newCode} className={btn}>Ajouter un appareil (code)</button>
+        {services.length === 0 && <p className="basis-full text-sm text-ink/60">Choisissez d'abord vos services (carte « Services ») : chaque appareil ouvre le cahier d'un service.</p>}
       </div>
       {error && <p className="mt-3 text-sm font-bold text-terracotta-deep" role="alert">{error}</p>}
       {activation && (
@@ -127,6 +129,8 @@ function TeamLink({ cahierPath, services }) {
 }
 
 const SERVICE_PRICE = 15;
+// Postes proposés d'un clic quand l'hôtel ne les a pas encore ; les autres se créent librement.
+const SUGGESTED_ROLES = ["manager", "directeur", "chef de service", "premier de réception"];
 
 // Abonnement : 15 €/mois par service, sans mois d'essai.
 function BillingCard({ billing, servicesDirty = false }) {
@@ -212,7 +216,8 @@ function BillingCard({ billing, servicesDirty = false }) {
 }
 
 export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath, billing, appearance, servicesInfo, hotelServices = [], serviceAccounts = null, supervisorsEnabled = false, retention = null }) {
-  const [stationService, setStationService] = useState("");
+  const [pickedStationService, setStationService] = useState("");
+  const stationService = hotelServices.some((s) => s.id === pickedStationService) ? pickedStationService : hotelServices[0]?.id ?? "";
   const [servicesDirty, setServicesDirty] = useState(false);
   const serviceNameById = Object.fromEntries(hotelServices.map((s) => [s.id, s.name]));
   const router = useRouter();
@@ -225,6 +230,7 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
   const [newStaff, setNewStaff] = useState({ name: "", pin: "", roleIds: [], serviceIds: [] });
   const [placesText, setPlacesText] = useState("");
   const [newTag, setNewTag] = useState("");
+  const [newRole, setNewRole] = useState("");
   const [stationLabel, setStationLabel] = useState("Réception");
 
   const manager = staff.find((s) => s.is_manager);
@@ -241,7 +247,8 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
       setMessage({ text: data.error || "Une erreur est survenue.", error: true });
       return false;
     }
-    if (okText) setMessage({ text: okText });
+    if (data.notice) setMessage({ text: data.notice });
+    else if (okText) setMessage({ text: okText });
     router.refresh();
     return true;
   }
@@ -307,7 +314,7 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
 
       <Card
         title="Votre PIN"
-        hint={manager?.hasPin ? "Votre PIN est défini. Saisissez-en un nouveau pour le changer." : "Définissez votre PIN à 4 chiffres : il vous identifie quand vous utilisez le poste de réception."}
+        hint={manager?.hasPin ? "Votre PIN est défini. Saisissez-en un nouveau pour le changer." : "Définissez votre PIN à 4 chiffres : il vous identifie quand vous utilisez un autre poste, par exemple celui de la réception ou d'un autre service."}
       >
         <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); call({ action: "set_manager_pin", pin: managerPin }, "PIN enregistré.").then((ok) => ok && setManagerPin("")); }}>
           <input required type="password" inputMode="numeric" maxLength={4} pattern="\d{4}" value={managerPin} onChange={(e) => setManagerPin(e.target.value.replace(/\D/g, ""))} className="input w-32 text-center text-xl tracking-[0.5em]" aria-label="PIN à 4 chiffres" />
@@ -315,7 +322,7 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
         </form>
       </Card>
 
-      <Card title="Équipe" hint="Chaque personne a un PIN à 4 chiffres et un ou plusieurs postes. Conseil : mettez le même code que celui de la badgeuse (Skello), celui de l'arrivée et du départ — personne n'a un nouveau code à retenir. À l'écran, il est écrit « Essayez avec votre code de la badgeuse : celui de votre arrivée et de votre départ ». Désactiver quelqu'un bloque son PIN ; ce qu'il a écrit reste dans le cahier.">
+      <Card title="Équipe" hint="Chaque personne a un PIN à 4 chiffres et un ou plusieurs postes. Conseil : reprenez le code de votre badgeuse ou de votre contrôle d'accès (celui de l'arrivée et du départ), ou créez-le vous-même : avec un code existant, personne n'a un nouveau code à retenir. À l'écran, il est écrit « Essayez avec votre code de badgeuse ou de contrôle d'accès : celui de votre arrivée et de votre départ ». Désactiver quelqu'un bloque son PIN ; ce qu'il a écrit reste dans le cahier.">
         <ul className="grid gap-3">
           {staff.filter((s) => !s.is_manager).map((s) => (
             <li key={s.id} className={`rounded border border-sand-dim p-3 ${s.active ? "" : "opacity-60"}`}>
@@ -382,6 +389,15 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
                 {r.name}
               </button>
             ))}
+            {SUGGESTED_ROLES.filter((n) => !roles.some((r) => r.name.toLowerCase() === n)).map((n) => (
+              <button key={n} type="button" disabled={busy} onClick={() => call({ action: "add_tag", kind: "role", name: n }, "Poste ajouté.")} className="rounded-full border border-dashed border-ink/40 px-3 py-1 text-sm font-bold text-ink/70 hover:border-ink">
+                + {n}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <input value={newRole} onChange={(e) => setNewRole(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); if (newRole.trim()) call({ action: "add_tag", kind: "role", name: newRole }, "Poste ajouté.").then((ok) => ok && setNewRole("")); } }} maxLength={40} placeholder="Un autre poste : serveur, cuisinier, barista…" className="input h-10 min-w-0 flex-1" aria-label="Nouveau poste" />
+            <button type="button" disabled={busy || !newRole.trim()} onClick={() => call({ action: "add_tag", kind: "role", name: newRole }, "Poste ajouté.").then((ok) => ok && setNewRole(""))} className={btnGhost}>Ajouter ce poste</button>
           </div>
           {hotelServices.length > 0 && (
             <div className="flex flex-wrap gap-2">
@@ -438,7 +454,7 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
       )}
 
       {serviceAccounts && hotelServices.length > 0 && (
-        <Card title="Accès des services" hint="Un email et un mot de passe par service. La personne se connecte sur la page de connexion de l'hôtel et l'ordinateur ouvre directement le cahier de son service (jusqu'à 3 services par ordinateur, sans retaper le mot de passe). Chacun signe ensuite avec son code personnel. L'email doit être nouveau : il ne peut pas déjà avoir un compte Tourist Book.">
+        <Card title="Accès des services" hint="Pour chaque service : un email et un mot de passe, ou simplement un lien envoyé par email (sans mot de passe). La personne se connecte sur la page de connexion de l'hôtel et l'ordinateur ouvre directement le cahier de son service (jusqu'à 3 services par ordinateur, sans retaper le mot de passe). Chacun signe ensuite avec son code personnel. L'email doit être nouveau : il ne peut pas déjà avoir un compte Tourist Book.">
           <ServiceAccounts services={hotelServices} accounts={serviceAccounts} busy={busy} call={call} />
         </Card>
       )}
@@ -448,16 +464,10 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
           <Card title="Couleur du cahier" hint="Le fond et la couleur du bouton « Écrire une consigne » pour toute l'équipe. Les palettes sont choisies pour rester lisibles à toute heure.">
             <ThemePicker value={appearance.theme} busy={busy} onPick={(theme) => call({ action: "set_theme", theme }, "Couleur enregistrée.")} />
           </Card>
-          <Card title="Types de consigne" hint="Ajoutez vos propres types (client VIP, lingerie, maintenance…) avec une icône et une couleur. Ils s'ajoutent aux quatre types d'origine.">
-            <TypesEditor initial={appearance.types} busy={busy} onSave={(types) => call({ action: "set_types", types }, "Types enregistrés.")} />
+          <Card title="Types de consigne" hint="Retrouvez ici tous vos types : modifiez-les, désactivez-les ou supprimez-les. Ajoutez les vôtres (client VIP, lingerie, maintenance…) avec une icône et une couleur ; ils s'ajoutent aux quatre types d'origine.">
+            <TypesEditor key={JSON.stringify(appearance.types)} initial={appearance.types} busy={busy} onSave={(types) => call({ action: "set_types", types }, "Types enregistrés.")} />
           </Card>
         </>
-      )}
-
-      {retention && (
-        <Card title="Conservation des données" hint="Vos consignes restent consultables et exportables pendant toute cette durée. Ce délai est fixe.">
-          <RetentionNotice info={retention} />
-        </Card>
       )}
 
       <Card title="Étiquettes" hint="Elles servent à dire à qui s'adresse une consigne (équipe du matin, du soir, de nuit, ou un poste).">
@@ -503,7 +513,7 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
       </Card>
 
       <Card title="Postes de réception" hint="Appareils déjà activés. Vous pouvez aussi activer l'ordinateur sur lequel vous êtes connecté, sans code : puis déconnectez-vous du compte manager.">
-        <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); call({ action: "activate_station", label: stationLabel, serviceId: stationService || undefined }, "Ce poste est activé. Déconnectez-vous du compte manager pour le laisser à l'équipe."); }}>
+        <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); call({ action: "activate_station", label: stationLabel, serviceId: stationService }, "Ce poste est activé. Déconnectez-vous du compte manager pour le laisser à l'équipe."); }}>
           <label className="grid gap-1.5">
             <span className={label}>Nom du poste</span>
             <input value={stationLabel} onChange={(e) => setStationLabel(e.target.value)} className="input" />
@@ -512,12 +522,11 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
             <label className="grid gap-1.5">
               <span className={label}>Cahier</span>
               <select value={stationService} onChange={(e) => setStationService(e.target.value)} className="input">
-                <option value="">Tout l'hôtel (ancien mode)</option>
                 {hotelServices.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </label>
           )}
-          <button type="submit" disabled={busy} className={btn}>Activer cet ordinateur</button>
+          <button type="submit" disabled={busy || hotelServices.length === 0} className={btn}>Activer cet ordinateur</button>
         </form>
         {stations.length > 0 && (
           <ul className="mt-4 grid gap-2">
@@ -530,6 +539,12 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
           </ul>
         )}
       </Card>
+
+      {retention && (
+        <Card title="Conservation des données" hint="Vos consignes restent consultables et exportables pendant toute cette durée. Ce délai est fixe.">
+          <RetentionNotice info={retention} />
+        </Card>
+      )}
 
       {billing && <BillingCard billing={billing} servicesDirty={servicesDirty} />}
     </div>

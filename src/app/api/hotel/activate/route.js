@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ACTIVATION_MINUTES, MAX_SERVICES_PER_DEVICE, PENDING_LABEL, SERVICE_COOKIE, STATION_COOKIE, activationHash, sha256, stationTokens } from "@/lib/hotelAuth";
+import { ACTIVATION_MINUTES, LINK_HOURS, MAX_SERVICES_PER_DEVICE, PENDING_LABEL, SERVICE_COOKIE, STATION_COOKIE, activationHash, sha256, stationTokens } from "@/lib/hotelAuth";
 import { listHotelSlugs } from "@/lib/hotelSlug";
 
 // Active un appareil avec le code donné par le manager. Le code est lié à
@@ -28,23 +28,29 @@ export async function POST(request) {
   if (tooMany(ip)) return fail("Trop d'essais. Réessayez dans une minute.", 429);
 
   const b = await request.json().catch(() => ({}));
+  // Soit le code à 6 chiffres du manager (10 minutes), soit le lien reçu par email (24 h).
+  const link = typeof b.link === "string" && /^[0-9a-f]{32}$/.test(b.link) ? b.link : "";
   const code = typeof b.code === "string" ? b.code.trim() : "";
-  if (!/^\d{6}$/.test(code) || typeof b.slug !== "string") return fail("Le code a 6 chiffres.", 400);
+  if ((!link && !/^\d{6}$/.test(code)) || typeof b.slug !== "string") return fail("Le code a 6 chiffres.", 400);
+  const secret = link || code;
+  const notValid = link
+    ? "Ce lien n'est plus valable (24 h, une seule utilisation). Demandez-en un nouveau au manager."
+    : "Ce code n'est pas bon ou a expiré. Demandez-en un nouveau au manager.";
 
   const admin = createAdminClient();
   const hotel = (await listHotelSlugs(admin)).find((h) => h.slug === b.slug);
   if (!hotel) return fail("Ce code n'est pas bon ou a expiré.", 404);
 
-  const since = new Date(Date.now() - ACTIVATION_MINUTES * 60 * 1000).toISOString();
+  const since = new Date(Date.now() - (link ? LINK_HOURS * 60 : ACTIVATION_MINUTES) * 60 * 1000).toISOString();
   const { data: pending } = await admin
     .from("hotel_stations")
     .select("id, service_id")
     .eq("hotel_id", hotel.id)
-    .eq("token_hash", activationHash(hotel.id, code))
+    .eq("token_hash", activationHash(hotel.id, secret))
     .eq("label", PENDING_LABEL)
     .gte("created_at", since)
     .maybeSingle();
-  if (!pending) return fail("Ce code n'est pas bon ou a expiré. Demandez-en un nouveau au manager.", 404);
+  if (!pending) return fail(notValid, 404);
 
   // Un appareil porte jusqu'à 3 services ; les jetons déjà présents sont gardés.
   const existing = stationTokens(request.cookies.get(STATION_COOKIE)?.value);

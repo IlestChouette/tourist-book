@@ -10,6 +10,7 @@ const btnGhost = "rounded border border-sand-dim px-3 py-1.5 text-sm font-bold t
 // /hotel/connexion ; l'appareil est alors activé pour ce service.
 export default function ServiceAccounts({ services, accounts, busy, call }) {
   const [drafts, setDrafts] = useState({});
+  const [linkEmails, setLinkEmails] = useState({});
   const draft = (id) => drafts[id] ?? { email: "", password: "" };
   const setDraft = (id, patch) => setDrafts((d) => ({ ...d, [id]: { ...draft(id), ...patch } }));
 
@@ -73,6 +74,20 @@ export default function ServiceAccounts({ services, accounts, busy, call }) {
                 <button type="submit" disabled={busy} className={btn}>Créer l'accès</button>
               </form>
             )}
+            <form
+              className="mt-4 flex flex-wrap items-end gap-3 border-t border-sand-dim pt-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                call({ action: "send_activation_link", serviceId: s.id, email: linkEmails[s.id] ?? "" }, "Lien envoyé.").then((ok) => ok && setLinkEmails((l) => ({ ...l, [s.id]: "" })));
+              }}
+            >
+              <label className="grid gap-1.5">
+                <span className={label}>Ou envoyer un lien par email (sans mot de passe)</span>
+                <input required type="email" value={linkEmails[s.id] ?? ""} onChange={(e) => setLinkEmails((l) => ({ ...l, [s.id]: e.target.value }))} placeholder="adresse du service ou du responsable" className="input" />
+              </label>
+              <button type="submit" disabled={busy} className={btnGhost}>Envoyer le lien</button>
+              <p className="basis-full text-sm text-ink/60">Le lien active l'ordinateur sur lequel il est ouvert, une seule fois, pendant 24 h. Aucun compte à créer.</p>
+            </form>
           </li>
         );
       })}

@@ -366,7 +366,7 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
                 <h2 className="text-center text-xl font-bold text-ink">
                   {sheet.action === "close" ? "Qui a fait ça ?" : sheet.action === "ack" ? "Qui valide ?" : "Votre code personnel"}
                 </h2>
-                <p className="mt-2 text-center text-base text-ink/70">Essayez avec votre code de la badgeuse : celui de votre arrivée et de votre départ.</p>
+                <p className="mt-2 text-center text-base text-ink/70">Essayez avec votre code de badgeuse ou de contrôle d'accès : celui de votre arrivée et de votre départ.</p>
                 <p className="mb-5 mt-1 text-center text-sm text-ink/60">4 chiffres.</p>
                 <PinPad busy={busy} message={sheetError} onComplete={confirmWithPin} />
               </>

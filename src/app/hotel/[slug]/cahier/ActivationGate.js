@@ -7,18 +7,20 @@ import PinPad from "../../cahier/PinPad";
 // Écran d'un poste pas encore activé : un code à 6 chiffres donné par le
 // manager (valable 10 minutes, utilisable une fois), sur le même clavier que le
 // code personnel.
-export default function ActivationGate({ slug, hotelName, logoUrl }) {
+export default function ActivationGate({ slug, hotelName, logoUrl, linkSecret = null }) {
   const [digits, setDigits] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  async function submit(code) {
+  async function submit(code, link) {
     setBusy(true);
     setError("");
-    const res = await fetch("/api/hotel/activate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug, code }) });
+    const res = await fetch("/api/hotel/activate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug, ...(link ? { link } : { code }) }) });
     const data = await res.json().catch(() => ({}));
     if (res.ok) {
-      window.location.reload();
+      // Après un lien d'email, on repart sur l'adresse propre (sans le secret).
+      if (link) window.location.replace(window.location.pathname);
+      else window.location.reload();
       return;
     }
     setError(data.error || "Une erreur est survenue. Réessayez.");
@@ -40,10 +42,23 @@ export default function ActivationGate({ slug, hotelName, logoUrl }) {
       </header>
       <section className="mx-auto max-w-xl px-6 py-10 text-center">
         <h1 className="text-3xl font-bold text-ink">Activer cet appareil</h1>
-        <p className="mt-3 text-xl text-ink/75">Demandez à votre manager le code d'activation à 6 chiffres, puis tapez-le ici.</p>
-        <div className="mt-8">
-          <SixDigits busy={busy} message={error} onChange={setDigits} onComplete={submit} digits={digits} />
-        </div>
+        {linkSecret ? (
+          <>
+            <p className="mt-3 text-xl text-ink/75">Vous avez reçu un lien du manager. Appuyez sur le bouton pour ouvrir le cahier sur cet ordinateur.</p>
+            <button type="button" disabled={busy} onClick={() => submit("", linkSecret)} className="mt-8 inline-flex h-14 items-center rounded-2xl bg-terracotta px-8 text-xl font-bold text-ink hover:bg-terracotta-deep disabled:opacity-60">
+              Activer cet ordinateur
+            </button>
+            {error && <p className="mt-4 text-lg font-bold text-terracotta-deep" role="alert">{error}</p>}
+            <p className="mt-8 text-base text-ink/60">Le lien ne marche qu'une fois. Si vous avez déjà un code à 6 chiffres, ouvrez directement l'adresse du cahier.</p>
+          </>
+        ) : (
+          <>
+            <p className="mt-3 text-xl text-ink/75">Demandez à votre manager le code d'activation à 6 chiffres, puis tapez-le ici.</p>
+            <div className="mt-8">
+              <SixDigits busy={busy} message={error} onChange={setDigits} onComplete={submit} digits={digits} />
+            </div>
+          </>
+        )}
         <p className="mt-10 text-lg text-ink/60">
           Vous êtes le manager ?{" "}
           <Link href="/hotel/connexion" className="font-bold text-aqua-deep underline underline-offset-4">Connectez-vous</Link>

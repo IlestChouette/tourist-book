@@ -705,6 +705,37 @@ Ne plus recevoir les emails du cahier à cette adresse : ${unsub}`;
   return { sent: true };
 }
 
+// Lien d'activation d'un ordinateur pour un service du cahier (24 h, une seule utilisation).
+export async function sendHotelActivationLink({ to, hotelName, serviceName, link, replyTo }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+  const text = `Cahier de consignes — ${hotelName}
+
+Le manager de ${hotelName} vous invite à ouvrir le cahier de consignes du service « ${serviceName} ».
+
+Ouvrez ce lien sur l'ordinateur ou la tablette du service, puis appuyez sur « Activer cet ordinateur » :
+${link}
+
+Le lien est valable 24 heures et ne peut servir qu'une seule fois. Aucun mot de passe n'est nécessaire : ensuite, chacun signe ses consignes avec son code personnel.
+
+Si vous n'attendiez pas ce message, ignorez-le : sans appuyer sur le bouton, rien ne se passe.`;
+  const subject = `Cahier de consignes — ${hotelName} : activer le service ${serviceName}`;
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: `${senderName(hotelName) || "Cahier de consignes"} <notifications@tourist-book.com>`,
+    to,
+    replyTo: replyTo || CONTACT_NOTIFICATION_EMAIL,
+    subject,
+    text,
+  });
+  if (error) {
+    await logEmail({ recipient: to, subject, template: "hotel_activation_link", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+  await logEmail({ recipient: to, subject, template: "hotel_activation_link", status: "sent" });
+  return { sent: true };
+}
+
 export async function sendHotelSignupNotification({ hotelName, name, email }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return { sent: false, reason: "not_configured" };

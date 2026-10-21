@@ -42,6 +42,8 @@ export function pinHash(hotelId, pin) {
 // du poste à l'utilisation.
 export const PENDING_LABEL = "__pending__";
 export const ACTIVATION_MINUTES = 10;
+// Lien d'activation envoyé par email : 32 caractères secrets, 24 h, une seule utilisation.
+export const LINK_HOURS = 24;
 export const activationHash = (hotelId, code) => sha256(`code:${hotelId}:${code}`);
 
 function supSignature(staffId, exp) {

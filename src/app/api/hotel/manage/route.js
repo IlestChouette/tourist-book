@@ -1,9 +1,11 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { cleanCustomTypes, THEMES } from "@/lib/hotelTheme";
+import { cleanCustomTypes, MAX_CUSTOM_TYPES, THEMES } from "@/lib/hotelTheme";
 import { SERVICES, cleanServices, cleanCustomServices, isCustomServiceId } from "@/lib/hotelServices";
 import { stripe } from "@/lib/stripe";
-import { ACTIVATION_MINUTES, MAX_SERVICES_PER_DEVICE, PENDING_LABEL, SERVICE_COOKIE, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE, stationTokens } from "@/lib/hotelAuth";
+import { slugForHotel } from "@/lib/hotelSlug";
+import { sendHotelActivationLink } from "@/lib/email";
+import { ACTIVATION_MINUTES, LINK_HOURS, MAX_SERVICES_PER_DEVICE, PENDING_LABEL, SERVICE_COOKIE, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE, stationTokens } from "@/lib/hotelAuth";
 
 // Identifiants de services qui appartiennent bien à cet hôtel.
 async function ownServiceIds(admin, hotelId, ids) {
@@ -59,8 +61,21 @@ export async function POST(request) {
     // que les consignes déjà écrites gardent leur libellé).
     case "set_types": {
       const types = cleanCustomTypes(b.types);
-      const { error } = await admin.from("hotels").update({ consigne_types: types }).eq("id", hotel.id);
-      return error ? fail("Impossible d'enregistrer.", 500) : ok();
+      // Supprimer un type : possible s'il n'a servi à aucune consigne. Sinon il est gardé,
+      // désactivé, pour que les consignes déjà écrites gardent leur nom.
+      const removed = cleanCustomTypes(hotel.consigne_types).filter((t) => !types.some((n) => n.id === t.id));
+      const kept = [];
+      if (removed.length > 0) {
+        const { data: used } = await admin.from("consignes").select("type_id").eq("hotel_id", hotel.id).in("type_id", removed.map((t) => t.id));
+        const usedIds = new Set((used ?? []).map((r) => r.type_id));
+        for (const t of removed) if (usedIds.has(t.id)) kept.push({ ...t, active: false });
+      }
+      if (types.length + kept.length > MAX_CUSTOM_TYPES) {
+        return fail(`Vous avez déjà ${MAX_CUSTOM_TYPES} types, dont certains utilisés par des consignes (ils ne peuvent qu'être désactivés). Supprimez-en un autre avant d'en ajouter.`);
+      }
+      const { error } = await admin.from("hotels").update({ consigne_types: [...types, ...kept] }).eq("id", hotel.id);
+      if (error) return fail("Impossible d'enregistrer.", 500);
+      return ok(kept.length ? { notice: `Enregistré. ${kept.map((t) => `« ${t.label} »`).join(", ")} ${kept.length > 1 ? "sont utilisés" : "est utilisé"} par des consignes déjà écrites : ${kept.length > 1 ? "ils sont désactivés" : "il est désactivé"} au lieu d'être supprimé${kept.length > 1 ? "s" : ""}, pour garder leur nom.` } : {});
     }
 
     // Services de l'hôtel : ils fixent le prix (15 €/mois chacun). Si
@@ -247,10 +262,13 @@ export async function POST(request) {
     }
 
     case "add_tag": {
-      const name = typeof b.name === "string" ? b.name.trim().slice(0, 40) : "";
-      if (!name) return fail("Indiquez le nom de l'étiquette.");
-      const { error } = await admin.from("hotel_tags").insert({ hotel_id: hotel.id, name, kind: "custom" });
-      return error ? fail(error.code === "23505" ? "Cette étiquette existe déjà." : "Impossible d'ajouter.", 409) : ok();
+      // kind "role" : un poste de l'équipe (serveur, cuisinier, directeur…), en minuscules comme les autres.
+      const kind = b.kind === "role" ? "role" : "custom";
+      const raw = typeof b.name === "string" ? b.name.replace(/\s+/g, " ").trim().slice(0, 40) : "";
+      const name = kind === "role" ? raw.toLowerCase() : raw;
+      if (!name) return fail(kind === "role" ? "Indiquez le nom du poste." : "Indiquez le nom de l'étiquette.");
+      const { error } = await admin.from("hotel_tags").insert({ hotel_id: hotel.id, name, kind });
+      return error ? fail(error.code === "23505" ? (kind === "role" ? "Ce poste existe déjà." : "Cette étiquette existe déjà.") : "Impossible d'ajouter.", 409) : ok();
     }
     case "delete_tag": {
       await admin.from("hotel_tags").delete().eq("id", b.id ?? "").eq("hotel_id", hotel.id);
@@ -306,7 +324,7 @@ export async function POST(request) {
         .delete()
         .eq("hotel_id", hotel.id)
         .eq("label", PENDING_LABEL)
-        .lt("created_at", new Date(Date.now() - ACTIVATION_MINUTES * 60 * 1000).toISOString());
+        .lt("created_at", new Date(Date.now() - LINK_HOURS * 3600 * 1000).toISOString());
       // Code lié à un service : l'appareil qui l'utilise ouvre le cahier de ce service.
       let serviceId = null;
       if (typeof b.serviceId === "string" && b.serviceId) {
@@ -322,6 +340,33 @@ export async function POST(request) {
         if (!error) return ok({ code, expiresInMinutes: ACTIVATION_MINUTES });
       }
       return fail("Impossible de créer le code.", 500);
+    }
+    // Lien d'activation envoyé par email à un service : à ouvrir sur l'ordinateur du service,
+    // une seule fois, valable 24 h. Sans mot de passe ni compte. Même mécanique qu'un code.
+    case "send_activation_link": {
+      const email = String(b.email ?? "").trim().toLowerCase();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail("Cette adresse email n'est pas valide.");
+      const { data: svc } = await admin.from("hotel_services").select("id, name").eq("id", b.serviceId ?? "").eq("hotel_id", hotel.id).eq("active", true).maybeSingle();
+      if (!svc) return fail("Service introuvable.", 404);
+      await admin.from("hotel_stations").delete().eq("hotel_id", hotel.id).eq("label", PENDING_LABEL).lt("created_at", new Date(Date.now() - LINK_HOURS * 3600 * 1000).toISOString());
+      // Au plus 10 liens par heure et par hôtel (évite d'envoyer des emails en rafale).
+      const { count } = await admin.from("hotel_stations").select("id", { count: "exact", head: true }).eq("hotel_id", hotel.id).eq("label", PENDING_LABEL).not("service_id", "is", null).gte("created_at", new Date(Date.now() - 3600 * 1000).toISOString());
+      if ((count ?? 0) >= 10) return fail("Trop de liens envoyés. Réessayez dans une heure.", 429);
+      const slug = await slugForHotel(hotel.id, admin);
+      if (!slug) return fail("Adresse du cahier introuvable.", 500);
+      const secret = crypto.randomBytes(16).toString("hex");
+      const { data: row, error } = await admin.from("hotel_stations").insert({ hotel_id: hotel.id, token_hash: activationHash(hotel.id, secret), label: PENDING_LABEL, service_id: svc.id }).select("id").single();
+      if (error) return fail("Impossible de créer le lien.", 500);
+      const link = `https://tourist-book.com/hotel/${slug}/cahier?lien=${secret}`;
+      try {
+        const sent = await sendHotelActivationLink({ to: email, hotelName: hotel.name, serviceName: svc.name, link, replyTo: hotel.reply_to || undefined });
+        if (sent?.sent === false && process.env.NODE_ENV === "production") throw new Error("not sent");
+      } catch (err) {
+        console.error("activation link email failed:", err);
+        await admin.from("hotel_stations").delete().eq("id", row.id);
+        return fail("L'email n'a pas pu être envoyé. Réessayez dans un instant.", 502);
+      }
+      return ok(process.env.NODE_ENV === "production" ? {} : { devLink: link });
     }
     case "delete_station": {
       await admin.from("hotel_stations").delete().eq("id", b.id ?? "").eq("hotel_id", hotel.id);
