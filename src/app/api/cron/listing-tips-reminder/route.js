@@ -19,7 +19,7 @@ export async function GET(request) {
 
   const { data: hosts, error } = await admin
     .from("hosts")
-    .select("id, name, email")
+    .select("*")
     .eq("is_admin", false)
     .is("listing_tips_sent_at", null);
 
@@ -35,7 +35,7 @@ export async function GET(request) {
   }
 
   const targets = (hosts ?? []).filter((h) => {
-    if (EXCLUDED_EMAILS.includes(h.email)) return false;
+    if (EXCLUDED_EMAILS.includes(h.email) || h.email_optout === true) return false;
     const earliest = earliestPropertyByHost.get(h.id);
     return earliest && earliest < cutoff;
   });
@@ -44,7 +44,7 @@ export async function GET(request) {
   const sentTo = [];
   for (const host of targets) {
     try {
-      await sendListingTipsEmail({ name: host.name, email: host.email });
+      await sendListingTipsEmail({ name: host.name, email: host.email, hostId: host.id });
       await admin.from("hosts").update({ listing_tips_sent_at: new Date().toISOString() }).eq("id", host.id);
       results.push({ email: host.email, sent: true });
       sentTo.push({ name: host.name, email: host.email });

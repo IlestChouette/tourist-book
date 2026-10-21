@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getHotelContext } from "@/lib/hotelAuth";
+import { canSeeNames, getHotelContext } from "@/lib/hotelAuth";
 import { hotelHasAccess } from "@/lib/hotelBilling";
 import { isUuid, loadDay, loadSent } from "@/lib/hotelData";
 import { isDay, parisDate } from "@/lib/hotelTime";
@@ -24,7 +24,7 @@ export async function GET(request) {
   const serviceId = ctx.service ? ctx.service.id : manager && isUuid(requested) ? requested : null;
 
   const [items, sent] = await Promise.all([
-    loadDay(ctx.hotel.id, day, manager, { serviceId }),
+    loadDay(ctx.hotel.id, day, canSeeNames(ctx, serviceId), { serviceId }),
     ctx.service ? loadSent(ctx.hotel.id, ctx.service.id, day) : [],
   ]);
   return NextResponse.json({ items, sent });

@@ -8,6 +8,9 @@ export const STATION_COOKIE = "tb_hotel_station";
 // il est revérifié contre les services réellement activés sur le poste).
 export const SERVICE_COOKIE = "tb_hotel_service";
 export const MAX_SERVICES_PER_DEVICE = 3;
+// Vue « responsable » : cookie signé (personne + expiration), revérifié en base à chaque requête.
+export const SUPERVISOR_COOKIE = "tb_hotel_sup";
+export const SUPERVISOR_HOURS = 8;
 
 // Le cookie du poste porte 1 à 3 jetons séparés par un point (un par service).
 // Un ancien cookie, avec un seul jeton, reste valable tel quel.
@@ -40,6 +43,41 @@ export function pinHash(hotelId, pin) {
 export const PENDING_LABEL = "__pending__";
 export const ACTIVATION_MINUTES = 10;
 export const activationHash = (hotelId, code) => sha256(`code:${hotelId}:${code}`);
+
+function supSignature(staffId, exp) {
+  return crypto.createHmac("sha256", process.env.SUPABASE_SERVICE_ROLE_KEY).update(`sup:${staffId}:${exp}`).digest("hex");
+}
+export function signSupervisor(staffId) {
+  const exp = Date.now() + SUPERVISOR_HOURS * 3600 * 1000;
+  return `${staffId}.${exp}.${supSignature(staffId, exp)}`;
+}
+
+// La personne de la vue « responsable », si le cookie est valable et si elle l'est
+// toujours en base (active, responsable, avec au moins un service). Sinon null.
+async function readSupervisor(admin, hotelId, raw) {
+  const [staffId, exp, sig] = String(raw ?? "").split(".");
+  if (!staffId || !/^\d+$/.test(exp ?? "") || Number(exp) < Date.now() || !/^[0-9a-f]{64}$/.test(sig ?? "")) return null;
+  const good = Buffer.from(supSignature(staffId, exp), "hex");
+  const given = Buffer.from(sig, "hex");
+  if (good.length !== given.length || !crypto.timingSafeEqual(good, given)) return null;
+  const { data: staff, error } = await admin
+    .from("hotel_staff")
+    .select("id, name, service_ids")
+    .eq("id", staffId)
+    .eq("hotel_id", hotelId)
+    .eq("active", true)
+    .eq("is_supervisor", true)
+    .maybeSingle();
+  if (error || !staff || !(staff.service_ids ?? []).length) return null;
+  return { staffId: staff.id, name: staff.name, serviceIds: staff.service_ids };
+}
+
+// Les noms (qui a écrit, qui a validé) : le manager voit tout, un responsable
+// seulement les services dont il a la charge, le personnel jamais.
+export function canSeeNames(ctx, serviceId) {
+  if (ctx?.mode === "manager") return true;
+  return Boolean(serviceId && ctx?.supervisor?.serviceIds?.includes(serviceId));
+}
 
 export const isPin = (value) => typeof value === "string" && /^\d{4}$/.test(value);
 
@@ -81,7 +119,8 @@ export async function getHotelContext() {
       if (services.length === 0) return null;
       const wanted = jar.get(SERVICE_COOKIE)?.value;
       const service = services.find((s) => s.id === wanted) ?? services[0];
-      return { mode: "station", hotel, station: { id: service.stationId }, service, services, admin };
+      const supervisor = await readSupervisor(admin, hotel.id, jar.get(SUPERVISOR_COOKIE)?.value);
+      return { mode: "station", hotel, station: { id: service.stationId }, service, services, supervisor, admin };
     }
   }
   return null;

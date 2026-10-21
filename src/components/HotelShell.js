@@ -45,10 +45,13 @@ export function HotelHeader({ hotel, title, subtitle, links = [], logout = false
 export function HotelFooter() {
   return (
     <footer className="mt-12 border-t border-sand-dim px-6 py-6 text-center text-xs text-ink/40 print:hidden">
-      Créé par{" "}
-      <a href="https://tourist-book.com/hotel" target="_blank" rel="noopener noreferrer" className="font-bold hover:text-ink/70">
-        Tourist Book
-      </a>
+      <p>Les consignes sont conservées 36 mois, puis supprimées automatiquement.</p>
+      <p className="mt-1">
+        Créé par{" "}
+        <a href="https://tourist-book.com/hotel" target="_blank" rel="noopener noreferrer" className="font-bold hover:text-ink/70">
+          Tourist Book
+        </a>
+      </p>
     </footer>
   );
 }

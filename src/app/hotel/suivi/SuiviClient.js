@@ -16,7 +16,7 @@ function Highlighted({ text, terms }) {
   );
 }
 
-export default function SuiviClient({ services, customTypes }) {
+export default function SuiviClient({ services, customTypes, canExport = true }) {
   const [q, setQ] = useState("");
   const [service, setService] = useState("");
   const [status, setStatus] = useState("all");
@@ -97,9 +97,11 @@ export default function SuiviClient({ services, customTypes }) {
         <span className="ml-2 text-base text-ink/70">
           <strong className="text-ink">{data.total}</strong> consigne{data.total > 1 ? "s" : ""} · <span className="text-terracotta-deep">{data.open} à faire</span> · <span className="text-aqua-deep">{data.done} faite{data.done > 1 ? "s" : ""}</span>
         </span>
-        <a href={`/api/hotel/overview-csv?${params()}`} className="ml-auto rounded-xl border-2 border-sand-dim px-4 py-2 text-base font-bold text-ink/70 hover:border-ink">
-          Télécharger pour Excel
-        </a>
+        {canExport && (
+          <a href={`/api/hotel/overview-csv?${params()}`} className="ml-auto rounded-xl border-2 border-sand-dim px-4 py-2 text-base font-bold text-ink/70 hover:border-ink">
+            Télécharger pour Excel
+          </a>
+        )}
       </div>
 
       {error && <p className="mt-4 text-base text-terracotta-deep">Le suivi n'a pas pu être chargé. Réessayez.</p>}

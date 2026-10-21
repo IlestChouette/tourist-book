@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getHotelContext } from "@/lib/hotelAuth";
+import { canSeeNames, getHotelContext } from "@/lib/hotelAuth";
 import { hotelHasAccess } from "@/lib/hotelBilling";
 import { searchConsignes } from "@/lib/hotelData";
 import { MIN_QUERY } from "@/lib/hotelSearch";
@@ -19,7 +19,7 @@ export async function GET(request) {
   if (q.trim().length < MIN_QUERY) return NextResponse.json({ items: [], total: 0 });
 
   const result = await searchConsignes(ctx.hotel.id, q, {
-    showNames: ctx.mode === "manager",
+    showNames: canSeeNames(ctx, ctx.service?.id),
     customTypes: cleanCustomTypes(ctx.hotel.consigne_types),
     serviceId: ctx.service?.id ?? null,
   });

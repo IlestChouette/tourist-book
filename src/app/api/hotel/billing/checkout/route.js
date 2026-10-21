@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { getHotelContext } from "@/lib/hotelAuth";
 import { hotelServicePriceId } from "@/lib/hotelBilling";
-import { cleanServices, servicesFromTags } from "@/lib/hotelServices";
+import { cleanServices } from "@/lib/hotelServices";
 
 const SITE_URL = process.env.SITE_URL || "https://tourist-book.com";
 const fail = (error, status) => NextResponse.json({ error }, { status });
@@ -22,12 +22,9 @@ export async function POST(request) {
   let quantity = Math.min(20, Math.max(1, Math.floor(Number(b.quantity) || 1)));
   const managed = hotel.services !== undefined;
   if (managed) {
-    let ids = cleanServices(hotel.services);
-    if (ids.length === 0) {
-      const { data: tags } = await admin.from("hotel_tags").select("name, kind").eq("hotel_id", hotel.id);
-      ids = servicesFromTags(tags);
-    }
-    quantity = Math.max(1, ids.length);
+    const ids = cleanServices(hotel.services);
+    if (ids.length === 0) return fail("Choisissez et enregistrez d'abord vos services (carte « Services »).", 400);
+    quantity = ids.length;
   }
 
   try {
@@ -42,6 +39,15 @@ export async function POST(request) {
       mode: "subscription",
       customer: customerId,
       allow_promotion_codes: true,
+      // Client professionnel : raison sociale, adresse, SIREN (la facture est émise
+      // par la société mère, mention de TVA réglée dans le modèle de facture Stripe).
+      billing_address_collection: "required",
+      tax_id_collection: { enabled: true },
+      name_collection: { business: { enabled: true, optional: false } },
+      customer_update: { name: "auto", address: "auto" },
+      custom_fields: [
+        { key: "siren", label: { type: "custom", custom: "SIREN (9 chiffres)" }, type: "text", text: { minimum_length: 9, maximum_length: 9 } },
+      ],
       line_items: [
         {
           price: await hotelServicePriceId(),

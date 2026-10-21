@@ -22,7 +22,7 @@ async function patch(id, body) {
 
 // Un écran, une action principale : écrire. Le reste se lit de haut en bas :
 // d'abord ce qui est important pour tous, puis ce qu'il reste à faire.
-export default function CahierClient({ hotelName, mode, today, initialItems, initialSent = [], managerHasPin = false, tags, places, customTypes, types, service = null, deviceServices = [], allServices = [] }) {
+export default function CahierClient({ showNames = false, hotelName, mode, today, initialItems, initialSent = [], managerHasPin = false, tags, places, customTypes, types, service = null, deviceServices = [], allServices = [] }) {
   const isManager = mode === "manager";
   const [day, setDay] = useState(today);
   const [items, setItems] = useState(initialItems);
@@ -149,7 +149,7 @@ export default function CahierClient({ hotelName, mode, today, initialItems, ini
       {c.tagIds.length > 0 && (
         <p className="mt-2 text-sm text-ink/60">Pour : {c.tagIds.map((id) => tagName[id]).filter(Boolean).join(", ")}</p>
       )}
-      {isManager && (c.createdByName || c.closedByName) && (
+      {showNames && (c.createdByName || c.closedByName) && (
         <p className="mt-1 text-base text-ink/50">
           Écrit par {c.createdByName}
           {c.closedByName ? ` · terminé par ${c.closedByName}` : ""}
@@ -158,8 +158,8 @@ export default function CahierClient({ hotelName, mode, today, initialItems, ini
       {c.requireAll && c.ack && (
         <div className="mt-3 rounded-xl bg-ink/[0.06] px-4 py-3 text-base text-ink">
           <p className="font-bold">À valider par chaque personne · {c.ack.acked} sur {c.ack.expected} ont validé</p>
-          {isManager && c.ack.missingNames?.length > 0 && <p className="mt-1 text-ink/70">Il manque : {c.ack.missingNames.join(", ")}</p>}
-          {isManager && c.ack.ackNames?.length > 0 && <p className="mt-1 text-ink/70">Ont validé : {c.ack.ackNames.join(", ")}</p>}
+          {showNames && c.ack.missingNames?.length > 0 && <p className="mt-1 text-ink/70">Il manque : {c.ack.missingNames.join(", ")}</p>}
+          {showNames && c.ack.ackNames?.length > 0 && <p className="mt-1 text-ink/70">Ont validé : {c.ack.ackNames.join(", ")}</p>}
         </div>
       )}
       <div className="mt-4 flex flex-wrap gap-3 print:hidden">

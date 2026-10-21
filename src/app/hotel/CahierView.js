@@ -5,6 +5,8 @@ import Link from "next/link";
 import { hotelHasAccess } from "@/lib/hotelBilling";
 import { cleanCustomTypes, selectableTypes, serviceThemeId, themeById, themeStyle } from "@/lib/hotelTheme";
 import CahierClient from "./cahier/CahierClient";
+import SupervisorBar from "./SupervisorBar";
+import { canSeeNames } from "@/lib/hotelAuth";
 
 // Le cahier d'un hôtel (même contenu quelle que soit l'adresse d'entrée).
 export default async function CahierView({ ctx }) {
@@ -22,6 +24,7 @@ export default async function CahierView({ ctx }) {
           {isManager ? (
             <>
               <p className="mt-4 text-xl text-ink/75">L'abonnement n'est pas actif. Vos consignes sont conservées : elles réapparaissent dès que l'abonnement est réglé.</p>
+              <p className="mt-3 text-base text-ink/70">Après la fin d'un abonnement, les données du cahier sont supprimées au bout de 3 mois (avec un email un mois avant). Pour en garder une copie : <Link href="/hotel/suivi" className="font-bold text-aqua-deep underline">Suivi, Télécharger pour Excel</Link>.</p>
               <Link href="/hotel/gestion" className="mt-8 inline-flex h-14 items-center rounded-2xl bg-terracotta px-8 text-xl font-bold text-ink hover:bg-terracotta-deep">Régler l'abonnement</Link>
             </>
           ) : (
@@ -37,8 +40,16 @@ export default async function CahierView({ ctx }) {
   const managerHasPin = isManager
     ? Boolean((await ctx.admin.from("hotel_staff").select("id").eq("hotel_id", ctx.hotel.id).eq("is_manager", true).not("pin_hash", "is", null).maybeSingle()).data)
     : false;
+  // Qui a écrit et validé : le manager, ou le responsable de ce service.
+  const showNames = canSeeNames(ctx, ctx.service?.id);
+  // Le bouton « Vue responsable » n'apparaît que si ce service a un responsable.
+  let supervisorExists = false;
+  if (ctx.service && !showNames) {
+    const { data: sups } = await ctx.admin.from("hotel_staff").select("id").eq("hotel_id", ctx.hotel.id).eq("active", true).eq("is_supervisor", true).contains("service_ids", [ctx.service.id]).limit(1);
+    supervisorExists = Boolean(sups?.length);
+  }
   const [items, meta, allServices, sent] = await Promise.all([
-    loadDay(ctx.hotel.id, today, isManager, { serviceId: ctx.service?.id }),
+    loadDay(ctx.hotel.id, today, showNames, { serviceId: ctx.service?.id }),
     loadMeta(ctx.hotel.id),
     listServices(ctx.hotel.id),
     ctx.service ? loadSent(ctx.hotel.id, ctx.service.id, today) : [],
@@ -72,8 +83,9 @@ export default async function CahierView({ ctx }) {
             : []),
         ]}
       />
+      {ctx.service && !isManager && (supervisorExists || ctx.supervisor) && <SupervisorBar active={Boolean(ctx.supervisor && showNames)} name={ctx.supervisor?.name} />}
       <section className="mx-auto max-w-6xl px-6 py-8">
-        <CahierClient hotelName={ctx.hotel.name} mode={ctx.mode} today={today} initialItems={items} initialSent={sent} managerHasPin={managerHasPin} service={ctx.service} deviceServices={ctx.services ?? []} allServices={allServices} tags={meta.tags} places={meta.places} customTypes={customTypes} types={selectableTypes(customTypes)} />
+        <CahierClient showNames={showNames} hotelName={ctx.hotel.name} mode={ctx.mode} today={today} initialItems={items} initialSent={sent} managerHasPin={managerHasPin} service={ctx.service} deviceServices={ctx.services ?? []} allServices={allServices} tags={meta.tags} places={meta.places} customTypes={customTypes} types={selectableTypes(customTypes)} />
       </section>
       <HotelFooter />
     </main>

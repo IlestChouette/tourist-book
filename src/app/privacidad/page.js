@@ -41,6 +41,7 @@ const content = {
       "Les données d'identité d'un hôte ne sont accessibles qu'à l'hôtelier du logement concerné, pour vérifier manuellement le check-in. Tourist Book n'y accède pas, sauf besoin technique ponctuel (par exemple, support en cas d'incident) ou obligation légale. Nous utilisons les sous-traitants suivants, soumis à un accord de traitement des données :",
     s4Supabase: "Supabase (base de données, authentification et stockage des documents)",
     s4Stripe: "Stripe (traitement des paiements et facturation de l'abonnement)",
+    s4More: "Autres prestataires : Vercel (hébergement du site), Resend (envoi des emails) et Anthropic (assistant IA du livret Premium : les questions du voyageur et le contenu du livret lui sont transmis pour répondre). Certains sont situés aux États-Unis ; les transferts reposent sur les clauses contractuelles types ou le cadre de protection des données UE–États-Unis.",
     s4Body2:
       "Ces prestataires peuvent héberger des données hors de l'Espace économique européen ; le cas échéant, le transfert repose sur les Clauses Contractuelles Types de la Commission européenne ou un autre mécanisme de transfert reconnu par le RGPD.",
     s5Title: "5. Durée de conservation",
@@ -68,6 +69,15 @@ const content = {
     s9Title: "9. Mineurs",
     s9Body:
       "La plateforme ne s'adresse pas aux mineurs. La création d'un compte hôtelier requiert d'être majeur et d'avoir la capacité juridique de contracter.",
+    cahierTitle: "Cahier de consignes des hôtels",
+    cahierItems: [
+      "Rôles : l'hôtel est responsable du traitement de ses consignes et des données de son équipe ; Tourist Book agit comme sous-traitant (art. 28 RGPD) et fournit un accord de sous-traitance sur demande à allo@ilestchouette.fr.",
+      "Données traitées : le texte des consignes (écrit librement par l'hôtel), le nom des personnes de l'équipe, leur code personnel à 4 chiffres (jamais conservé en clair : seulement une empreinte signée par une clé du serveur), l'historique de qui a écrit et validé chaque consigne, et les adresses email de relève choisies par l'hôtel.",
+      "Visibilité : le personnel voit uniquement l'état des consignes (écrite, faite). Seuls le manager et les responsables de service qu'il désigne voient qui a écrit et qui a validé, et uniquement pour leurs services.",
+      "Minimisation : n'écrivez dans une consigne que ce qui est utile au service. Évitez les données sensibles sur les clients (santé, religion, opinions) et les informations sans lien avec l'exploitation.",
+      "Durée de conservation : les consignes sont supprimées automatiquement 36 mois après leur date. Le manager est prévenu par email 3 mois avant, avec un lien pour les télécharger, et peut les exporter (PDF, Excel) à tout moment. Trois mois après la fin de l'abonnement, toutes les données du cahier de l'hôtel (consignes, équipe, services, accès) sont supprimées définitivement ; un email d'avertissement avec un lien de téléchargement est envoyé un mois avant. Nous recommandons de faire une copie avant de résilier. La suppression peut aussi être demandée à allo@ilestchouette.fr.",
+      "Emails de relève : envoyés aux adresses indiquées par l'hôtel (6h55, 14h55 et 22h55) ; chaque email contient un lien pour retirer l'adresse du destinataire.",
+    ],
     s10Title: "10. Modifications",
     s10Body:
       "Nous pouvons mettre à jour cette politique pour refléter des changements légaux ou du service. La date de dernière mise à jour est indiquée en bas de cette page ; nous vous recommandons de la consulter régulièrement.",
@@ -112,6 +122,7 @@ const content = {
       "A guest's identity data is only accessible to the host of the corresponding property, to manually verify check-in. Tourist Book does not review or access it except for occasional technical needs (e.g. support during an incident) or legal obligation. We use the following processors, subject to a data processing agreement:",
     s4Supabase: "Supabase (database, authentication and document storage)",
     s4Stripe: "Stripe (payment processing and subscription billing)",
+    s4More: "Other providers: Vercel (site hosting), Resend (email delivery) and Anthropic (AI assistant of the Premium welcome book: the guest's questions and the book content are sent to it to answer). Some are located in the United States; transfers rely on standard contractual clauses or the EU–US data protection framework.",
     s4Body2:
       "These providers may host data outside the European Economic Area; in that case, the transfer relies on the European Commission's Standard Contractual Clauses or another transfer mechanism recognized by the GDPR.",
     s5Title: "5. Retention period",
@@ -139,6 +150,15 @@ const content = {
     s9Title: "9. Minors",
     s9Body:
       "The platform is not aimed at minors. Creating a host account requires being of legal age and having the legal capacity to contract.",
+    cahierTitle: "Hotel instruction logbook",
+    cahierItems: [
+      "Roles: the hotel is the controller of its instructions and of its team's data; Tourist Book acts as processor (GDPR art. 28) and provides a data processing agreement on request at allo@ilestchouette.fr.",
+      "Data processed: the text of the instructions (freely written by the hotel), team members' names, their 4-digit personal code (never stored in clear: only a fingerprint signed with a server key), the history of who wrote and who validated each instruction, and the handover email addresses chosen by the hotel.",
+      "Visibility: staff only see the status of instructions (written, done). Only the manager and the service supervisors they appoint see who wrote and who validated, and only for their own services.",
+      "Minimisation: write only what the service needs in an instruction. Avoid sensitive guest data (health, religion, opinions) and information unrelated to operations.",
+      "Retention: instructions are deleted automatically 36 months after their date. The manager is warned by email 3 months ahead, with a download link, and can export them (PDF, Excel) at any time. Three months after the subscription ends, all the hotel's logbook data (instructions, team, services, access) is permanently deleted; a warning email with a download link is sent one month before. We recommend making a copy before cancelling. Deletion can also be requested at allo@ilestchouette.fr.",
+      "Handover emails: sent to the addresses given by the hotel (6:55, 14:55 and 22:55); each email contains a link to remove the recipient's address.",
+    ],
     s10Title: "10. Changes",
     s10Body:
       "We may update this policy to reflect legal or service changes. The last-updated date is shown at the bottom of this page; we recommend checking it periodically.",
@@ -183,6 +203,7 @@ const content = {
       "Los datos de identidad de un huésped solo son accesibles por el hotelero de la propiedad correspondiente, para verificar manualmente el check-in. Tourist Book no los revisa ni accede a ellos salvo requerimiento técnico puntual (por ejemplo, soporte ante un incidente) o obligación legal. Utilizamos los siguientes encargados del tratamiento, sujetos a acuerdo de tratamiento de datos:",
     s4Supabase: "Supabase (base de datos, autenticación y almacenamiento de documentos)",
     s4Stripe: "Stripe (procesamiento de pagos y facturación de la suscripción)",
+    s4More: "Otros proveedores: Vercel (alojamiento del sitio), Resend (envío de correos) y Anthropic (asistente de IA del livret Premium: se le envían las preguntas del huésped y el contenido del livret para responder). Algunos están en Estados Unidos; las transferencias se basan en cláusulas contractuales tipo o en el marco de protección de datos UE–EE. UU.",
     s4Body2:
       "Estos proveedores pueden alojar datos fuera del Espacio Económico Europeo; en ese caso, la transferencia se realiza sobre la base de las Cláusulas Contractuales Tipo de la Comisión Europea u otro mecanismo de transferencia reconocido por el RGPD.",
     s5Title: "5. Plazo de conservación",
@@ -210,6 +231,15 @@ const content = {
     s9Title: "9. Menores de edad",
     s9Body:
       "La plataforma no está dirigida a menores de edad. La creación de una cuenta de hotelero requiere ser mayor de edad y tener capacidad legal para contratar.",
+    cahierTitle: "Cuaderno de consignas de hoteles",
+    cahierItems: [
+      "Roles: el hotel es el responsable del tratamiento de sus consignas y de los datos de su equipo; Tourist Book actúa como encargado del tratamiento (art. 28 RGPD) y facilita un contrato de encargo a petición en allo@ilestchouette.fr.",
+      "Datos tratados: el texto de las consignas (escrito libremente por el hotel), el nombre de las personas del equipo, su código personal de 4 cifras (nunca se guarda en claro: solo una huella firmada con una clave del servidor), el historial de quién escribió y quién validó cada consigna, y los correos de relevo elegidos por el hotel.",
+      "Visibilidad: el personal solo ve el estado de las consignas (escrita, hecha). Solo el manager y los responsables de servicio que él designe ven quién escribió y quién validó, y únicamente en sus servicios.",
+      "Minimización: escribe en una consigna solo lo que el servicio necesita. Evita datos sensibles de clientes (salud, religión, opiniones) e información ajena a la explotación.",
+      "Plazo de conservación: las consignas se eliminan automáticamente 36 meses después de su fecha. El manager recibe un aviso por correo 3 meses antes, con un enlace de descarga, y puede exportarlas (PDF, Excel) en cualquier momento. Tres meses después de terminar la suscripción, todos los datos del cuaderno del hotel (consignas, equipo, servicios, accesos) se eliminan definitivamente; un mes antes se envía un correo de aviso con un enlace de descarga. Recomendamos hacer una copia antes de cancelar. La eliminación también puede solicitarse en allo@ilestchouette.fr.",
+      "Correos de relevo: se envían a las direcciones indicadas por el hotel (6:55, 14:55 y 22:55); cada correo incluye un enlace para retirar la dirección del destinatario.",
+    ],
     s10Title: "10. Modificaciones",
     s10Body:
       "Podemos actualizar esta política para reflejar cambios legales o del servicio. La fecha de la última actualización se indica al pie de esta página; te recomendamos consultarla periódicamente.",
@@ -272,6 +302,7 @@ export default async function PrivacidadPage() {
               <li>• {t.s4Supabase}</li>
               <li>• {t.s4Stripe}</li>
             </ul>
+            <p className="mt-2">{t.s4More}</p>
             <p className="mt-2">{t.s4Body2}</p>
           </div>
 
@@ -306,6 +337,15 @@ export default async function PrivacidadPage() {
           <div>
             <h2 className="font-display italic text-2xl text-ink">{t.s9Title}</h2>
             <p className="mt-2">{t.s9Body}</p>
+          </div>
+
+          <div>
+            <h2 className="font-display italic text-2xl text-ink">{t.cahierTitle}</h2>
+            <ul className="mt-2 grid gap-1">
+              {t.cahierItems.map((x) => (
+                <li key={x}>• {x}</li>
+              ))}
+            </ul>
           </div>
 
           <div>

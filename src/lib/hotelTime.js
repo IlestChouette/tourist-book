@@ -34,6 +34,13 @@ export function addDays(day, n) {
   return d.toISOString().slice(0, 10);
 }
 
+// Avance (n > 0) ou recule (n < 0) d'un nombre de mois entiers.
+export function addMonths(day, n) {
+  const d = new Date(`${day}T12:00:00Z`);
+  d.setUTCMonth(d.getUTCMonth() + n);
+  return d.toISOString().slice(0, 10);
+}
+
 export function daysBetween(from, to) {
   return Math.round((Date.parse(`${to}T12:00:00Z`) - Date.parse(`${from}T12:00:00Z`)) / 86400000);
 }

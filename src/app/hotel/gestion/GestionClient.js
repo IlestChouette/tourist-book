@@ -8,6 +8,7 @@ import { uploadMedia } from "@/lib/uploadMedia";
 import { ThemePicker, TypesEditor } from "./AppearanceEditors";
 import { ServicesEditor } from "./ServicesEditor";
 import ServiceAccounts from "./ServiceAccounts";
+import RetentionNotice from "@/components/RetentionNotice";
 
 const label = "text-xs font-bold uppercase tracking-wider text-ink/60";
 const btn = "rounded bg-aqua-deep px-4 py-2 text-sm font-bold text-sand-card hover:bg-aqua-deep/90 disabled:opacity-60";
@@ -128,7 +129,7 @@ function TeamLink({ cahierPath, services }) {
 const SERVICE_PRICE = 15;
 
 // Abonnement : 15 €/mois par service, sans mois d'essai.
-function BillingCard({ billing }) {
+function BillingCard({ billing, servicesDirty = false }) {
   const [quantity, setQuantity] = useState(Math.max(1, billing.services || 1));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -158,7 +159,12 @@ function BillingCard({ billing }) {
         <p className="rounded-lg bg-aqua-deep/10 px-4 py-3 font-bold text-aqua-deep">
           Abonnement actif{billing.periodEnd ? ` · prochain paiement le ${new Date(billing.periodEnd).toLocaleDateString("fr-FR")}` : ""}
         </p>
-        <button type="button" disabled={busy} onClick={() => go("/api/hotel/billing/portal")} className={`${btnGhost} mt-4`}>Gérer mon abonnement, mes factures</button>
+        <p className="mt-3 text-sm text-ink/70">Résiliable à tout moment, sans frais : le cahier reste actif jusqu'à la fin du mois payé.</p>
+        <p className="mt-2 rounded border border-sand-dim bg-sand-card p-3 text-sm text-ink/80">
+          <strong>Avant de résilier, faites une copie.</strong> Trois mois après la fin de l'abonnement, toutes les données du cahier sont supprimées définitivement ; vous êtes prévenu par email un mois avant. Téléchargez vos consignes depuis{" "}
+          <Link href="/hotel/suivi" className="font-bold text-aqua-deep underline">Suivi (Télécharger pour Excel)</Link>.
+        </p>
+        <button type="button" disabled={busy} onClick={() => go("/api/hotel/billing/portal")} className={`${btnGhost} mt-4`}>Gérer mon abonnement, résilier, mes factures</button>
         {error && <p className="mt-3 text-sm font-bold text-terracotta-deep" role="alert">{error}</p>}
       </Card>
     );
@@ -170,7 +176,7 @@ function BillingCard({ billing }) {
       <p className="mt-1 text-sm text-ink/70">
         {pastDue
           ? "Le dernier paiement a échoué. Mettez à jour votre carte pour que le cahier reste accessible à vos équipes."
-          : "Le cahier s'ouvre à vos équipes dès le paiement. 15 € par mois et par service (réception, conciergerie, technique…), sans engagement ni mois d'essai."}
+          : "Le cahier s'ouvre à vos équipes dès le paiement. 15 € par mois et par service (réception, conciergerie, technique…), sans mois d'essai. Résiliable à tout moment : le cahier reste actif jusqu'à la fin du mois payé."}
       </p>
       {pastDue ? (
         <button type="button" disabled={busy} onClick={() => go("/api/hotel/billing/portal")} className={`${btn} mt-4`}>Mettre à jour le paiement</button>
@@ -179,7 +185,7 @@ function BillingCard({ billing }) {
           {billing.managed ? (
             <p className="pb-2 text-lg font-bold text-ink">
               {billing.planned} service{billing.planned > 1 ? "s" : ""} · {billing.planned * SERVICE_PRICE} € par mois
-              <span className="block text-sm font-normal text-ink/60">Les services se choisissent dans la carte « Services » ci-dessous.</span>
+              <span className="block text-sm font-normal text-ink/60">Les services se choisissent dans la carte « Services » plus haut.</span>
             </p>
           ) : (
             <>
@@ -192,7 +198,12 @@ function BillingCard({ billing }) {
               <p className="pb-2 text-lg font-bold text-ink">{quantity * SERVICE_PRICE} € par mois</p>
             </>
           )}
-          <button type="button" disabled={busy} onClick={() => go("/api/hotel/billing/checkout", { quantity })} className={btn}>Payer et activer</button>
+          <button type="button" disabled={busy || (billing.managed && (servicesDirty || billing.planned === 0))} onClick={() => go("/api/hotel/billing/checkout", { quantity })} className={btn}>Payer et activer</button>
+          {billing.managed && (servicesDirty || billing.planned === 0) && (
+            <p className="basis-full text-sm font-bold text-terracotta-deep">
+              {servicesDirty ? "Enregistrez d'abord vos services (carte « Services » plus haut)." : "Choisissez d'abord vos services dans la carte « Services » plus haut."}
+            </p>
+          )}
         </div>
       )}
       {error && <p className="mt-3 text-sm font-bold text-terracotta-deep" role="alert">{error}</p>}
@@ -200,8 +211,9 @@ function BillingCard({ billing }) {
   );
 }
 
-export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath, billing, appearance, servicesInfo, hotelServices = [], serviceAccounts = null }) {
+export default function GestionClient({ userId, hotel, tags, places, staff, stations, lostFound, cahierPath, billing, appearance, servicesInfo, hotelServices = [], serviceAccounts = null, supervisorsEnabled = false, retention = null }) {
   const [stationService, setStationService] = useState("");
+  const [servicesDirty, setServicesDirty] = useState(false);
   const serviceNameById = Object.fromEntries(hotelServices.map((s) => [s.id, s.name]));
   const router = useRouter();
   const [message, setMessage] = useState(null); // { text, error }
@@ -268,15 +280,11 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
         <button type="button" onClick={logout} className={`${btnGhost} px-5 py-3`}>Se déconnecter</button>
       </div>
 
-      {billing && billing.status !== "active" && !billing.exempt && <BillingCard billing={billing} />}
-
       {message && (
         <p className={`mt-4 rounded border p-3 text-sm font-bold ${message.error ? "border-terracotta-deep text-terracotta-deep" : "border-aqua-deep text-aqua-deep"}`} role="status">
           {message.text}
         </p>
       )}
-
-      {billing && (billing.status === "active" || billing.exempt) && <BillingCard billing={billing} />}
 
       <Card title="Votre hôtel" hint="Le logo apparaît en haut du cahier.">
         <div className="flex flex-wrap items-center gap-4">
@@ -342,6 +350,14 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
                       );
                     })}
                   </div>
+                </div>
+              )}
+              {supervisorsEnabled && hotelServices.length > 0 && (
+                <div className="mt-3 border-t border-sand-dim pt-3">
+                  <button type="button" disabled={busy} aria-pressed={s.is_supervisor} onClick={() => call({ action: "update_staff", id: s.id, supervisor: !s.is_supervisor }, s.is_supervisor ? "Ce n'est plus un responsable." : "Responsable enregistré.")} className={`rounded-full border px-3 py-1 text-sm font-bold ${s.is_supervisor ? "border-terracotta-deep bg-terracotta-deep text-sand-card" : "border-sand-dim text-ink/60"}`}>
+                    {s.is_supervisor ? "Responsable de ses services ✓" : "Nommer responsable de ses services"}
+                  </button>
+                  <p className="mt-1 text-sm text-ink/60">Avec son code personnel, un responsable voit qui a écrit et qui a validé les consignes des services cochés ci-dessus, et seulement ceux-là.</p>
                 </div>
               )}
             </li>
@@ -411,10 +427,12 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
         <Card title="Services" hint="Chaque service est facturé 15 € par mois. Cochez ceux qui utilisent le cahier : vous pouvez en ajouter ou en retirer à tout moment.">
           <ServicesEditor
             selected={servicesInfo.selected}
+            initialCustom={servicesInfo.custom}
+            onDirtyChange={setServicesDirty}
             price={SERVICE_PRICE}
             subscribed={billing?.status === "active" && !billing?.exempt}
             busy={busy}
-            onSave={(services) => call({ action: "set_services", services }, "Services enregistrés.")}
+            onSave={(services, customServices) => call({ action: "set_services", services, customServices }, "Services enregistrés.")}
           />
         </Card>
       )}
@@ -434,6 +452,12 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
             <TypesEditor initial={appearance.types} busy={busy} onSave={(types) => call({ action: "set_types", types }, "Types enregistrés.")} />
           </Card>
         </>
+      )}
+
+      {retention && (
+        <Card title="Conservation des données" hint="Vos consignes restent consultables et exportables pendant toute cette durée. Ce délai est fixe.">
+          <RetentionNotice info={retention} />
+        </Card>
       )}
 
       <Card title="Étiquettes" hint="Elles servent à dire à qui s'adresse une consigne (équipe du matin, du soir, de nuit, ou un poste).">
@@ -506,6 +530,8 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
           </ul>
         )}
       </Card>
+
+      {billing && <BillingCard billing={billing} servicesDirty={servicesDirty} />}
     </div>
   );
 }

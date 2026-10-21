@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 import { csvResponse } from "@/lib/csv";
 import { getHotelContext } from "@/lib/hotelAuth";
 import { overviewConsignes } from "@/lib/hotelData";
-import { cleanCustomTypes, typeOf } from "@/lib/hotelTheme";
-
-const dateFmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" });
-const timeFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
+import { cleanCustomTypes } from "@/lib/hotelTheme";
+import { OVERVIEW_CSV_HEAD, overviewCsvRows } from "@/lib/overviewCsv";
 
 // Export (Excel) du suivi, avec les mêmes filtres que l'écran.
 export async function GET(request) {
@@ -23,21 +21,5 @@ export async function GET(request) {
     customTypes,
   });
 
-  const head = ["Date", "Heure", "Type", "Chambre ou lieu", "De (service)", "Vers (service)", "Consigne", "Statut", "Écrite par", "Terminée le", "Terminée par", "Ont validé", "Manquent"];
-  const rows = all.map((c) => [
-    c.day,
-    timeFmt.format(new Date(c.createdAt)),
-    typeOf(customTypes, c.kind, c.typeId).short,
-    c.placeName,
-    c.fromServiceName ?? "",
-    c.toServiceName ?? "",
-    c.body,
-    c.done ? "Faite" : "À faire",
-    c.createdByName ?? "",
-    c.closedAt ? `${dateFmt.format(new Date(c.closedAt))} ${timeFmt.format(new Date(c.closedAt))}` : "",
-    c.closedByName ?? "",
-    (c.ack?.ackNames ?? []).join(" / "),
-    (c.ack?.missingNames ?? []).join(" / "),
-  ]);
-  return csvResponse(head, rows, "suivi-consignes.csv");
+  return csvResponse(OVERVIEW_CSV_HEAD, overviewCsvRows(all, customTypes), "suivi-consignes.csv");
 }

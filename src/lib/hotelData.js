@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { addDays, daysBetween, isDay, parisDate } from "@/lib/hotelTime";
+import { addDays, addMonths, daysBetween, isDay, parisDate } from "@/lib/hotelTime";
 import { normalize, searchTerms } from "@/lib/hotelSearch";
 import { typeOf } from "@/lib/hotelTheme";
 
@@ -34,6 +34,22 @@ export async function ackProgress(admin, hotelId, rows) {
 }
 
 // Services actifs d'un hôtel (vide si la table n'existe pas encore).
+// Conservation des consignes : `months` mois (36 par défaut), puis suppression
+// automatique. Compte celles qui seront supprimées dans les 3 mois (à prévenir).
+export const RETENTION_WARNING_MONTHS = 3;
+export async function retentionInfo(hotelId, months = 36) {
+  const today = parisDate();
+  const warnBefore = addMonths(today, -(months - RETENTION_WARNING_MONTHS));
+  const admin = createAdminClient();
+  const [{ count }, { data: oldest }] = await Promise.all([
+    admin.from("consignes").select("id", { count: "exact", head: true }).eq("hotel_id", hotelId).lt("day", warnBefore),
+    admin.from("consignes").select("day").eq("hotel_id", hotelId).order("day", { ascending: true }).limit(1),
+  ]);
+  const first = oldest?.[0]?.day ?? null;
+  // Une consigne du jour D est supprimée quand D est plus vieux que « aujourd'hui − months ».
+  return { months, expiring: count ?? 0, deleteFrom: first && (count ?? 0) > 0 ? addDays(addMonths(first, months), 1) : null };
+}
+
 export async function listServices(hotelId) {
   const { data } = await createAdminClient()
     .from("hotel_services")
@@ -216,13 +232,17 @@ export async function searchConsignes(hotelId, query, { showNames, customTypes, 
 // accents, tous les mots), service (écrit ou reçu par), état, période.
 const OVERVIEW_SCAN_LIMIT = 5000;
 
-export async function overviewConsignes(hotelId, { q = "", serviceId, status = "all", from, to, limit = 40, offset = 0, customTypes } = {}) {
+export async function overviewConsignes(hotelId, { q = "", serviceId, scopeServiceIds, status = "all", from, to, limit = 40, offset = 0, customTypes } = {}) {
   const terms = searchTerms(q);
   const admin = createAdminClient();
   let query = admin.from("consignes").select("*").eq("hotel_id", hotelId);
   if (isDay(from)) query = query.gte("day", from);
   if (isDay(to)) query = query.lte("day", to);
-  if (isUuid(serviceId)) query = query.or(`service_id.eq.${serviceId},from_service_id.eq.${serviceId}`);
+  // Un responsable ne voit que les services dont il a la charge.
+  const scope = Array.isArray(scopeServiceIds) ? scopeServiceIds.filter(isUuid) : null;
+  if (scope && scope.length === 0) return { total: 0, open: 0, done: 0, items: [], all: [] };
+  const wanted = scope ? (isUuid(serviceId) && scope.includes(serviceId) ? [serviceId] : scope) : isUuid(serviceId) ? [serviceId] : null;
+  if (wanted) query = query.or(wanted.map((id) => `service_id.eq.${id},from_service_id.eq.${id}`).join(","));
   if (status === "open") query = query.is("closed_at", null);
   if (status === "done") query = query.not("closed_at", "is", null);
   const [{ data }, services] = await Promise.all([

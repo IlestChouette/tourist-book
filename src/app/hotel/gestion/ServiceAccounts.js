@@ -64,7 +64,7 @@ export default function ServiceAccounts({ services, accounts, busy, call }) {
               >
                 <label className="grid gap-1.5">
                   <span className={label}>Email</span>
-                  <input required type="email" value={d.email} onChange={(e) => setDraft(s.id, { email: e.target.value })} placeholder={`${s.key}@votrehotel.com`} className="input" />
+                  <input required type="email" value={d.email} onChange={(e) => setDraft(s.id, { email: e.target.value })} placeholder={`${s.key.startsWith("x-") ? "service" : s.key}@votrehotel.com`} className="input" />
                 </label>
                 <label className="grid gap-1.5">
                   <span className={label}>Mot de passe</span>

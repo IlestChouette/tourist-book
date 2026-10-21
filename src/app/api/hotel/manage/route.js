@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { cleanCustomTypes, THEMES } from "@/lib/hotelTheme";
-import { SERVICES, cleanServices } from "@/lib/hotelServices";
+import { SERVICES, cleanServices, cleanCustomServices, isCustomServiceId } from "@/lib/hotelServices";
 import { stripe } from "@/lib/stripe";
 import { ACTIVATION_MINUTES, MAX_SERVICES_PER_DEVICE, PENDING_LABEL, SERVICE_COOKIE, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE, stationTokens } from "@/lib/hotelAuth";
 
@@ -66,14 +66,23 @@ export async function POST(request) {
     // Services de l'hôtel : ils fixent le prix (15 €/mois chacun). Si
     // l'abonnement est actif, la quantité Stripe suit, au prorata.
     case "set_services": {
-      const ids = cleanServices(b.services);
+      const custom = cleanCustomServices(b.customServices);
+      const customIds = new Set(custom.map((c) => c.id));
+      // Un service propre n'est retenu que s'il arrive avec son nom.
+      const ids = cleanServices(Array.isArray(b.services) ? b.services.filter((id) => !isCustomServiceId(id) || customIds.has(id)) : []);
       if (ids.length === 0) return fail("Gardez au moins un service.");
       const { error } = await admin.from("hotels").update({ services: ids }).eq("id", hotel.id);
       if (error) return fail("Impossible d'enregistrer.", 500);
       // Les étiquettes de poste correspondantes existent (pour adresser une consigne).
       await admin
         .from("hotel_tags")
-        .upsert(SERVICES.filter((s) => ids.includes(s.id)).map((s) => ({ hotel_id: hotel.id, name: s.tag, kind: "role" })), { onConflict: "hotel_id,name", ignoreDuplicates: true });
+        .upsert(
+          [
+            ...SERVICES.filter((s) => ids.includes(s.id)).map((s) => ({ hotel_id: hotel.id, name: s.tag, kind: "role" })),
+            ...custom.filter((c) => ids.includes(c.id)).map((c) => ({ hotel_id: hotel.id, name: c.name.toLowerCase(), kind: "role" })),
+          ],
+          { onConflict: "hotel_id,name", ignoreDuplicates: true },
+        );
       // Les services du cahier suivent : on crée les nouveaux, on désactive les retirés
       // (jamais supprimés : leurs consignes gardent leur service).
       const { data: current } = await admin.from("hotel_services").select("id, key, active").eq("hotel_id", hotel.id);
@@ -83,6 +92,16 @@ export async function POST(request) {
         const wanted = ids.includes(s.id);
         if (row && row.active !== wanted) await admin.from("hotel_services").update({ active: wanted }).eq("id", row.id);
         if (!row && wanted) await admin.from("hotel_services").insert({ hotel_id: hotel.id, key: s.id, name: s.label, position: i + 1 });
+      }
+      for (const [i, c] of custom.entries()) {
+        const row = have.get(c.id);
+        const wanted = ids.includes(c.id);
+        if (row) await admin.from("hotel_services").update({ active: wanted, name: c.name }).eq("id", row.id);
+        else if (wanted) await admin.from("hotel_services").insert({ hotel_id: hotel.id, key: c.id, name: c.name, position: 100 + i });
+      }
+      // Un service propre qui n'est plus dans la liste est désactivé (jamais supprimé).
+      for (const row of current ?? []) {
+        if (isCustomServiceId(row.key) && !ids.includes(row.key) && row.active) await admin.from("hotel_services").update({ active: false }).eq("id", row.id);
       }
       if (hotel.stripe_subscription_id && ["active", "past_due"].includes(hotel.billing_status) && !hotel.billing_exempt) {
         try {
@@ -201,6 +220,16 @@ export async function POST(request) {
       }
       if (Array.isArray(b.serviceIds)) update.service_ids = await ownServiceIds(admin, hotel.id, b.serviceIds);
       if (typeof b.active === "boolean" && !staff.is_manager) update.active = b.active;
+      // Responsable de service : voit qui a écrit et validé pour ses services ; il en faut au moins un.
+      if (typeof b.supervisor === "boolean" && !staff.is_manager) {
+        if (b.supervisor) {
+          const services = update.service_ids ?? (await admin.from("hotel_staff").select("service_ids").eq("id", staff.id).maybeSingle()).data?.service_ids ?? [];
+          if (services.length === 0) return fail("Choisissez d'abord au moins un service pour cette personne.");
+        }
+        update.is_supervisor = b.supervisor;
+      }
+      // Retirer tous les services d'un responsable lui retire aussi cette vue.
+      if (update.service_ids && update.service_ids.length === 0 && b.supervisor !== true) update.is_supervisor = false;
       const { error } = await admin.from("hotel_staff").update(update).eq("id", staff.id);
       if (error) return fail(error.code === "23505" ? PIN_TAKEN : "Impossible d'enregistrer.", error.code === "23505" ? 409 : 500);
       return ok();

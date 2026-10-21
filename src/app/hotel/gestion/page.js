@@ -5,7 +5,8 @@ import { listServices, loadMeta } from "@/lib/hotelData";
 import { PENDING_LABEL } from "@/lib/hotelAuth";
 import { slugForHotel } from "@/lib/hotelSlug";
 import { cleanCustomTypes } from "@/lib/hotelTheme";
-import { cleanServices, servicesFromTags } from "@/lib/hotelServices";
+import { retentionInfo } from "@/lib/hotelData";
+import { cleanServices, servicesFromTags, isCustomServiceId } from "@/lib/hotelServices";
 import { createClient } from "@/lib/supabase/server";
 import CreateHotel from "./CreateHotel";
 import GestionClient from "./GestionClient";
@@ -42,13 +43,23 @@ export default async function GestionPage() {
     listServices(hotel.id),
   ]);
 
+  const retention = await retentionInfo(hotel.id, hotel.retention_months ?? 36);
+
+  // Responsables de service : colonne absente tant que le SQL n'est pas passé.
+  const { data: supRows, error: supError } = await admin.from("hotel_staff").select("id, is_supervisor").eq("hotel_id", hotel.id);
+  const supervisorsEnabled = !supError;
+  const supById = Object.fromEntries((supRows ?? []).map((r) => [r.id, r.is_supervisor === true]));
+
   // Services facturés : choix de l'hôtel, sinon ceux dont l'étiquette existe déjà.
   const servicesManaged = hotel.services !== undefined;
   const savedServices = servicesManaged ? cleanServices(hotel.services) : [];
   // Accès email + mot de passe des services : colonne absente tant que le SQL n'est pas passé.
   const { data: accountRows, error: accountError } = await admin.from("hotel_services").select("id, account_email").eq("hotel_id", hotel.id);
   const serviceAccounts = accountError ? null : Object.fromEntries((accountRows ?? []).map((r) => [r.id, r.account_email ?? null]));
-  const selectedServices = savedServices.length ? savedServices : servicesFromTags(meta.tags);
+  // Un hôtel qui n'a pas encore payé commence sans service coché : il choisit
+// d'abord, puis paie. Les autres gardent le repli sur leurs postes existants.
+const keepsFallback = hotel.billing_exempt === true || ["active", "past_due"].includes(hotel.billing_status);
+  const selectedServices = savedServices.length ? savedServices : keepsFallback ? servicesFromTags(meta.tags) : [];
 
   return (
     <main className="flex-1 bg-sand-card/50">
@@ -59,7 +70,9 @@ export default async function GestionPage() {
           hotel={{ name: hotel.name, logoUrl: hotel.logo_url, emails: hotel.notification_emails, replyTo: hotel.reply_to === undefined ? null : hotel.reply_to ?? "" }}
           tags={meta.tags}
           places={meta.places}
-          staff={(staff ?? []).map((s) => ({ ...s, hasPin: Boolean(s.pin_hash), pin_hash: undefined }))}
+          staff={(staff ?? []).map((s) => ({ ...s, is_supervisor: supById[s.id] === true, hasPin: Boolean(s.pin_hash), pin_hash: undefined }))}
+          supervisorsEnabled={supervisorsEnabled}
+          retention={retention}
           stations={stations ?? []}
           hotelServices={hotelServices}
           serviceAccounts={serviceAccounts}
@@ -80,7 +93,7 @@ export default async function GestionPage() {
           }
           // null tant que la migration SQL n'est pas passée : la section reste cachée.
           appearance={hotel.consigne_types === undefined ? null : { theme: hotel.theme ?? "sable", types: cleanCustomTypes(hotel.consigne_types) }}
-          servicesInfo={servicesManaged ? { selected: selectedServices } : null}
+          servicesInfo={servicesManaged ? { selected: selectedServices, custom: hotelServices.filter((s) => isCustomServiceId(s.key)).map((s) => ({ id: s.key, name: s.name })) } : null}
           lostFound={hotel.lost_found_enabled === true ? { token: hotel.lost_found_token ?? null } : null}
         />
       </section>
