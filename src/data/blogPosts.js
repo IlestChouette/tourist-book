@@ -1,9 +1,132 @@
-import { WifiIcon, CompassIcon, CarIcon, ChatIcon, ShieldIcon, BookIcon } from "@/components/icons";
+import { WifiIcon, CompassIcon, CarIcon, ChatIcon, ShieldIcon, BookIcon, UsersIcon, MoonIcon, PartyIcon, PawIcon, SmokeIcon, CameraIcon, KeyIcon, CalendarIcon } from "@/components/icons";
 
 // Contenu du blog — français uniquement, même choix que les pages villes
 // (voir cityPages.js) : sans hreflang, seule cette version a une vraie
 // chance d'être indexée par Google.
 export const blogPosts = [
+  {
+    slug: "airbnb-regles-de-la-maison-20-novembre-2026",
+    title: "Airbnb change ses règles de la maison le 20 novembre 2026 : ce que les hôtes doivent savoir",
+    metaDescription:
+      "Airbnb distingue 7 règles de la maison et de simples demandes : fini les corvées de départ imposées. Ce qui change le 20 novembre 2026 et comment s'y préparer.",
+    excerpt: "Fini les corvées de départ imposées : Airbnb sépare les règles de la maison des simples demandes. L'essentiel en un coup d'œil.",
+    publishedAt: "2026-10-23",
+    blocks: [
+      {
+        type: "lead",
+        text: "Airbnb change les règles du jeu pour les corvées de départ. Voici l'essentiel en un coup d'œil : ce qui change, ce que vous pouvez encore demander, et ce qu'il faut faire d'ici le 20 novembre 2026.",
+      },
+      {
+        type: "steps",
+        items: [
+          { n: "20 oct.", title: "Annonce", text: "Airbnb prévient les hôtes et ouvre le nouvel éditeur de règles dans l'annonce." },
+          { n: "Maintenant", title: "Vous vous préparez", text: "Relisez vos consignes de départ et réécrivez celles qui sont des corvées imposées." },
+          { n: "20 nov.", title: "Entrée en vigueur", text: "La nouvelle politique des règles de la maison s'applique." },
+        ],
+      },
+      {
+        type: "stats",
+        items: [
+          { value: "7", label: "Règles de la maison standard" },
+          { value: "0", label: "Corvée de départ imposable" },
+          { value: "1", label: "Seul endroit pour tout écrire : l'annonce" },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Les 7 règles de la maison",
+        paragraphs: [
+          "Ce sont les seules vraies règles : le voyageur doit les respecter, et vous pouvez annuler sans frais s'il les enfreint. Vous les réglez directement dans l'éditeur de l'annonce.",
+        ],
+      },
+      {
+        type: "icons",
+        items: [
+          { icon: UsersIcon, title: "Voyageurs maximum", text: "Combien de personnes peuvent dormir sur place." },
+          { icon: MoonIcon, title: "Heures de calme", text: "Les horaires où l'on évite le bruit." },
+          { icon: PartyIcon, title: "Événements", text: "Fêtes et rassemblements : autorisés ou non." },
+          { icon: PawIcon, title: "Animaux", text: "Acceptés ou non, et combien." },
+          { icon: SmokeIcon, title: "Tabac", text: "Vapotage compris." },
+          { icon: CameraIcon, title: "Photo et tournage commercial", text: "Autorisés ou non dans le logement." },
+          { icon: KeyIcon, title: "Fermeture à clé au départ", text: "Obligatoire ou non, avec des précisions possibles sur la remise des clés." },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Corvées de départ : ce qui change",
+        paragraphs: [
+          "Tout ce qui n'est pas l'une des sept règles est une demande : le voyageur est invité à la suivre, sans obligation. Elle doit rester raisonnable.",
+        ],
+      },
+      {
+        type: "compare",
+        left: {
+          title: "Ce que vous ne pouvez plus exiger",
+          items: [
+            "Laver et ranger la vaisselle",
+            "Enlever les draps ou lancer une lessive",
+            "Sortir les poubelles hors du logement",
+            "Interdire un équipement annoncé, comme la climatisation",
+          ],
+        },
+        right: {
+          title: "Ce que vous pouvez demander",
+          items: [
+            "Mettre la vaisselle utilisée dans l'évier",
+            "Rassembler les serviettes utilisées",
+            "Trier les déchets dans les bacs à l'intérieur",
+            "Éteindre la climatisation en partant",
+          ],
+        },
+      },
+      {
+        type: "text",
+        heading: "À savoir en plus",
+        paragraphs: [],
+      },
+      {
+        type: "icons",
+        items: [
+          { icon: BookIcon, title: "Un seul endroit", text: "Règles et demandes se placent dans l'annonce, pas dans les messages ni sur des affichettes dans le logement." },
+          { icon: ShieldIcon, title: "Contrats très limités", text: "Autorisés seulement pour une obligation légale, une copropriété, les séjours mensuels, Airbnb Luxe ou un équipement optionnel." },
+          { icon: CalendarIcon, title: "Règles mises en avant", text: "Visibles sur l'annonce avant la réservation, dans l'onglet Voyages et dans les rappels de réservation." },
+          { icon: ChatIcon, title: "Contrôle et recours", text: "Une demande non conforme est signalée dans l'éditeur : vous recevez un e-mail et pouvez faire appel." },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Et votre livret d'accueil ?",
+        paragraphs: [
+          "Il reste le bon endroit pour l'information utile : wifi, fonctionnement des appareils, accès, bonnes adresses. Notre lecture, à vérifier de votre côté : gardez dans le livret ce qui informe et conseille, et faites en sorte que les règles qui engagent le voyageur soient celles de l'annonce, sans en ajouter de nouvelles dans le livret ou les messages.",
+          "Si vous utilisez un check-in électronique, un point demande de la prudence. Selon la presse spécialisée, la politique limite par défaut la collecte de coordonnées ou de pièces d'identité, avec des exceptions pour les obligations légales, ce qui peut concerner l'enregistrement des voyageurs étrangers en France. La page officielle d'Airbnb ne détaille pas ce point : relisez le texte exact avant de changer votre procédure.",
+        ],
+      },
+      {
+        type: "steps",
+        items: [
+          { n: "1", title: "Faites le tri", text: "Relisez vos consignes de départ et repérez celles qui sont des corvées imposées." },
+          { n: "2", title: "Réécrivez", text: "Gardez comme règles ce qui compte parmi les sept ; reformulez le reste en demandes simples et aimables." },
+          { n: "3", title: "Prévoyez le travail ailleurs", text: "Draps, vaisselle, déchets : intégrez-les à votre organisation de ménage ou à vos tarifs." },
+        ],
+      },
+      {
+        type: "text",
+        heading: "Bon à savoir",
+        paragraphs: [
+          "Selon la presse spécialisée, la politique concerne les réservations effectuées à partir du 20 novembre ; les réservations déjà faites gardent les règles affichées à la réservation. L'application exacte peut dépendre de votre annonce : vérifiez dans votre espace hôte.",
+          "Si les corvées de départ faisaient partie de votre équation, revoyez vos frais de ménage : c'est ce que plusieurs professionnels cités par la presse spécialisée soulèvent. Une demande aimable passe aussi mieux qu'une consigne sèche, et Airbnb permet d'envoyer les règles de la maison en réponse rapide pendant le séjour.",
+        ],
+      },
+      {
+        type: "quote",
+        text: "Moins de corvées imposées, plus de clarté : ce que vous attendez du voyageur doit tenir en quelques règles nettes.",
+      },
+      {
+        type: "note",
+        text: "Sources : Airbnb, Centre de ressources, « Important changes to house rules » (20 octobre 2026) ; Skift, 21 octobre 2026 ; RentalScaleUp. Les points attribués à la presse spécialisée ne figurent pas sur la page officielle consultée. Cet article donne un aperçu général et ne remplace pas un avis juridique — vérifiez les conditions exactes dans votre espace hôte Airbnb.",
+      },
+    ],
+  },
   {
     slug: "livret-accueil-numerique-avantages-hote",
     title: "Livret d'accueil numérique : à quoi ça sert et comment ça simplifie le travail de l'hôte",
