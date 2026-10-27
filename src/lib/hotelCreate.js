@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendHotelSignupNotification } from "@/lib/email";
+import { GENERAL_PLACE } from "@/lib/hotelPlaces";
 
 const SHIFT_TAGS = ["matin", "soir", "nuit"];
 const ROLE_TAGS = [
@@ -38,6 +39,7 @@ export async function ensureHotel(user, nameOverride) {
   }
 
   await admin.from("hotel_staff").insert({ hotel_id: hotel.id, name: meta.name || "Manager", is_manager: true });
+  await admin.from("hotel_places").insert({ hotel_id: hotel.id, name: GENERAL_PLACE, kind: "area" });
   await admin.from("hotel_tags").insert([
     ...SHIFT_TAGS.map((name) => ({ hotel_id: hotel.id, name, kind: "shift" })),
     ...ROLE_TAGS.map((name) => ({ hotel_id: hotel.id, name, kind: "role" })),

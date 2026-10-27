@@ -1,4 +1,5 @@
 import { addDays, daysBetween, parisDate, parisMinutes } from "@/lib/hotelTime";
+import { isGeneralPlace } from "@/lib/hotelPlaces";
 
 export const RANGES = {
   today: { label: "Aujourd'hui", days: 1 },
@@ -314,6 +315,7 @@ export function computeStats(rows, f, tags) {
   const issues = new Map();
   for (const c of cur) {
     if (c.kind !== "probleme" && c.kind !== "plainte") continue;
+    if (isGeneralPlace(c.place_name)) continue; // consigne d'équipe, pas une chambre
     const e = issues.get(c.place_name) ?? { place: c.place_name, count: 0, last: c.day, probleme: 0, plainte: 0 };
     e.count += 1;
     e[c.kind] += 1;
@@ -333,8 +335,8 @@ export function computeStats(rows, f, tags) {
     current: summary(cur),
     previous: f.compare ? summary(prev) : null,
     byKind: countBy(cur, (c) => c.kind),
-    topPlaces: countBy(cur, (c) => c.place_name).slice(0, 10),
-    placesCount: new Set(cur.map((c) => c.place_name)).size,
+    topPlaces: countBy(cur.filter((c) => !isGeneralPlace(c.place_name)), (c) => c.place_name).slice(0, 10),
+    placesCount: new Set(cur.filter((c) => !isGeneralPlace(c.place_name)).map((c) => c.place_name)).size,
     byService: serviceRows,
     shiftLeft,
     heat,

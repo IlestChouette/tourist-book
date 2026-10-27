@@ -1,5 +1,6 @@
 "use client";
 
+import { isGeneralPlace } from "@/lib/hotelPlaces";
 import { useEffect, useMemo, useState } from "react";
 import { addDays } from "@/lib/hotelTime";
 import { Icon } from "./CahierIcons";
@@ -42,7 +43,8 @@ export default function NewConsigne({ isManager, managerHasPin = false, today, d
   const place = useMemo(() => places.find((p) => p.name.toLowerCase() === form.placeName.trim().toLowerCase()), [places, form.placeName]);
   const roles = tags.filter((t) => t.kind !== "shift");
   const shiftTag = (name) => tags.find((t) => t.kind === "shift" && t.name === name);
-  const areas = places.filter((p) => p.kind === "area");
+  // « Général » (consigne pour toute l'équipe) en premier, les autres lieux ensuite.
+  const areas = places.filter((p) => p.kind === "area").sort((a, b) => Number(isGeneralPlace(b.name)) - Number(isGeneralPlace(a.name)));
   const typed = form.placeName.trim().toLowerCase();
   const suggestions = typed ? places.filter((p) => p.name.toLowerCase().includes(typed)).slice(0, 8) : [];
 

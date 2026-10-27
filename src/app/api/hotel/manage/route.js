@@ -4,6 +4,7 @@ import { cleanCustomTypes, MAX_CUSTOM_TYPES, THEMES } from "@/lib/hotelTheme";
 import { SERVICES, cleanServices, cleanCustomServices, isCustomServiceId } from "@/lib/hotelServices";
 import { stripe } from "@/lib/stripe";
 import { slugForHotel } from "@/lib/hotelSlug";
+import { isGeneralPlace } from "@/lib/hotelPlaces";
 import { sendHotelActivationLink } from "@/lib/email";
 import { ACTIVATION_MINUTES, LINK_HOURS, MAX_SERVICES_PER_DEVICE, liveStationTokens, PENDING_LABEL, SERVICE_COOKIE, activationHash, getHotelContext, isPin, pinHash, sha256, STATION_COOKIE, stationTokens } from "@/lib/hotelAuth";
 
@@ -257,6 +258,8 @@ export async function POST(request) {
       return error ? fail("Impossible d'ajouter.", 500) : ok({ count: places.length });
     }
     case "delete_place": {
+      const { data: place } = await admin.from("hotel_places").select("name").eq("id", b.id ?? "").eq("hotel_id", hotel.id).maybeSingle();
+      if (place && isGeneralPlace(place.name)) return fail("« Général » est le lieu des consignes pour toute l'équipe : il reste toujours disponible.");
       await admin.from("hotel_places").delete().eq("id", b.id ?? "").eq("hotel_id", hotel.id);
       return ok();
     }
