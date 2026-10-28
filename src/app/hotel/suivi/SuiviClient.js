@@ -130,7 +130,7 @@ export default function SuiviClient({ services, customTypes, tags = [], canExpor
               )}
               <p className="mt-2 whitespace-pre-wrap break-words text-lg leading-snug text-ink"><Highlighted text={c.body} terms={terms} /></p>
               <p className="mt-2 text-sm text-ink/60">
-                Écrit par <Highlighted text={c.createdByName ?? "?"} terms={terms} /> à {timeFmt.format(new Date(c.createdAt))}
+                Écrit par <Highlighted text={c.createdByName ?? "?"} terms={terms} /> le {dayFmt.format(new Date(c.createdAt))} à {timeFmt.format(new Date(c.createdAt))}
                 {c.done && c.closedAt && (
                   <> · {c.requireAll ? "validé par tous" : <>terminé par <Highlighted text={c.closedByName ?? "?"} terms={terms} /></>} le {dayFmt.format(new Date(c.closedAt))} à {timeFmt.format(new Date(c.closedAt))}</>
                 )}

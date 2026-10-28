@@ -7,6 +7,8 @@ import { TONES, typeOf } from "@/lib/hotelTheme";
 import { Icon } from "./CahierIcons";
 
 const dayFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" });
+const timeFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
+const stamp = (v) => `${dayFmt.format(new Date(v))} à ${timeFmt.format(new Date(v))}`;
 
 function Highlighted({ text, terms }) {
   return highlightParts(text, terms).map((p, i) =>
@@ -93,9 +95,9 @@ export default function SearchPanel({ customTypes, tagName, onActive }) {
                       <Icon name={t.icon} className="h-5 w-5" /> {t.short}
                     </span>
                     <span className={`rounded-xl px-3 py-1 text-sm font-bold ${c.done ? "bg-aqua-deep/10 text-aqua-deep" : "bg-terracotta/30 text-terracotta-deep"}`}>
-                      {c.done ? `Fait le ${dayFmt.format(new Date(c.closedAt))}` : "À faire"}
+                      {c.done ? `Fait le ${stamp(c.closedAt)}` : "À faire"}
                     </span>
-                    <span className="ml-auto text-sm text-ink/60" title={formatDayLong(c.day)}>{dayFmt.format(new Date(`${c.day}T12:00:00Z`))}</span>
+                    <span className="ml-auto text-sm text-ink/60" title={formatDayLong(c.day)}>Écrite le {stamp(c.createdAt)}</span>
                   </div>
                   <p className="mt-3 whitespace-pre-wrap break-words text-lg leading-snug text-ink"><Highlighted text={c.body} terms={terms} /></p>
                   {tags.length > 0 && <p className="mt-2 text-sm text-ink/60">Pour : {tags.join(", ")}</p>}

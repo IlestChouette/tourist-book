@@ -13,6 +13,9 @@ import { TONES, typeOf } from "@/lib/hotelTheme";
 const focus = "focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-aqua-deep";
 const bigBtn = `flex min-h-11 items-center justify-center gap-3 rounded-2xl px-4 text-base font-bold transition active:scale-[0.98] ${focus}`;
 const timeFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
+const dayShortFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "Europe/Paris" });
+// « 28 oct. à 14:32 » : la date compte autant que l'heure pour une consigne qui passe d'un jour à l'autre.
+const stamp = (v) => `${dayShortFmt.format(new Date(v))} à ${timeFmt.format(new Date(v))}`;
 
 async function patch(id, body) {
   const res = await fetch(`/api/hotel/consignes/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -148,8 +151,8 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
             {c.carried ? `Pas fait depuis ${c.daysOpen} jour${c.daysOpen > 1 ? "s" : ""}` : "Urgent"}
           </span>
         )}
-        {c.editedAt && <span className="rounded-xl bg-ink/[0.08] px-3 py-1 text-sm font-bold text-ink/70">Modifiée à {timeFmt.format(new Date(c.editedAt))}</span>}
-        <span className="ml-auto text-sm tabular-nums text-ink/60">{timeFmt.format(new Date(c.createdAt))}</span>
+        {c.editedAt && <span className="rounded-xl bg-ink/[0.08] px-3 py-1 text-sm font-bold text-ink/70">Modifiée le {stamp(c.editedAt)}</span>}
+        <span className="ml-auto text-sm tabular-nums text-ink/60">Écrite le {stamp(c.createdAt)}</span>
       </div>
       <p className="mt-3 whitespace-pre-wrap break-words text-lg leading-snug text-ink">{c.body}</p>
       {showNames && c.editedAt && <EditHistory id={c.id} tags={tags} />}
@@ -192,7 +195,7 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
           </button>
         ) : (
           <span className="flex items-center gap-2 text-base font-bold text-aqua-deep">
-            <Icon name="check" className="h-5 w-5" /> Terminé{c.closedAt ? ` à ${timeFmt.format(new Date(c.closedAt))}` : ""}
+            <Icon name="check" className="h-5 w-5" /> Terminé{c.closedAt ? ` le ${stamp(c.closedAt)}` : ""}
           </span>
         )}
         {c.done && isManager && (
@@ -319,7 +322,7 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
                   <span className="rounded-xl bg-ink px-3 py-1 text-lg font-bold tabular-nums text-sand">{c.placeName}</span>
                   <span className="rounded-xl bg-aqua-deep/10 px-3 py-1 text-sm font-bold text-aqua-deep">→ {c.toServiceName}</span>
                   <span className={`rounded-xl px-3 py-1 text-sm font-bold ${c.done ? "bg-aqua-deep text-sand-card" : "bg-terracotta/30 text-terracotta-deep"}`}>
-                    {c.done ? `Fait${c.closedAt ? ` à ${timeFmt.format(new Date(c.closedAt))}` : ""}` : "Pas encore fait"}
+                    {c.done ? `Fait${c.closedAt ? ` le ${stamp(c.closedAt)}` : ""}` : "Pas encore fait"}
                   </span>
                 </div>
                 <p className="mt-3 whitespace-pre-wrap break-words text-lg leading-snug text-ink">{c.body}</p>
