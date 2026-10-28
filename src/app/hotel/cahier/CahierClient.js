@@ -29,6 +29,7 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
   const [creating, setCreating] = useState(false);
   const [sheet, setSheet] = useState(null); // { id, action, until? }
   const [sheetError, setSheetError] = useState("");
+  const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   const [showDone, setShowDone] = useState(false);
   const [showTools, setShowTools] = useState(false);
@@ -109,11 +110,12 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
       return;
     }
     setSheetError("");
+    setComment("");
     setSheet({ id, action, ...extra });
   }
 
   async function confirmWithPin(pin) {
-    const result = await run(sheet.id, { action: sheet.action, until: sheet.until, pin });
+    const result = await run(sheet.id, { action: sheet.action, until: sheet.until, pin, ...(comment.trim() && (sheet.action === "close" || sheet.action === "ack") ? { comment: comment.trim() } : {}) });
     if (result) {
       if (sheet.action === "ack") {
         setNotice(result.already ? "Vous aviez déjà validé cette consigne." : result.complete ? "Merci ! Tout le service a validé." : "Merci, votre validation est enregistrée.");
@@ -155,10 +157,22 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
           {c.closedByName ? ` · terminé par ${c.closedByName}` : ""}
         </p>
       )}
+      {c.closedComment && (
+        <p className="mt-2 rounded-xl bg-ink/[0.06] px-4 py-2 text-base text-ink">
+          <span className="font-bold">Précision{showNames && c.closedByName ? ` de ${c.closedByName}` : ""} :</span> {c.closedComment}
+        </p>
+      )}
       {c.requireAll && c.ack && (
         <div className="mt-3 rounded-xl bg-ink/[0.06] px-4 py-3 text-base text-ink">
           <p className="font-bold">À valider par chaque personne · {c.ack.acked} sur {c.ack.expected} ont validé</p>
           {showNames && c.ack.missingNames?.length > 0 && <p className="mt-1 text-ink/70">Il manque : {c.ack.missingNames.join(", ")}</p>}
+          {c.ack.comments?.length > 0 && (
+            <ul className="mt-2 grid gap-1 text-ink/80">
+              {c.ack.comments.map((x, i) => (
+                <li key={i}><span className="font-bold">Précision{x.name ? ` de ${x.name}` : ""} :</span> {x.comment}</li>
+              ))}
+            </ul>
+          )}
           {showNames && c.ack.ackNames?.length > 0 && <p className="mt-1 text-ink/70">Ont validé : {c.ack.ackNames.join(", ")}</p>}
         </div>
       )}
@@ -368,6 +382,19 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
                 </h2>
                 <p className="mt-2 text-center text-base text-ink/70">Essayez avec votre code de badgeuse ou de contrôle d'accès : celui de votre arrivée et de votre départ.</p>
                 <p className="mb-5 mt-1 text-center text-sm text-ink/60">4 chiffres.</p>
+                {(sheet.action === "close" || sheet.action === "ack") && (
+                  <label className="mb-5 grid gap-2">
+                    <span className="text-base font-bold text-ink">Une précision à ajouter ? <span className="font-normal text-ink/60">(facultatif)</span></span>
+                    <textarea
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      maxLength={500}
+                      rows={3}
+                      placeholder="Ex. : fuite réparée, à surveiller demain ; client prévenu."
+                      className="w-full rounded-xl border-2 border-sand-dim bg-sand p-3 text-lg text-ink"
+                    />
+                  </label>
+                )}
                 <PinPad busy={busy} message={sheetError} onComplete={confirmWithPin} />
               </>
             )}

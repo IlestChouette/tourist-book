@@ -4,6 +4,7 @@ import { HotelFooter, HotelHeader } from "@/components/HotelShell";
 import { getHotelContext } from "@/lib/hotelAuth";
 import { loadMeta } from "@/lib/hotelData";
 import { RECURRENCE_DAYS, computeStats, parseStatsParams, selectDetail, statsHref, withRecurrence } from "@/lib/hotelStats";
+import { problemTopics } from "@/lib/hotelTopics";
 import { addDays, formatDayLong, parisDate } from "@/lib/hotelTime";
 import StatsFilters from "./StatsFilters";
 import Chronology from "./Chronology";
@@ -383,6 +384,7 @@ function DetailSection({ detail, f, today, tags }) {
   // Les statistiques de la sélection seule (sans refiltrer : elle l'est déjà).
   const own = computeStats(detail.list, { ...f, compare: false, kinds: [], service: "", shift: "", place: "" }, tags);
   const kindRows = own.byKind.map((r) => ({ ...r, label: KIND_LABELS[r.label] ?? r.label }));
+  const topics = problemTopics(detail.list);
   const period = f.from === f.to ? formatDayLong(f.from) : `${dayFmt.format(new Date(`${f.from}T12:00:00Z`))} → ${dayFmt.format(new Date(`${f.to}T12:00:00Z`))}`;
   const n = detail.items.length;
 
@@ -436,8 +438,9 @@ function DetailSection({ detail, f, today, tags }) {
                 <div className="mt-3"><Bars rows={kindRows} total={own.total} empty="" f={f} /></div>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-ink">Délai de clôture</h3>
-                <div className="mt-3"><Bars rows={own.closeDist} total={own.current.closedCount} empty="Aucune consigne clôturée." f={f} /></div>
+                <h3 className="text-lg font-bold text-ink">Problèmes qui reviennent</h3>
+                <p className="mt-1 text-sm text-ink/60">Sujets repérés dans le texte des problèmes et plaintes.</p>
+                <div className="mt-3"><Bars rows={topics} total={detail.issuesCount} empty="Aucun problème ni plainte dans cette sélection." f={f} /></div>
               </div>
             </div>
           </div>

@@ -11,14 +11,21 @@ export const isUuid = (v) => typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-
 export async function ackProgress(admin, hotelId, rows) {
   const wanted = (rows ?? []).filter((r) => r.require_all);
   if (wanted.length === 0) return new Map();
+  // « comment » est une colonne récente : sans elle, on relit sans les précisions plutôt que d'échouer.
+  const readAcks = async () => {
+    const full = await admin.from("consigne_acks").select("consigne_id, staff_id, created_at, comment").in("consigne_id", wanted.map((r) => r.id));
+    return full.error ? admin.from("consigne_acks").select("consigne_id, staff_id, created_at").in("consigne_id", wanted.map((r) => r.id)) : full;
+  };
   const [{ data: acks }, { data: staff }] = await Promise.all([
-    admin.from("consigne_acks").select("consigne_id, staff_id, created_at").in("consigne_id", wanted.map((r) => r.id)),
+    readAcks(),
     admin.from("hotel_staff").select("id, name, service_ids").eq("hotel_id", hotelId).eq("active", true).eq("is_manager", false),
   ]);
   const out = new Map();
   for (const r of wanted) {
     const expected = (staff ?? []).filter((s) => (s.service_ids ?? []).includes(r.service_id));
-    const done = new Map((acks ?? []).filter((a) => a.consigne_id === r.id).map((a) => [a.staff_id, a.created_at]));
+    const mine = (acks ?? []).filter((a) => a.consigne_id === r.id);
+    const done = new Map(mine.map((a) => [a.staff_id, a.created_at]));
+    const said = (staffId) => mine.find((a) => a.staff_id === staffId)?.comment ?? "";
     const acked = expected.filter((s) => done.has(s.id));
     const missing = expected.filter((s) => !done.has(s.id));
     out.set(r.id, {
@@ -28,6 +35,7 @@ export async function ackProgress(admin, hotelId, rows) {
       missingNames: missing.map((s) => s.name),
       complete: expected.length > 0 && missing.length === 0,
       lastAt: acked.map((s) => done.get(s.id)).sort().pop() ?? null,
+      comments: acked.map((s) => ({ name: s.name, comment: said(s.id) })).filter((x) => x.comment),
     });
   }
   return out;
@@ -167,7 +175,8 @@ export async function loadDay(hotelId, day, showNames, scope = {}) {
       pinnedUntil: c.pinned_until,
       closedAt: done ? c.closed_at ?? pr?.lastAt ?? null : null,
       requireAll: Boolean(c.require_all),
-      ack: pr ? { expected: pr.expected, acked: pr.acked, ...(showNames ? { ackNames: pr.ackNames, missingNames: pr.missingNames } : {}) } : null,
+      closedComment: done ? c.closed_comment ?? null : null,
+      ack: pr ? { expected: pr.expected, acked: pr.acked, comments: (pr.comments ?? []).map((x) => (showNames ? x : { comment: x.comment })), ...(showNames ? { ackNames: pr.ackNames, missingNames: pr.missingNames } : {}) } : null,
       ...(showNames ? { createdByName: c.created_by_name, closedByName: done ? c.closed_by_name : null } : {}),
     });
   }
@@ -205,7 +214,7 @@ export async function searchConsignes(hotelId, query, { showNames, customTypes, 
 
   const found = (data ?? []).filter((c) => {
     const haystack = normalize(
-      [c.body, c.place_name, (c.tag_ids ?? []).map((id) => tagName[id]).join(" "), typeOf(customTypes, c.kind, c.type_id).short].join(" ")
+      [c.body, c.closed_comment, c.place_name, (c.tag_ids ?? []).map((id) => tagName[id]).join(" "), typeOf(customTypes, c.kind, c.type_id).short].join(" ")
     );
     return terms.every((t) => haystack.includes(t));
   });
@@ -270,15 +279,16 @@ export async function overviewConsignes(hotelId, { q = "", serviceId, scopeServi
       done,
       closedAt: c.closed_at ?? pr?.lastAt ?? null,
       closedByName: c.closed_by_name ?? null,
+      closedComment: c.closed_comment ?? null,
       requireAll: Boolean(c.require_all),
-      ack: pr ? { expected: pr.expected, acked: pr.acked, ackNames: pr.ackNames, missingNames: pr.missingNames } : null,
+      ack: pr ? { expected: pr.expected, acked: pr.acked, ackNames: pr.ackNames, missingNames: pr.missingNames, comments: pr.comments ?? [] } : null,
     };
   });
   if (status === "open") items = items.filter((i) => !i.done);
   if (terms.length > 0) {
     items = items.filter((i) => {
       const haystack = normalize(
-        [i.body, i.placeName, i.fromServiceName, i.toServiceName, i.createdByName, i.closedByName, (i.ack?.ackNames ?? []).join(" "), (i.ack?.missingNames ?? []).join(" "), typeOf(customTypes, i.kind, i.typeId).short].join(" ")
+        [i.body, i.closedComment, ...(i.ack?.comments ?? []).map((x) => x.comment), i.placeName, i.fromServiceName, i.toServiceName, i.createdByName, i.closedByName, (i.ack?.ackNames ?? []).join(" "), (i.ack?.missingNames ?? []).join(" "), typeOf(customTypes, i.kind, i.typeId).short].join(" ")
       );
       return terms.every((t) => haystack.includes(t));
     });

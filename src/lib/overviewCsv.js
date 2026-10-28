@@ -3,7 +3,7 @@ import { typeOf } from "@/lib/hotelTheme";
 const dateFmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" });
 const timeFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
 
-export const OVERVIEW_CSV_HEAD = ["Date", "Heure", "Type", "Chambre ou lieu", "De (service)", "Vers (service)", "Consigne", "Statut", "Écrite par", "Terminée le", "Terminée par", "Ont validé", "Manquent"];
+export const OVERVIEW_CSV_HEAD = ["Date", "Heure", "Type", "Chambre ou lieu", "De (service)", "Vers (service)", "Consigne", "Statut", "Écrite par", "Terminée le", "Terminée par", "Ont validé", "Manquent", "Précision à la validation"];
 
 // Lignes de l'export Excel du suivi (utilisées par l'export du manager et par le lien
 // de téléchargement des consignes bientôt supprimées).
@@ -22,5 +22,6 @@ export function overviewCsvRows(all, customTypes) {
     c.closedByName ?? "",
     (c.ack?.ackNames ?? []).join(" / "),
     (c.ack?.missingNames ?? []).join(" / "),
+    [c.closedComment, ...(c.ack?.comments ?? []).map((x) => `${x.name} : ${x.comment}`)].filter(Boolean).join(" | "),
   ]);
 }

@@ -34,6 +34,9 @@ export async function PATCH(request, { params }) {
 
   // Consigne « chaque personne doit valider » : chacun valide avec son propre
   // code ; elle se clôture toute seule quand la dernière personne a validé.
+  // Précision facultative donnée en validant (information complémentaire pour la suite).
+  const comment = typeof b.comment === "string" ? b.comment.replace(/\s+/g, " ").trim().slice(0, 500) : "";
+
   if (b.action === "ack") {
     if (ctx.mode === "manager") {
       return NextResponse.json({ error: "Ce sont les personnes du service qui valident, avec leur code, sur le poste." }, { status: 400 });
@@ -50,7 +53,7 @@ export async function PATCH(request, { params }) {
 
     const { error: ackError } = await admin
       .from("consigne_acks")
-      .insert({ consigne_id: id, staff_id: who.staff.id, staff_name: who.staff.name });
+      .insert({ consigne_id: id, staff_id: who.staff.id, staff_name: who.staff.name, ...(comment ? { comment } : {}) });
     const already = ackError?.code === "23505";
     if (ackError && !already) return NextResponse.json({ error: "Impossible d'enregistrer votre validation." }, { status: 500 });
 
@@ -78,9 +81,11 @@ export async function PATCH(request, { params }) {
   let update;
   if (b.action === "close") {
     if (consigne.closed_at) return NextResponse.json({ ok: true });
-    update = { closed_at: new Date().toISOString(), closed_by: actor.staff.id, closed_by_name: actor.staff.name };
+    update = { closed_at: new Date().toISOString(), closed_by: actor.staff.id, closed_by_name: actor.staff.name, ...(comment ? { closed_comment: comment } : {}) };
   } else if (b.action === "reopen") {
     update = { closed_at: null, closed_by: null, closed_by_name: null };
+    // Colonne ajoutée plus tard : un échec ici ne doit jamais empêcher de rouvrir.
+    await admin.from("consignes").update({ closed_comment: null }).eq("id", id).eq("hotel_id", hotel.id);
     // Une consigne à valider par tous repart de zéro.
     if (consigne.require_all) await admin.from("consigne_acks").delete().eq("consigne_id", id);
   } else if (b.action === "pin") {

@@ -134,10 +134,14 @@ export default function SuiviClient({ services, customTypes, canExport = true })
                   <> · {c.requireAll ? "validé par tous" : <>terminé par <Highlighted text={c.closedByName ?? "?"} terms={terms} /></>} le {dayFmt.format(new Date(c.closedAt))} à {timeFmt.format(new Date(c.closedAt))}</>
                 )}
               </p>
+              {c.closedComment && (
+                <p className="mt-2 rounded-xl bg-ink/[0.06] px-3 py-2 text-sm text-ink"><span className="font-bold">Précision{c.closedByName ? ` de ${c.closedByName}` : ""} :</span> <Highlighted text={c.closedComment} terms={terms} /></p>
+              )}
               {c.requireAll && c.ack && (
                 <div className="mt-2 rounded-xl bg-ink/[0.06] px-3 py-2 text-sm text-ink">
                   <p className="font-bold">À valider par chaque personne · {c.ack.acked} sur {c.ack.expected}</p>
                   {c.ack.ackNames.length > 0 && <p className="mt-0.5 text-ink/70">Ont validé : <Highlighted text={c.ack.ackNames.join(", ")} terms={terms} /></p>}
+                  {(c.ack.comments ?? []).map((x, i) => <p key={i} className="mt-0.5 text-ink/80"><span className="font-bold">Précision de {x.name} :</span> {x.comment}</p>)}
                   {c.ack.missingNames.length > 0 && <p className="mt-0.5 text-terracotta-deep">Il manque : <Highlighted text={c.ack.missingNames.join(", ")} terms={terms} /></p>}
                 </div>
               )}
