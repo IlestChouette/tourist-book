@@ -176,6 +176,7 @@ export async function loadDay(hotelId, day, showNames, scope = {}) {
       closedAt: done ? c.closed_at ?? pr?.lastAt ?? null : null,
       requireAll: Boolean(c.require_all),
       closedComment: done ? c.closed_comment ?? null : null,
+      editedAt: c.edited_at ?? null,
       ack: pr ? { expected: pr.expected, acked: pr.acked, comments: (pr.comments ?? []).map((x) => (showNames ? x : { comment: x.comment })), ...(showNames ? { ackNames: pr.ackNames, missingNames: pr.missingNames } : {}) } : null,
       ...(showNames ? { createdByName: c.created_by_name, closedByName: done ? c.closed_by_name : null } : {}),
     });
@@ -280,6 +281,7 @@ export async function overviewConsignes(hotelId, { q = "", serviceId, scopeServi
       closedAt: c.closed_at ?? pr?.lastAt ?? null,
       closedByName: c.closed_by_name ?? null,
       closedComment: c.closed_comment ?? null,
+      editedAt: c.edited_at ?? null,
       requireAll: Boolean(c.require_all),
       ack: pr ? { expected: pr.expected, acked: pr.acked, ackNames: pr.ackNames, missingNames: pr.missingNames, comments: pr.comments ?? [] } : null,
     };

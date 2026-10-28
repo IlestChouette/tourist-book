@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { highlightParts, searchTerms } from "@/lib/hotelSearch";
 import { TONES, typeOf } from "@/lib/hotelTheme";
 import { Icon } from "../cahier/CahierIcons";
+import EditHistory from "../cahier/EditHistory";
 
 const dayFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" });
 const timeFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
@@ -16,7 +17,7 @@ function Highlighted({ text, terms }) {
   );
 }
 
-export default function SuiviClient({ services, customTypes, canExport = true }) {
+export default function SuiviClient({ services, customTypes, tags = [], canExport = true }) {
   const [q, setQ] = useState("");
   const [service, setService] = useState("");
   const [status, setStatus] = useState("all");
@@ -134,6 +135,8 @@ export default function SuiviClient({ services, customTypes, canExport = true })
                   <> · {c.requireAll ? "validé par tous" : <>terminé par <Highlighted text={c.closedByName ?? "?"} terms={terms} /></>} le {dayFmt.format(new Date(c.closedAt))} à {timeFmt.format(new Date(c.closedAt))}</>
                 )}
               </p>
+              {c.editedAt && <p className="mt-1 text-sm font-bold text-ink/70">Modifiée le {dayFmt.format(new Date(c.editedAt))} à {timeFmt.format(new Date(c.editedAt))}</p>}
+              {c.editedAt && <EditHistory id={c.id} tags={tags} />}
               {c.closedComment && (
                 <p className="mt-2 rounded-xl bg-ink/[0.06] px-3 py-2 text-sm text-ink"><span className="font-bold">Précision{c.closedByName ? ` de ${c.closedByName}` : ""} :</span> <Highlighted text={c.closedComment} terms={terms} /></p>
               )}

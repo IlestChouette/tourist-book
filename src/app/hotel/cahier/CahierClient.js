@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { addDays, formatDayLong } from "@/lib/hotelTime";
 import { Icon } from "./CahierIcons";
 import NewConsigne from "./NewConsigne";
+import EditConsigne from "./EditConsigne";
+import EditHistory from "./EditHistory";
 import PinPad from "./PinPad";
 import SearchPanel from "./SearchPanel";
 import { TONES, typeOf } from "@/lib/hotelTheme";
@@ -27,6 +29,7 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
   const [day, setDay] = useState(today);
   const [items, setItems] = useState(initialItems);
   const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState(null); // la consigne en cours de modification
   const [sheet, setSheet] = useState(null); // { id, action, until? }
   const [sheetError, setSheetError] = useState("");
   const [comment, setComment] = useState("");
@@ -145,9 +148,11 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
             {c.carried ? `Pas fait depuis ${c.daysOpen} jour${c.daysOpen > 1 ? "s" : ""}` : "Urgent"}
           </span>
         )}
+        {c.editedAt && <span className="rounded-xl bg-ink/[0.08] px-3 py-1 text-sm font-bold text-ink/70">Modifiée à {timeFmt.format(new Date(c.editedAt))}</span>}
         <span className="ml-auto text-sm tabular-nums text-ink/60">{timeFmt.format(new Date(c.createdAt))}</span>
       </div>
       <p className="mt-3 whitespace-pre-wrap break-words text-lg leading-snug text-ink">{c.body}</p>
+      {showNames && c.editedAt && <EditHistory id={c.id} tags={tags} />}
       {c.tagIds.length > 0 && (
         <p className="mt-2 text-sm text-ink/60">Pour : {c.tagIds.map((id) => tagName[id]).filter(Boolean).join(", ")}</p>
       )}
@@ -192,6 +197,9 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
         )}
         {c.done && isManager && (
           <button type="button" onClick={() => request(c.id, "reopen")} className={`${bigBtn} border-2 border-sand-dim text-ink/70`}>Remettre à faire</button>
+        )}
+        {(!c.done || isManager) && (
+          <button type="button" onClick={() => setEditing(c)} className={`${bigBtn} border-2 border-sand-dim text-ink/70`}>Modifier</button>
         )}
         {c.pinned ? (
           <button type="button" onClick={() => request(c.id, "unpin")} className={`${bigBtn} border-2 border-sand-dim text-ink/70`}>Ne plus garder en haut</button>
@@ -360,6 +368,19 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
           defaultServiceIds={service ? [service.id] : []}
           onClose={() => setCreating(false)}
           onCreated={() => { setCreating(false); setNotice("C'est enregistré !"); load(day); }}
+        />
+      )}
+
+      {editing && (
+        <EditConsigne
+          c={editing}
+          tags={tags}
+          places={places}
+          types={types}
+          isManager={isManager}
+          managerHasPin={managerHasPin}
+          onClose={() => setEditing(null)}
+          onSaved={(r) => { setEditing(null); setNotice(r?.unchanged ? "Rien n'a changé." : "Modification enregistrée."); load(day); }}
         />
       )}
 
