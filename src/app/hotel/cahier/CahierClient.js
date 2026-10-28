@@ -32,6 +32,7 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
   const [day, setDay] = useState(today);
   const [items, setItems] = useState(initialItems);
   const [creating, setCreating] = useState(false);
+  const [suiteOf, setSuiteOf] = useState(null); // la consigne à laquelle on ajoute une suite
   const [editing, setEditing] = useState(null); // la consigne en cours de modification
   const [sheet, setSheet] = useState(null); // { id, action, until? }
   const [sheetError, setSheetError] = useState("");
@@ -154,7 +155,9 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
         {c.editedAt && <span className="rounded-xl bg-ink/[0.08] px-3 py-1 text-sm font-bold text-ink/70">Modifiée le {stamp(c.editedAt)}</span>}
         <span className="ml-auto text-sm tabular-nums text-ink/60">Écrite le {stamp(c.createdAt)}</span>
       </div>
+      {c.parentBody && <p className="mt-3 rounded-xl bg-ink/[0.06] px-3 py-2 text-base text-ink/70">↪ Suite de : {c.parentBody}</p>}
       <p className="mt-3 whitespace-pre-wrap break-words text-lg leading-snug text-ink">{c.body}</p>
+      {c.suitesCount > 0 && <p className="mt-2 text-base font-bold text-aqua-deep">{c.suitesCount} suite{c.suitesCount > 1 ? "s" : ""} ajoutée{c.suitesCount > 1 ? "s" : ""} plus bas ou dans les jours suivants</p>}
       {showNames && c.editedAt && <EditHistory id={c.id} tags={tags} />}
       {c.tagIds.length > 0 && (
         <p className="mt-2 text-sm text-ink/60">Pour : {c.tagIds.map((id) => tagName[id]).filter(Boolean).join(", ")}</p>
@@ -200,6 +203,9 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
         )}
         {c.done && isManager && (
           <button type="button" onClick={() => request(c.id, "reopen")} className={`${bigBtn} border-2 border-sand-dim text-ink/70`}>Remettre à faire</button>
+        )}
+        {!c.parentId && (
+          <button type="button" onClick={() => setSuiteOf(c)} className={`${bigBtn} border-2 border-sand-dim text-ink/70`}>Ajouter une suite</button>
         )}
         {(!c.done || isManager) && (
           <button type="button" onClick={() => setEditing(c)} className={`${bigBtn} border-2 border-sand-dim text-ink/70`}>Modifier</button>
@@ -358,8 +364,9 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
         )}
       </section>
 
-      {creating && (
+      {(creating || suiteOf) && (
         <NewConsigne
+          parent={suiteOf}
           isManager={isManager}
           managerHasPin={managerHasPin}
           today={today}
@@ -369,8 +376,8 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
           types={types}
           services={allServices}
           defaultServiceIds={service ? [service.id] : []}
-          onClose={() => setCreating(false)}
-          onCreated={() => { setCreating(false); setNotice("C'est enregistré !"); load(day); }}
+          onClose={() => { setCreating(false); setSuiteOf(null); }}
+          onCreated={() => { setCreating(false); setSuiteOf(null); setNotice("C'est enregistré !"); load(day); }}
         />
       )}
 

@@ -40,11 +40,17 @@ export async function POST(request) {
   }
 
   const { admin, hotel } = ctx;
+  // Suite d'une consigne : même lieu, même service que la consigne de départ.
+  let parent = null;
+  if (b.parentId) {
+    ({ data: parent } = await admin.from("consignes").select("id, place_id, service_id, parent_id").eq("hotel_id", hotel.id).eq("id", String(b.parentId)).maybeSingle());
+    if (!parent) return NextResponse.json({ error: "Consigne d'origine introuvable." }, { status: 404 });
+  }
   const { data: place } = await admin
     .from("hotel_places")
     .select("id, name")
     .eq("hotel_id", hotel.id)
-    .eq("id", b.placeId ?? "")
+    .eq("id", parent ? parent.place_id ?? "" : b.placeId ?? "")
     .maybeSingle();
   if (!place) return NextResponse.json({ error: "Choisissez une chambre ou un lieu." }, { status: 400 });
 
@@ -71,7 +77,7 @@ export async function POST(request) {
   let targets = [];
   if (services.length > 0) {
     const asked = Array.isArray(b.serviceIds) ? b.serviceIds : [];
-    targets = services.filter((s) => asked.includes(s.id)).map((s) => s.id);
+    targets = parent ? (parent.service_id ? [parent.service_id] : []) : services.filter((s) => asked.includes(s.id)).map((s) => s.id);
     if (targets.length === 0 && ctx.service) targets = [ctx.service.id];
     if (targets.length === 0) {
       return NextResponse.json({ error: "Choisissez pour quel service est cette consigne." }, { status: 400 });
@@ -103,6 +109,8 @@ export async function POST(request) {
     priority: Boolean(b.priority),
     created_by: actor.staff.id,
     created_by_name: actor.staff.name,
+    // Une suite se rattache toujours à la consigne d'origine, pas à une autre suite.
+    ...(parent ? { parent_id: parent.parent_id ?? parent.id } : {}),
     pinned: Boolean(pinnedUntil),
     pinned_until: pinnedUntil,
   };

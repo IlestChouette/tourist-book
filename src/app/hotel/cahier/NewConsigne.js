@@ -20,18 +20,18 @@ const SHIFTS = [
 // Une seule question par écran, des gros boutons, des mots simples : on peut
 // y arriver sans jamais avoir utilisé un ordinateur. Aucune étape n'oblige à
 // comprendre ce qui précède ou ce qui suit.
-export default function NewConsigne({ isManager, managerHasPin = false, today, defaultDay, tags, places, types, services = [], defaultServiceIds = [], onClose, onCreated }) {
+export default function NewConsigne({ isManager, managerHasPin = false, today, defaultDay, tags, places, types, services = [], defaultServiceIds = [], parent = null, onClose, onCreated }) {
   // Hôtel avec des services : une étape « pour quel service ? » avant « pour qui ? ».
   const steps = [
     "kind",
-    "place",
+    ...(parent ? [] : ["place"]),
     "message",
-    ...(services.length > 0 ? ["service"] : []),
+    ...(services.length > 0 && !parent ? ["service"] : []),
     "who",
     ...(isManager && !managerHasPin ? [] : ["pin"]),
   ];
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState({ requireAll: false, serviceIds: defaultServiceIds, kind: null, typeId: null, placeName: "", body: "", shift: "", roleIds: [], urgent: false, day: defaultDay, pinDays: 0 });
+  const [form, setForm] = useState({ requireAll: false, serviceIds: defaultServiceIds, kind: null, typeId: null, placeName: parent?.placeName ?? "", body: "", shift: "", roleIds: [], urgent: false, day: defaultDay, pinDays: 0 });
   const [showMore, setShowMore] = useState(false);
   const [showRoles, setShowRoles] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -75,7 +75,8 @@ export default function NewConsigne({ isManager, managerHasPin = false, today, d
         body: form.body.trim(),
         kind: form.kind,
         typeId: form.typeId && form.typeId !== form.kind ? form.typeId : undefined,
-        placeId: place.id,
+        placeId: parent ? undefined : place.id,
+        parentId: parent?.id,
         serviceIds: services.length > 0 ? form.serviceIds : undefined,
         requireAll: isManager && form.requireAll ? true : undefined,
         tagIds,
@@ -181,7 +182,8 @@ export default function NewConsigne({ isManager, managerHasPin = false, today, d
 
           {!saved && current === "message" && (
             <>
-              <h2 className="text-3xl font-bold text-ink">Que faut-il savoir ?</h2>
+              <h2 className="text-3xl font-bold text-ink">{parent ? "Que s'est-il passé depuis ?" : "Que faut-il savoir ?"}</h2>
+              {parent && <p className="mt-2 rounded-xl bg-ink/[0.06] px-4 py-2 text-base text-ink/70">Suite de la consigne · {parent.placeName} : {parent.body.slice(0, 120)}</p>}
               <p className="mt-2 text-xl text-ink/70">Écrivez comme si vous parliez à un collègue.</p>
               <textarea
                 autoFocus

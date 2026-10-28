@@ -144,6 +144,14 @@ export async function loadDay(hotelId, day, showNames, scope = {}) {
   const { data } = await query.order("created_at", { ascending: true });
   const progress = await ackProgress(admin, hotelId, data ?? []);
 
+  // Fils de suivi : texte de la consigne d'origine, et nombre de suites par consigne.
+  const parentIds = [...new Set((data ?? []).map((c) => c.parent_id).filter(Boolean))];
+  const { data: parents } = parentIds.length ? await admin.from("consignes").select("id, body, day").in("id", parentIds) : { data: [] };
+  const parentOf = new Map((parents ?? []).map((p) => [p.id, p]));
+  const { data: kids } = (data ?? []).length ? await admin.from("consignes").select("parent_id").eq("hotel_id", hotelId).in("parent_id", (data ?? []).map((c) => c.id)) : { data: [] };
+  const suites = new Map();
+  for (const k of kids ?? []) suites.set(k.parent_id, (suites.get(k.parent_id) ?? 0) + 1);
+
   const items = [];
   for (const c of data ?? []) {
     const closedDay = c.closed_at ? parisDate(new Date(c.closed_at)) : null;
@@ -177,6 +185,9 @@ export async function loadDay(hotelId, day, showNames, scope = {}) {
       requireAll: Boolean(c.require_all),
       closedComment: done ? c.closed_comment ?? null : null,
       editedAt: c.edited_at ?? null,
+      parentId: c.parent_id ?? null,
+      parentBody: c.parent_id ? parentOf.get(c.parent_id)?.body?.slice(0, 120) ?? null : null,
+      suitesCount: suites.get(c.id) ?? 0,
       ack: pr ? { expected: pr.expected, acked: pr.acked, comments: (pr.comments ?? []).map((x) => (showNames ? x : { comment: x.comment })), ...(showNames ? { ackNames: pr.ackNames, missingNames: pr.missingNames } : {}) } : null,
       ...(showNames ? { createdByName: c.created_by_name, closedByName: done ? c.closed_by_name : null } : {}),
     });
