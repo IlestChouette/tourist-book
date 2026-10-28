@@ -85,9 +85,14 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
   }, [notice]);
 
   const scoped = team ? items.filter((i) => i.tagIds.some((id) => tagName[id] === team)) : items;
+  // Les suites s'affichent dans la carte de la consigne d'origine (si elle est sur la page).
+  const scopedIds = new Set(scoped.map((i) => i.id));
+  const kidsOf = new Map();
+  for (const i of scoped) if (i.parentId && scopedIds.has(i.parentId)) kidsOf.set(i.parentId, [...(kidsOf.get(i.parentId) ?? []), i]);
+  const top = scoped.filter((i) => !(i.parentId && scopedIds.has(i.parentId)));
   // Une consigne importante déjà terminée n'a plus à rester en haut de page.
-  const pinned = scoped.filter((i) => i.pinned && !i.done);
-  const rest = scoped.filter((i) => !(i.pinned && !i.done));
+  const pinned = top.filter((i) => i.pinned && !i.done);
+  const rest = top.filter((i) => !(i.pinned && !i.done));
   const urgent = (i) => i.priority || i.carried;
   const pending = rest.filter((i) => !i.done).sort((a, b) => Number(urgent(b)) - Number(urgent(a)) || a.createdAt.localeCompare(b.createdAt));
   const done = rest.filter((i) => i.done);
@@ -157,7 +162,25 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
       </div>
       {c.parentBody && <p className="mt-3 rounded-xl bg-ink/[0.06] px-3 py-2 text-base text-ink/70">↪ Suite de : {c.parentBody}</p>}
       <p className="mt-3 whitespace-pre-wrap break-words text-lg leading-snug text-ink">{c.body}</p>
-      {c.suitesCount > 0 && <p className="mt-2 text-base font-bold text-aqua-deep">{c.suitesCount} suite{c.suitesCount > 1 ? "s" : ""} ajoutée{c.suitesCount > 1 ? "s" : ""} plus bas ou dans les jours suivants</p>}
+      {(kidsOf.get(c.id)?.length ?? 0) > 0 && (
+        <ul className="mt-3 grid gap-2 border-l-4 border-aqua-deep pl-3">
+          {kidsOf.get(c.id).map((k) => (
+            <li key={k.id} className="rounded-xl bg-ink/[0.06] p-3">
+              <p className="text-sm tabular-nums text-ink/60">Suite · écrite le {stamp(k.createdAt)}{showNames && k.createdByName ? ` par ${k.createdByName}` : ""}</p>
+              <p className="mt-1 whitespace-pre-wrap break-words text-base leading-snug text-ink">{k.body}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2 print:hidden">
+                {k.done ? (
+                  <span className="flex items-center gap-2 text-base font-bold text-aqua-deep"><Icon name="check" className="h-5 w-5" /> Terminé{k.closedAt ? ` le ${stamp(k.closedAt)}` : ""}</span>
+                ) : (
+                  <button type="button" onClick={() => request(k.id, k.requireAll && !isManager ? "ack" : "close")} className={`${bigBtn} bg-aqua-deep text-sand-card hover:bg-aqua-deep/90`}><Icon name="check" className="h-5 w-5" /> C'est fait</button>
+                )}
+                {(!k.done || isManager) && <button type="button" onClick={() => setEditing(k)} className={`${bigBtn} border-2 border-sand-dim text-ink/70`}>Modifier</button>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {c.suitesCount > (kidsOf.get(c.id)?.length ?? 0) && <p className="mt-2 text-base text-ink/60">{c.suitesCount - (kidsOf.get(c.id)?.length ?? 0)} autre{c.suitesCount - (kidsOf.get(c.id)?.length ?? 0) > 1 ? "s" : ""} suite{c.suitesCount - (kidsOf.get(c.id)?.length ?? 0) > 1 ? "s" : ""} sur d'autres jours</p>}
       {showNames && c.editedAt && <EditHistory id={c.id} tags={tags} />}
       {c.tagIds.length > 0 && (
         <p className="mt-2 text-sm text-ink/60">Pour : {c.tagIds.map((id) => tagName[id]).filter(Boolean).join(", ")}</p>
