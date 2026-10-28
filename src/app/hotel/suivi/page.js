@@ -30,7 +30,7 @@ export default async function SuiviPage() {
         subtitle={supervisor ? "Vos services : qui a écrit quoi, pour qui, et qui l'a fait." : "Tous les services : qui a écrit quoi, pour qui, et qui l'a fait."}
         links={
           supervisor
-            ? [{ href: "/hotel/cahier", label: "Cahier" }]
+            ? [{ href: "/hotel/cahier", label: "Cahier" }, { href: "/hotel/statistiques", label: "Statistiques" }]
             : [
                 { href: "/hotel/cahier", label: "Cahier" },
                 { href: "/hotel/statistiques", label: "Statistiques" },

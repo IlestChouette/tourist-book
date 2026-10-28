@@ -36,6 +36,7 @@ export default function SupervisorBar({ active, name }) {
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-6 pt-4 print:hidden">
         <span className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-sand">Vue responsable · {name}</span>
         <Link href="/hotel/suivi" className={chip}>Suivi de mon service</Link>
+        <Link href="/hotel/statistiques" className={chip}>Statistiques de mon service</Link>
         <button type="button" onClick={lock} className={chip}>Quitter</button>
       </div>
     );

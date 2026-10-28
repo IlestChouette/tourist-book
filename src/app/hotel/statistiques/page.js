@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { HotelFooter, HotelHeader } from "@/components/HotelShell";
 import { getHotelContext } from "@/lib/hotelAuth";
+import { hotelHasAccess } from "@/lib/hotelBilling";
 import { loadMeta } from "@/lib/hotelData";
 import { RECURRENCE_DAYS, computeStats, parseStatsParams, selectDetail, statsHref, withRecurrence } from "@/lib/hotelStats";
 import { problemTopics } from "@/lib/hotelTopics";
@@ -156,19 +157,25 @@ function Heatmap({ heat }) {
 export default async function StatistiquesPage({ searchParams }) {
   const ctx = await getHotelContext();
   if (!ctx) redirect("/hotel/connexion");
-  if (ctx.mode !== "manager") redirect("/hotel/cahier");
+  // Un responsable (code personnel) voit les statistiques de ses services seulement.
+  const supervisor = ctx.mode === "station" ? ctx.supervisor : null;
+  if (ctx.mode !== "manager" && !supervisor) redirect("/hotel/cahier");
+  if (supervisor && !hotelHasAccess(ctx.hotel)) redirect("/hotel/cahier");
+  const scope = (q) => (supervisor ? q.in("service_id", supervisor.serviceIds) : q);
 
   const today = parisDate();
   const f = parseStatsParams(await searchParams, today);
   const [{ data }, meta] = await Promise.all([
-    ctx.admin
-      .from("consignes")
-      .select("id, day, kind, body, place_name, tag_ids, priority, created_at, closed_at")
-      .eq("hotel_id", ctx.hotel.id)
-      .gte("day", f.compare ? f.prevFrom : f.from)
-      .lte("day", f.to)
-      .order("created_at", { ascending: true })
-      .limit(20000),
+    scope(
+      ctx.admin
+        .from("consignes")
+        .select("id, day, kind, body, place_name, tag_ids, priority, created_at, closed_at")
+        .eq("hotel_id", ctx.hotel.id)
+        .gte("day", f.compare ? f.prevFrom : f.from)
+        .lte("day", f.to)
+        .order("created_at", { ascending: true })
+        .limit(20000),
+    ),
     loadMeta(ctx.hotel.id),
   ]);
   const s = computeStats(data ?? [], f, meta.tags);
@@ -181,14 +188,16 @@ export default async function StatistiquesPage({ searchParams }) {
     const places = [...new Set(picked.list.map((c) => c.place_name))].slice(0, 200);
     const since = addDays(f.from < addDays(today, -365) ? f.from : addDays(today, -365), -RECURRENCE_DAYS);
     const { data: history } = places.length
-      ? await ctx.admin
-          .from("consignes")
-          .select("id, day, kind, place_name, tag_ids, created_at")
-          .eq("hotel_id", ctx.hotel.id)
-          .in("kind", ["probleme", "plainte"])
-          .in("place_name", places)
-          .gte("day", since)
-          .limit(20000)
+      ? await scope(
+          ctx.admin
+            .from("consignes")
+            .select("id, day, kind, place_name, tag_ids, created_at")
+            .eq("hotel_id", ctx.hotel.id)
+            .in("kind", ["probleme", "plainte"])
+            .in("place_name", places)
+            .gte("day", since)
+            .limit(20000),
+        )
       : { data: [] };
     detail = { ...picked, ...withRecurrence(picked, history ?? []), history: history ?? [] };
   }
@@ -201,7 +210,7 @@ export default async function StatistiquesPage({ searchParams }) {
 
   return (
     <main className="flex-1 bg-sand-card/50">
-      <HotelHeader hotel={ctx.hotel} logout title="Statistiques" links={[{ href: "/hotel/cahier", label: "Cahier" }, { href: "/hotel/suivi", label: "Suivi" }, { href: "/hotel/gestion", label: "Gestion" }]} />
+      <HotelHeader hotel={ctx.hotel} logout={!supervisor} title="Statistiques" subtitle={supervisor ? "Vos services uniquement." : undefined} links={supervisor ? [{ href: "/hotel/cahier", label: "Cahier" }, { href: "/hotel/suivi", label: "Suivi" }] : [{ href: "/hotel/cahier", label: "Cahier" }, { href: "/hotel/suivi", label: "Suivi" }, { href: "/hotel/gestion", label: "Gestion" }]} />
       <section className="mx-auto max-w-6xl px-6 py-8">
         <StatsFilters params={f} tags={meta.tags} places={meta.places} today={today} />
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -209,14 +218,14 @@ export default async function StatistiquesPage({ searchParams }) {
           Consignes {period}
           {f.compare && <> · comparées au {formatDayLong(f.prevFrom)} → {formatDayLong(f.prevTo)}</>}
         </p>
-        <div className="flex flex-wrap gap-2 print:hidden">
+        {!supervisor && <div className="flex flex-wrap gap-2 print:hidden">
           <a href={`/api/hotel/stats-summary-csv?${exportQuery}`} className={exportBtn}>
             Télécharger le résumé (Excel)
           </a>
           <a href={`/api/hotel/stats-csv?${exportQuery}`} className={exportBtn}>
             Télécharger toutes les consignes (Excel)
           </a>
-        </div>
+        </div>}
         </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
