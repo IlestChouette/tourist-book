@@ -1,5 +1,6 @@
 import Link from "next/link";
 import HotelLogoutButton from "./HotelLogoutButton";
+import HotelSwitcher from "./HotelSwitcher";
 import { themeById } from "@/lib/hotelTheme";
 
 const linkClass =
@@ -29,6 +30,7 @@ export function HotelHeader({ hotel, title, subtitle, links = [], logout = false
               {l.label}
             </Link>
           ))}
+          {logout && <HotelSwitcher />}
           {logout && <HotelLogoutButton />}
         </nav>
       </div>

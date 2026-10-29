@@ -8,6 +8,8 @@ export const STATION_COOKIE = "tb_hotel_station";
 // il est revérifié contre les services réellement activés sur le poste).
 export const SERVICE_COOKIE = "tb_hotel_service";
 export const MAX_SERVICES_PER_DEVICE = 3;
+// Hôtel affiché par un manager qui en gère plusieurs (id, revérifié : il doit lui appartenir).
+export const HOTEL_COOKIE = "tb_hotel_active";
 // Vue « responsable » : cookie signé (personne + expiration), revérifié en base à chaque requête.
 export const SUPERVISOR_COOKIE = "tb_hotel_sup";
 export const SUPERVISOR_HOURS = 8;
@@ -104,8 +106,12 @@ export async function getHotelContext() {
     data: { user },
   } = await supabase.auth.getUser();
   if (user) {
-    const { data: hotel } = await admin.from("hotels").select("*").eq("owner_id", user.id).maybeSingle();
-    if (hotel) return { mode: "manager", hotel, user, service: null, services: null, admin };
+    const { data: owned } = await admin.from("hotels").select("*").eq("owner_id", user.id).order("created_at", { ascending: true });
+    if (owned?.length) {
+      const wanted = (await cookies()).get(HOTEL_COOKIE)?.value;
+      const hotel = owned.find((h) => h.id === wanted) ?? owned[0];
+      return { mode: "manager", hotel, hotels: owned.map((h) => ({ id: h.id, name: h.name })), user, service: null, services: null, admin };
+    }
   }
 
   const jar = await cookies();

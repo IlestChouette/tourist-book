@@ -10,6 +10,7 @@ import { cleanServices, servicesFromTags, isCustomServiceId } from "@/lib/hotelS
 import { createClient } from "@/lib/supabase/server";
 import CreateHotel from "./CreateHotel";
 import GestionClient from "./GestionClient";
+import AddHotel from "./AddHotel";
 
 export const metadata = { title: "Gestion du cahier", robots: { index: false, follow: false } };
 
@@ -96,6 +97,7 @@ const keepsFallback = hotel.billing_exempt === true || ["active", "past_due"].in
           servicesInfo={servicesManaged ? { selected: selectedServices, custom: hotelServices.filter((s) => isCustomServiceId(s.key)).map((s) => ({ id: s.key, name: s.name })) } : null}
           lostFound={hotel.lost_found_enabled === true ? { token: hotel.lost_found_token ?? null } : null}
         />
+        <AddHotel />
       </section>
       <HotelFooter />
     </main>
