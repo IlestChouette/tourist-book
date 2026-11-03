@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import Flowchart from "./Flowchart";
 import { Notes, PriceCalc } from "./Interactive";
 
@@ -91,6 +92,10 @@ export default async function CahierDemoPage() {
   const { data: me } = await supabase.from("hosts").select("is_admin").eq("id", user.id).single();
   if (!me?.is_admin) notFound();
 
+  // La vidéo vit dans un bucket privé : un lien signé d'une heure, généré seulement pour l'administrateur connecté.
+  const { data: signed } = await createAdminClient().storage.from("pitch").createSignedUrl("cahier-hotels.mp4", 3600);
+  const videoUrl = signed?.signedUrl ?? null;
+
   return (
     <main className="flex-1 bg-sand text-ink">
       <header className="sticky top-0 z-30 border-b border-sand-dim bg-sand/95 backdrop-blur print:hidden">
@@ -106,10 +111,11 @@ export default async function CahierDemoPage() {
       </header>
 
       {/* 1. Accroche */}
-      <section className="bg-[#2f7d76] px-6 py-20 text-[#f7f1e4] sm:py-28">
-        <div className="mx-auto max-w-6xl">
+      <section className="bg-[#2f7d76] px-6 py-16 text-[#f7f1e4] sm:py-24">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
+         <div>
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#f7f1e4]/80">Le cahier de consignes numérique pour hôtels</p>
-          <h1 className="mt-5 max-w-4xl font-display italic text-5xl leading-[1.08] sm:text-7xl">Chaque équipe sait ce qu&apos;elle doit faire, à chaque relève.</h1>
+          <h1 className="mt-5 max-w-4xl font-display italic text-5xl leading-[1.08] sm:text-6xl">Chaque équipe sait ce qu&apos;elle doit faire, à chaque relève.</h1>
           <p className="mt-8 max-w-3xl text-xl leading-relaxed text-[#f7f1e4]/90 sm:text-2xl">Un cahier par service, tout l&apos;hôtel au même niveau d&apos;information, et une direction qui voit ce qui se passe.</p>
           <ul className="mt-10 grid max-w-3xl gap-3 text-lg sm:text-xl">
             {["Ce que dit l'équipe du matin, l'équipe du soir le sait.", "Une consigne importante est suivie jusqu'au bout.", "La direction voit, comprend et décide avec des faits."].map((t) => (
@@ -120,6 +126,15 @@ export default async function CahierDemoPage() {
             <a href="#comment" className="rounded-xl bg-terracotta px-8 py-4 text-lg font-bold text-ink hover:bg-terracotta-deep">Voir comment ça marche ↓</a>
             <span className="rounded-xl border border-[#f7f1e4]/50 px-6 py-4 text-lg font-bold">15 € par service et par mois</span>
           </div>
+         </div>
+         {videoUrl && (
+          <figure className="w-full">
+            <video controls playsInline preload="metadata" className="aspect-video w-full rounded-2xl border-2 border-[#f7f1e4]/40 bg-black shadow-2xl">
+              <source src={videoUrl} type="video/mp4" />
+            </video>
+            <figcaption className="mt-3 text-center text-sm font-bold uppercase tracking-[0.2em] text-[#f7f1e4]/80">Le cahier en 1 min 30</figcaption>
+          </figure>
+         )}
         </div>
       </section>
 
