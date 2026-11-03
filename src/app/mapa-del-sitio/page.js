@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cityPages } from "@/data/cityPages";
 import Hero from "@/components/Hero";
 import { getLocale } from "@/lib/i18n/locale";
 
@@ -22,9 +23,7 @@ const content = {
       {
         title: "Guides locaux",
         links: [
-          { href: "/livret-accueil-nice", label: "Nice" },
-          { href: "/livret-accueil-cannes", label: "Cannes" },
-          { href: "/livret-accueil-antibes", label: "Antibes" },
+          ...cityPages.map((c) => ({ href: `/livret-accueil-${c.slug}`, label: c.city })),
         ],
       },
       {
@@ -64,9 +63,7 @@ const content = {
       {
         title: "Local guides",
         links: [
-          { href: "/livret-accueil-nice", label: "Nice" },
-          { href: "/livret-accueil-cannes", label: "Cannes" },
-          { href: "/livret-accueil-antibes", label: "Antibes" },
+          ...cityPages.map((c) => ({ href: `/livret-accueil-${c.slug}`, label: c.city })),
         ],
       },
       {
@@ -106,9 +103,7 @@ const content = {
       {
         title: "Guías locales",
         links: [
-          { href: "/livret-accueil-nice", label: "Nice" },
-          { href: "/livret-accueil-cannes", label: "Cannes" },
-          { href: "/livret-accueil-antibes", label: "Antibes" },
+          ...cityPages.map((c) => ({ href: `/livret-accueil-${c.slug}`, label: c.city })),
         ],
       },
       {

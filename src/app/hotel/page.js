@@ -1,12 +1,12 @@
 import Image from "next/image";
+import ContactButton from "@/components/ContactButton";
 import Link from "next/link";
 import { Icon } from "./cahier/CahierIcons";
 import { EmailMockup, PhoneKind, PhonePin, StatsMockup, TabletMockup } from "./Mockups";
 
 const URL = "https://tourist-book.com/hotel";
 const TITLE = "Cahier de consignes numérique pour hôtels — Tourist Book";
-const DESCRIPTION =
-  "Remplacez le cahier papier de votre réception : consignes qui ne se perdent plus entre deux équipes, validation avec le code de la badgeuse, récap par email à chaque relève et statistiques pour la direction.";
+const DESCRIPTION = "Remplacez le cahier papier de votre réception : consignes validées par code personnel, récap par email à chaque relève, statistiques pour la direction.";
 
 // Le dossier /hotel est en noindex (espace de travail) : cette page de
 // présentation, elle, doit être référencée.
@@ -140,6 +140,7 @@ export default function HotelLandingPage() {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Cta />
+              <ContactButton locale="fr" variant="dark" intent="demo" />
               <a href="#comment" className="text-base font-bold text-[#f7f1e4] underline underline-offset-4 hover:text-white">Voir comment ça marche</a>
             </div>
             <p className="mt-5 text-sm text-[#f7f1e4]/80">Prêt en 10 minutes · Aucune formation nécessaire · Pour les équipes de réception, conciergerie, technique…</p>

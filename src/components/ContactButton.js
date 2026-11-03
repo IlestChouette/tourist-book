@@ -65,8 +65,17 @@ const buttonClasses = {
     "fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-full bg-terracotta px-5 py-3 text-sm font-bold text-ink shadow-lg transition-colors hover:bg-terracotta-deep",
 };
 
-export default function ContactButton({ locale, variant = "outline" }) {
-  const t = content[locale] ?? content.fr;
+// Textes du bouton « démo » : même formulaire, autre intitulé ; le message part préfixé pour être repéré dans l'email.
+const DEMO = {
+  fr: { cta: "Réserver une démo gratuite", title: "Réservez votre démo gratuite", subtitle: "Laissez vos coordonnées : on vous écrit pour fixer un moment qui vous convient. Sans engagement.", submit: "Réserver ma démo →", prefix: "[DÉMO GRATUITE] " },
+  en: { cta: "Book a free demo", title: "Book your free demo", subtitle: "Leave your details and we'll write to you to find a time that suits you. No commitment.", submit: "Book my demo →", prefix: "[FREE DEMO] " },
+  es: { cta: "Reservar una demo gratuita", title: "Reserva tu demo gratuita", subtitle: "Déjanos tus datos y te escribimos para fijar un momento que te venga bien. Sin compromiso.", submit: "Reservar mi demo →", prefix: "[DEMO GRATIS] " },
+};
+
+export default function ContactButton({ locale, variant = "outline", intent = "contact" }) {
+  const base = content[locale] ?? content.fr;
+  const demo = intent === "demo" ? DEMO[locale] ?? DEMO.fr : null;
+  const t = demo ? { ...base, ...demo } : base;
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [status, setStatus] = useState("idle");
@@ -100,7 +109,7 @@ export default function ContactButton({ locale, variant = "outline" }) {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(demo ? { ...form, message: `${demo.prefix}${form.message}`.trim() } : form),
       });
       if (!res.ok) throw new Error("request failed");
       setStatus("success");

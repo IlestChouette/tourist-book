@@ -397,14 +397,9 @@ export default async function Home() {
               >
                 {t.ctaPrimary}
               </Link>
-              <a
-                href="#planes"
-                className="rounded border border-[#f7f1e4]/40 px-6 py-3.5 font-bold text-[#f7f1e4] transition-colors hover:border-[#f7f1e4]"
-              >
-                {t.ctaSecondary}
-              </a>
+              <ContactButton locale={locale} variant="dark" intent="demo" />
             </div>
-            <p className="mx-auto mt-5 max-w-sm text-xs font-bold tracking-wide text-[#f7f1e4]/70 lg:mx-0">{t.priceNote}</p>
+            <p className="mx-auto mt-5 max-w-sm text-xs font-bold tracking-wide text-[#f7f1e4]/70 lg:mx-0">{t.priceNote} · <a href="#planes" className="underline underline-offset-2">{t.ctaSecondary}</a></p>
             <p className="mx-auto mt-3 max-w-md text-sm text-[#f7f1e4]/80 lg:mx-0">✓ {t.legalBadge}</p>
           </div>
 
