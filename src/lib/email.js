@@ -96,6 +96,41 @@ export async function sendContactLeadNotification({ name, phone, email, properti
   return { sent: true };
 }
 
+// Notifie Fernando dès qu'un hôtelier demande une démonstration gratuite depuis /demo-livret.
+export async function sendDemoRequestNotification({ name, phone, email, answers, source }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: "not_configured" };
+
+  const resend = new Resend(apiKey);
+  const lines = [
+    "Demande de démonstration gratuite (livret d'accueil)",
+    "",
+    `Nom : ${name}`,
+    `Téléphone : ${phone}`,
+    `Email : ${email}`,
+    "",
+    ...answers.map((a) => `${a.q} ${a.a}`),
+    ...(source ? ["", `Source : ${source}`] : []),
+  ];
+
+  const subject = `Démo gratuite — ${name}`;
+  const { error } = await resend.emails.send({
+    from: "Tourist Book <notifications@tourist-book.com>",
+    to: CONTACT_NOTIFICATION_EMAIL,
+    replyTo: email,
+    subject,
+    text: lines.join("\n"),
+  });
+
+  if (error) {
+    await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "demo_request_notification", status: "failed", error: error.message });
+    throw new Error(`Resend API error: ${error.name} — ${error.message}`);
+  }
+
+  await logEmail({ recipient: CONTACT_NOTIFICATION_EMAIL, subject, template: "demo_request_notification", status: "sent" });
+  return { sent: true };
+}
+
 // Notifie Fernando dès qu'un hôtelier crée un compte, pour savoir qui vient
 // de s'inscrire sans devoir aller vérifier la page admin.
 export async function sendHostSignupNotification({ name, email, phone }) {
