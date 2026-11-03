@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendDemoRequestNotification } from "@/lib/email";
+import { clientIp, limited } from "@/lib/rateLimit";
 
 // Les trois questions du parcours /demo-livret : on n'accepte que ces réponses.
 const QUESTIONS = [
@@ -13,6 +14,7 @@ const clean = (v, max) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim()
 // Demande de démonstration gratuite : endpoint public, donc entrées bornées. Enregistre dans
 // contact_leads (déjà lu par l'admin) et prévient par email.
 export async function POST(request) {
+  if (limited(`demo:${clientIp(request)}`, 5, 10 * 60_000)) return NextResponse.json({ error: "Trop de demandes. Réessayez dans quelques minutes." }, { status: 429 });
   const b = await request.json().catch(() => ({}));
   if (b.website) return NextResponse.json({ ok: true }, { status: 201 }); // champ-piège : un robot le remplit
 
@@ -25,7 +27,10 @@ export async function POST(request) {
   const source = clean(b.source, 300);
 
   const message = ["Démo gratuite demandée (/demo-livret)", ...answers.map((a) => `${a.q} ${a.a}`), ...(source ? [`Source : ${source}`] : [])].join("\n");
-  const { error } = await createAdminClient().from("contact_leads").insert({
+  const admin = createAdminClient();
+  const { count } = await admin.from("contact_leads").select("id", { count: "exact", head: true }).gt("created_at", new Date(Date.now() - 10 * 60_000).toISOString());
+  if ((count ?? 0) >= 30) return NextResponse.json({ error: "Trop de demandes. Réessayez dans quelques minutes." }, { status: 429 });
+  const { error } = await admin.from("contact_leads").insert({
     name,
     phone,
     email,

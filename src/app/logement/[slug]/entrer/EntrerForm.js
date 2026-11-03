@@ -20,6 +20,7 @@ const content = {
     opening: "Ouverture du livret…",
     errorUnavailable: "Ce livret n'est pas encore disponible — contacte ton hôte.",
     errorCode: "Code incorrect, réessaie.",
+    errorTooMany: "Trop d'essais. Réessaie dans quelques minutes.",
     errorLogin: "Identifiant ou mot de passe incorrect.",
     errorExpired: "Cet accès a expiré. Contacte ton hôte si tu as besoin d'y accéder à nouveau.",
   },
@@ -39,6 +40,7 @@ const content = {
     opening: "Opening the welcome book…",
     errorUnavailable: "This welcome book isn't available yet — contact your host.",
     errorCode: "Incorrect code, try again.",
+    errorTooMany: "Too many attempts. Try again in a few minutes.",
     errorLogin: "Incorrect username or password.",
     errorExpired: "This access has expired. Contact your host if you need access again.",
   },
@@ -58,6 +60,7 @@ const content = {
     opening: "Abriendo el livret…",
     errorUnavailable: "Este livret todavía no está disponible — contacta a tu anfitrión.",
     errorCode: "Código incorrecto, intenta de nuevo.",
+    errorTooMany: "Demasiados intentos. Inténtalo de nuevo en unos minutos.",
     errorLogin: "Usuario o contraseña incorrectos.",
     errorExpired: "Este acceso caducó. Contacta a tu anfitrión si necesitas volver a entrar.",
   },
@@ -108,7 +111,7 @@ export default function EntrerForm({ params, locale = "fr" }) {
       window.location.href = next;
     } else {
       setLoading(false);
-      setError(res.status === 403 ? t.errorUnavailable : t.errorCode);
+      setError(res.status === 403 ? t.errorUnavailable : res.status === 429 ? t.errorTooMany : t.errorCode);
     }
   }
 
@@ -133,6 +136,7 @@ export default function EntrerForm({ params, locale = "fr" }) {
     } else {
       setLoading(false);
       if (res.status === 403) setError(t.errorUnavailable);
+      else if (res.status === 429) setError(t.errorTooMany);
       else if (res.status === 410) setError(t.errorExpired);
       else setError(t.errorLogin);
     }
