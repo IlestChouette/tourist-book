@@ -541,6 +541,12 @@ export default async function AdminPage() {
             {t.searchConsole}
           </a>
           <Link
+            href="/admin/cahier-demo"
+            className="rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4] hover:text-[#2f7d76]"
+          >
+            {locale === "es" ? "Presentación hotel" : locale === "en" ? "Hotel pitch" : "Présentation hôtel"}
+          </Link>
+          <Link
             href="/admin/tableau"
             className="rounded-full bg-[#f7f1e4] px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#2f7d76] transition-colors hover:bg-[#f7f1e4]/80"
           >

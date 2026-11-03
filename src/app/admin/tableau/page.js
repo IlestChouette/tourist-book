@@ -239,7 +239,8 @@ export default async function TableauPage({ searchParams }) {
           <Image src="/tourist book long.png" alt="Tourist Book" width={278} height={106} className="h-14 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] sm:h-20" />
         </Link>
         <span className="rounded-md bg-[#f7f1e4] px-3 py-1.5 text-sm font-bold uppercase tracking-widest text-[#2f7d76]">Admin</span>
-        <Link href="/admin" className="ml-auto rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] hover:bg-[#f7f1e4] hover:text-[#2f7d76]">{L.back}</Link>
+        <Link href="/admin/cahier-demo" className="ml-auto rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] hover:bg-[#f7f1e4] hover:text-[#2f7d76]">Présentation hôtel</Link>
+        <Link href="/admin" className=" rounded-full bg-[#f7f1e4]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#f7f1e4] hover:bg-[#f7f1e4] hover:text-[#2f7d76]">{L.back}</Link>
       </div>
 
       <div className="mx-auto max-w-6xl px-6 py-10">
