@@ -272,6 +272,7 @@ export default async function CahierDemoPage() {
         <div className="mx-auto max-w-4xl">
           <h2 className="font-display italic text-4xl leading-tight sm:text-6xl">Commençons par un service, aujourd&apos;hui.</h2>
           <p className="mx-auto mt-6 max-w-2xl text-xl leading-relaxed text-[#f7f1e4]/90">On configure ensemble le premier cahier, vos équipes l&apos;adoptent dès la prochaine relève, et vous ajoutez les autres services au rythme qui vous convient.</p>
+          <p className="mx-auto mt-4 max-w-2xl text-xl font-bold text-[#f4b393]">Les premiers hôtels sont accompagnés personnellement, avec un support à leurs côtés.</p>
           <p className="mt-8 inline-block rounded-xl border border-[#f7f1e4]/50 px-6 py-4 text-xl font-bold">15 € par service et par mois · résiliable à tout moment</p>
           <p className="mt-10 text-lg text-[#f7f1e4]/80">Tourist Book · Cahier de consignes pour hôtels</p>
         </div>
@@ -286,10 +287,10 @@ export default async function CahierDemoPage() {
             {[
               ["1 · Réciprocité", "Donnez d'abord : « Je configure votre premier service avec vous, ici, maintenant. » La démonstration sur leur propre hôtel est le cadeau."],
               ["2 · Engagement et cohérence", "Obtenez des petits « oui » : « Vous voulez que le soir sache ce que le matin a décidé ? Qu'une consigne importante soit suivie jusqu'au bout ? » Puis : « On commence par un service ? »"],
-              ["3 · Preuve sociale", "Ne pas inventer. Si c'est vrai, dites où il est utilisé (un hôtel pilote, un témoignage). Sinon : « Les hôtels adoptent ce rythme parce que les relèves sont les mêmes partout. » (à adapter)"],
+              ["3 · Preuve sociale", "Ne pas affirmer qu'un hôtel l'utilise tant que ce n'est pas vrai. Dites plutôt : « Rejoignez les premiers hôtels qui adoptent le cahier. » Quand vous aurez un premier hôtel ou un témoignage réel, ajoutez-le ici."],
               ["4 · Autorité", "Parlez le métier : relève, main courante, services, chambres. Insistez sur le suivi horodaté et la conservation de 36 mois avec export. Si vous le souhaitez : le produit est pensé par quelqu'un du terrain hôtelier."],
               ["5 · Sympathie", "Leur logo, leurs couleurs, leurs services : « C'est VOTRE cahier. » Écoutez d'abord comment ils font aujourd'hui, et reprenez leurs mots."],
-              ["6 · Rareté", "Seulement si c'est vrai : accompagnement personnel pour les premiers hôtels, ou un créneau de mise en route cette semaine. Sinon : « Plus tôt on démarre, plus vite les relèves s'en sentent. »"],
+              ["6 · Rareté", "Vrai et à utiliser : « Les premiers hôtels sont accompagnés personnellement, avec un support à leurs côtés. » Ajoutez un créneau de mise en route cette semaine seulement s'il est réel."],
               ["7 · Unité", "« Nous voulons la même chose : des équipes qui travaillent ensemble et des clients bien accueillis. » Parlez de « nos équipes » et de « votre hôtel et nous »."],
             ].map(([t, d]) => (
               <li key={t} className="rounded-lg border border-sand-dim bg-sand p-4"><p className="font-bold text-terracotta-deep">{t}</p><p className="mt-1 text-ink/80">{d}</p></li>
