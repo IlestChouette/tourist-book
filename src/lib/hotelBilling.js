@@ -8,6 +8,7 @@ export const GRACE_DAYS = 7;
 // L'hôtel a-t-il le droit d'utiliser le cahier ? Tant que la migration SQL
 // n'est pas appliquée (colonne absente), personne n'est bloqué.
 export function hotelHasAccess(hotel) {
+  if (hotel?.blocked_at) return false; // bloqué par l'admin (colonne absente avant la migration : pas de blocage)
   if (!hotel || hotel.billing_status === undefined) return true;
   if (hotel.billing_exempt) return true;
   if (hotel.billing_status === "active") return true;
