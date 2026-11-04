@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyPassword } from "@/lib/password";
 import { hasActiveSubscription } from "@/lib/properties";
+import { blocked, clear, clientIp, fail } from "@/lib/rateLimit";
+
+const WINDOW = 10 * 60_000, MAX_FAILS = 10;
 
 export async function POST(request) {
   const { slug, username, password } = await request.json();
@@ -9,6 +12,8 @@ export async function POST(request) {
     return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
   }
 
+  const key = `guest:${clientIp(request)}:${slug}`;
+  if (blocked(key, MAX_FAILS, WINDOW)) return NextResponse.json({ error: "Trop d'essais. Réessayez dans quelques minutes." }, { status: 429 });
   const admin = createAdminClient();
   const { data: property } = await admin.from("properties").select("id, subscription_status").eq("slug", slug).single();
   if (!property) {
@@ -26,6 +31,7 @@ export async function POST(request) {
     .single();
 
   if (!account || !verifyPassword(password, account.password_hash)) {
+    fail(key, WINDOW);
     return NextResponse.json({ error: "Identifiant ou mot de passe incorrect." }, { status: 401 });
   }
 
@@ -40,6 +46,7 @@ export async function POST(request) {
     }
   }
 
+  clear(key);
   const response = NextResponse.json({ ok: true });
   response.cookies.set(`access_${slug}`, "1", {
     httpOnly: true,

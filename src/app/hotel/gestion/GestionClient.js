@@ -9,6 +9,7 @@ import { ThemePicker, TypesEditor } from "./AppearanceEditors";
 import { ServicesEditor } from "./ServicesEditor";
 import ServiceAccounts from "./ServiceAccounts";
 import RetentionNotice from "@/components/RetentionNotice";
+import { isGeneralPlace } from "@/lib/hotelPlaces";
 
 const label = "text-xs font-bold uppercase tracking-wider text-ink/60";
 const btn = "rounded bg-aqua-deep px-4 py-2 text-sm font-bold text-sand-card hover:bg-aqua-deep/90 disabled:opacity-60";
@@ -433,7 +434,9 @@ export default function GestionClient({ userId, hotel, tags, places, staff, stat
           {places.map((p) => (
             <span key={p.id} className="flex items-center gap-1 rounded-full border border-sand-dim bg-sand-card px-3 py-1 text-sm text-ink">
               {p.name}
-              <button type="button" disabled={busy} aria-label={`Supprimer ${p.name}`} onClick={() => call({ action: "delete_place", id: p.id })} className="text-ink/40 hover:text-terracotta-deep">×</button>
+              {!isGeneralPlace(p.name) && (
+                <button type="button" disabled={busy} aria-label={`Supprimer ${p.name}`} onClick={() => call({ action: "delete_place", id: p.id })} className="text-ink/40 hover:text-terracotta-deep">×</button>
+              )}
             </span>
           ))}
           {places.length === 0 && <span className="text-sm text-ink/60">Aucune chambre ni lieu pour l'instant.</span>}

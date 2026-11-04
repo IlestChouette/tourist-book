@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { addDays, formatDayLong } from "@/lib/hotelTime";
 import { Icon } from "./CahierIcons";
 import NewConsigne from "./NewConsigne";
+import EditConsigne from "./EditConsigne";
+import EditHistory from "./EditHistory";
 import PinPad from "./PinPad";
 import SearchPanel from "./SearchPanel";
 import { TONES, typeOf } from "@/lib/hotelTheme";
@@ -11,6 +13,9 @@ import { TONES, typeOf } from "@/lib/hotelTheme";
 const focus = "focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-aqua-deep";
 const bigBtn = `flex min-h-11 items-center justify-center gap-3 rounded-2xl px-4 text-base font-bold transition active:scale-[0.98] ${focus}`;
 const timeFmt = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
+const dayShortFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "Europe/Paris" });
+// « 28 oct. à 14:32 » : la date compte autant que l'heure pour une consigne qui passe d'un jour à l'autre.
+const stamp = (v) => `${dayShortFmt.format(new Date(v))} à ${timeFmt.format(new Date(v))}`;
 
 async function patch(id, body) {
   const res = await fetch(`/api/hotel/consignes/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -27,8 +32,11 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
   const [day, setDay] = useState(today);
   const [items, setItems] = useState(initialItems);
   const [creating, setCreating] = useState(false);
+  const [suiteOf, setSuiteOf] = useState(null); // la consigne à laquelle on ajoute une suite
+  const [editing, setEditing] = useState(null); // la consigne en cours de modification
   const [sheet, setSheet] = useState(null); // { id, action, until? }
   const [sheetError, setSheetError] = useState("");
+  const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   const [showDone, setShowDone] = useState(false);
   const [showTools, setShowTools] = useState(false);
@@ -77,9 +85,14 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
   }, [notice]);
 
   const scoped = team ? items.filter((i) => i.tagIds.some((id) => tagName[id] === team)) : items;
+  // Les suites s'affichent dans la carte de la consigne d'origine (si elle est sur la page).
+  const scopedIds = new Set(scoped.map((i) => i.id));
+  const kidsOf = new Map();
+  for (const i of scoped) if (i.parentId && scopedIds.has(i.parentId)) kidsOf.set(i.parentId, [...(kidsOf.get(i.parentId) ?? []), i]);
+  const top = scoped.filter((i) => !(i.parentId && scopedIds.has(i.parentId)));
   // Une consigne importante déjà terminée n'a plus à rester en haut de page.
-  const pinned = scoped.filter((i) => i.pinned && !i.done);
-  const rest = scoped.filter((i) => !(i.pinned && !i.done));
+  const pinned = top.filter((i) => i.pinned && !i.done);
+  const rest = top.filter((i) => !(i.pinned && !i.done));
   const urgent = (i) => i.priority || i.carried;
   const pending = rest.filter((i) => !i.done).sort((a, b) => Number(urgent(b)) - Number(urgent(a)) || a.createdAt.localeCompare(b.createdAt));
   const done = rest.filter((i) => i.done);
@@ -109,11 +122,12 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
       return;
     }
     setSheetError("");
+    setComment("");
     setSheet({ id, action, ...extra });
   }
 
   async function confirmWithPin(pin) {
-    const result = await run(sheet.id, { action: sheet.action, until: sheet.until, pin });
+    const result = await run(sheet.id, { action: sheet.action, until: sheet.until, pin, ...(comment.trim() && (sheet.action === "close" || sheet.action === "ack") ? { comment: comment.trim() } : {}) });
     if (result) {
       if (sheet.action === "ack") {
         setNotice(result.already ? "Vous aviez déjà validé cette consigne." : result.complete ? "Merci ! Tout le service a validé." : "Merci, votre validation est enregistrée.");
@@ -143,9 +157,31 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
             {c.carried ? `Pas fait depuis ${c.daysOpen} jour${c.daysOpen > 1 ? "s" : ""}` : "Urgent"}
           </span>
         )}
-        <span className="ml-auto text-sm tabular-nums text-ink/60">{timeFmt.format(new Date(c.createdAt))}</span>
+        {c.editedAt && <span className="rounded-xl bg-ink/[0.08] px-3 py-1 text-sm font-bold text-ink/70">Modifiée le {stamp(c.editedAt)}</span>}
+        <span className="ml-auto text-sm tabular-nums text-ink/60">Écrite le {stamp(c.createdAt)}</span>
       </div>
+      {c.parentBody && <p className="mt-3 rounded-xl bg-ink/[0.06] px-3 py-2 text-base text-ink/70">↪ Suite de : {c.parentBody}</p>}
       <p className="mt-3 whitespace-pre-wrap break-words text-lg leading-snug text-ink">{c.body}</p>
+      {(kidsOf.get(c.id)?.length ?? 0) > 0 && (
+        <ul className="mt-3 grid gap-2 border-l-4 border-aqua-deep pl-3">
+          {kidsOf.get(c.id).map((k) => (
+            <li key={k.id} className="rounded-xl bg-ink/[0.06] p-3">
+              <p className="text-sm tabular-nums text-ink/60">Suite · écrite le {stamp(k.createdAt)}{showNames && k.createdByName ? ` par ${k.createdByName}` : ""}</p>
+              <p className="mt-1 whitespace-pre-wrap break-words text-base leading-snug text-ink">{k.body}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2 print:hidden">
+                {k.done ? (
+                  <span className="flex items-center gap-2 text-base font-bold text-aqua-deep"><Icon name="check" className="h-5 w-5" /> Terminé{k.closedAt ? ` le ${stamp(k.closedAt)}` : ""}</span>
+                ) : (
+                  <button type="button" onClick={() => request(k.id, k.requireAll && !isManager ? "ack" : "close")} className={`${bigBtn} bg-aqua-deep text-sand-card hover:bg-aqua-deep/90`}><Icon name="check" className="h-5 w-5" /> C'est fait</button>
+                )}
+                {(!k.done || isManager) && <button type="button" onClick={() => setEditing(k)} className={`${bigBtn} border-2 border-sand-dim text-ink/70`}>Modifier</button>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {c.suitesCount > (kidsOf.get(c.id)?.length ?? 0) && <p className="mt-2 text-base text-ink/60">{c.suitesCount - (kidsOf.get(c.id)?.length ?? 0)} autre{c.suitesCount - (kidsOf.get(c.id)?.length ?? 0) > 1 ? "s" : ""} suite{c.suitesCount - (kidsOf.get(c.id)?.length ?? 0) > 1 ? "s" : ""} sur d'autres jours</p>}
+      {showNames && c.editedAt && <EditHistory id={c.id} tags={tags} />}
       {c.tagIds.length > 0 && (
         <p className="mt-2 text-sm text-ink/60">Pour : {c.tagIds.map((id) => tagName[id]).filter(Boolean).join(", ")}</p>
       )}
@@ -155,10 +191,22 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
           {c.closedByName ? ` · terminé par ${c.closedByName}` : ""}
         </p>
       )}
+      {c.closedComment && (
+        <p className="mt-2 rounded-xl bg-ink/[0.06] px-4 py-2 text-base text-ink">
+          <span className="font-bold">Précision{showNames && c.closedByName ? ` de ${c.closedByName}` : ""} :</span> {c.closedComment}
+        </p>
+      )}
       {c.requireAll && c.ack && (
         <div className="mt-3 rounded-xl bg-ink/[0.06] px-4 py-3 text-base text-ink">
           <p className="font-bold">À valider par chaque personne · {c.ack.acked} sur {c.ack.expected} ont validé</p>
           {showNames && c.ack.missingNames?.length > 0 && <p className="mt-1 text-ink/70">Il manque : {c.ack.missingNames.join(", ")}</p>}
+          {c.ack.comments?.length > 0 && (
+            <ul className="mt-2 grid gap-1 text-ink/80">
+              {c.ack.comments.map((x, i) => (
+                <li key={i}><span className="font-bold">Précision{x.name ? ` de ${x.name}` : ""} :</span> {x.comment}</li>
+              ))}
+            </ul>
+          )}
           {showNames && c.ack.ackNames?.length > 0 && <p className="mt-1 text-ink/70">Ont validé : {c.ack.ackNames.join(", ")}</p>}
         </div>
       )}
@@ -173,11 +221,17 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
           </button>
         ) : (
           <span className="flex items-center gap-2 text-base font-bold text-aqua-deep">
-            <Icon name="check" className="h-5 w-5" /> Terminé{c.closedAt ? ` à ${timeFmt.format(new Date(c.closedAt))}` : ""}
+            <Icon name="check" className="h-5 w-5" /> Terminé{c.closedAt ? ` le ${stamp(c.closedAt)}` : ""}
           </span>
         )}
         {c.done && isManager && (
           <button type="button" onClick={() => request(c.id, "reopen")} className={`${bigBtn} border-2 border-sand-dim text-ink/70`}>Remettre à faire</button>
+        )}
+        {!c.parentId && (
+          <button type="button" onClick={() => setSuiteOf(c)} className={`${bigBtn} border-2 border-sand-dim text-ink/70`}>Ajouter une suite</button>
+        )}
+        {(!c.done || isManager) && (
+          <button type="button" onClick={() => setEditing(c)} className={`${bigBtn} border-2 border-sand-dim text-ink/70`}>Modifier</button>
         )}
         {c.pinned ? (
           <button type="button" onClick={() => request(c.id, "unpin")} className={`${bigBtn} border-2 border-sand-dim text-ink/70`}>Ne plus garder en haut</button>
@@ -297,7 +351,7 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
                   <span className="rounded-xl bg-ink px-3 py-1 text-lg font-bold tabular-nums text-sand">{c.placeName}</span>
                   <span className="rounded-xl bg-aqua-deep/10 px-3 py-1 text-sm font-bold text-aqua-deep">→ {c.toServiceName}</span>
                   <span className={`rounded-xl px-3 py-1 text-sm font-bold ${c.done ? "bg-aqua-deep text-sand-card" : "bg-terracotta/30 text-terracotta-deep"}`}>
-                    {c.done ? `Fait${c.closedAt ? ` à ${timeFmt.format(new Date(c.closedAt))}` : ""}` : "Pas encore fait"}
+                    {c.done ? `Fait${c.closedAt ? ` le ${stamp(c.closedAt)}` : ""}` : "Pas encore fait"}
                   </span>
                 </div>
                 <p className="mt-3 whitespace-pre-wrap break-words text-lg leading-snug text-ink">{c.body}</p>
@@ -333,8 +387,9 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
         )}
       </section>
 
-      {creating && (
+      {(creating || suiteOf) && (
         <NewConsigne
+          parent={suiteOf}
           isManager={isManager}
           managerHasPin={managerHasPin}
           today={today}
@@ -344,8 +399,21 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
           types={types}
           services={allServices}
           defaultServiceIds={service ? [service.id] : []}
-          onClose={() => setCreating(false)}
-          onCreated={() => { setCreating(false); setNotice("C'est enregistré !"); load(day); }}
+          onClose={() => { setCreating(false); setSuiteOf(null); }}
+          onCreated={() => { setCreating(false); setSuiteOf(null); setNotice("C'est enregistré !"); load(day); }}
+        />
+      )}
+
+      {editing && (
+        <EditConsigne
+          c={editing}
+          tags={tags}
+          places={places}
+          types={types}
+          isManager={isManager}
+          managerHasPin={managerHasPin}
+          onClose={() => setEditing(null)}
+          onSaved={(r) => { setEditing(null); setNotice(r?.unchanged ? "Rien n'a changé." : "Modification enregistrée."); load(day); }}
         />
       )}
 
@@ -368,6 +436,19 @@ export default function CahierClient({ showNames = false, hotelName, mode, today
                 </h2>
                 <p className="mt-2 text-center text-base text-ink/70">Essayez avec votre code de badgeuse ou de contrôle d'accès : celui de votre arrivée et de votre départ.</p>
                 <p className="mb-5 mt-1 text-center text-sm text-ink/60">4 chiffres.</p>
+                {(sheet.action === "close" || sheet.action === "ack") && (
+                  <label className="mb-5 grid gap-2">
+                    <span className="text-base font-bold text-ink">Une précision à ajouter ? <span className="font-normal text-ink/60">(facultatif)</span></span>
+                    <textarea
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      maxLength={500}
+                      rows={3}
+                      placeholder="Ex. : fuite réparée, à surveiller demain ; client prévenu."
+                      className="w-full rounded-xl border-2 border-sand-dim bg-sand p-3 text-lg text-ink"
+                    />
+                  </label>
+                )}
                 <PinPad busy={busy} message={sheetError} onComplete={confirmWithPin} />
               </>
             )}

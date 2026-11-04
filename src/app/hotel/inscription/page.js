@@ -10,7 +10,7 @@ import Hero from "@/components/Hero";
 const label = "text-xs font-bold uppercase tracking-wider text-ink/60";
 
 export default function HotelInscriptionPage() {
-  const [form, setForm] = useState({ hotel: "", nom: "", email: "", password: "" });
+  const [form, setForm] = useState({ hotel: "", others: "", nom: "", email: "", password: "" });
   const [accepted, setAccepted] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -39,6 +39,8 @@ export default function HotelInscriptionPage() {
         data: {
           account_type: "hotel",
           hotel_name: form.hotel,
+          // Groupe : les autres hôtels du même compte (un nom par ligne), chacun avec son logo et sa configuration.
+          extra_hotels: form.others.split("\n").map((n) => n.trim()).filter((n) => n.length >= 2).slice(0, 19),
           name: form.nom,
           accepted_terms_at: new Date().toISOString(),
         },
@@ -109,6 +111,11 @@ export default function HotelInscriptionPage() {
           <label className="grid gap-1.5">
             <span className={label}>Nom de l'hôtel</span>
             <input required value={form.hotel} onChange={update("hotel")} className="input" />
+          </label>
+          <label className="grid gap-1.5">
+            <span className={label}>Autres hôtels du groupe (facultatif)</span>
+            <textarea rows={3} value={form.others} onChange={update("others")} placeholder={"Un nom par ligne"} className="input" />
+            <span className="text-sm text-ink/60">Un seul compte pour plusieurs hôtels : chacun aura son logo, ses services et son équipe, et vous passerez de l'un à l'autre d'un clic.</span>
           </label>
           <label className="grid gap-1.5">
             <span className={label}>Votre nom (manager)</span>

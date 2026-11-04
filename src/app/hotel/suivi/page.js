@@ -30,7 +30,7 @@ export default async function SuiviPage() {
         subtitle={supervisor ? "Vos services : qui a écrit quoi, pour qui, et qui l'a fait." : "Tous les services : qui a écrit quoi, pour qui, et qui l'a fait."}
         links={
           supervisor
-            ? [{ href: "/hotel/cahier", label: "Cahier" }]
+            ? [{ href: "/hotel/cahier", label: "Cahier" }, { href: "/hotel/statistiques", label: "Statistiques" }]
             : [
                 { href: "/hotel/cahier", label: "Cahier" },
                 { href: "/hotel/statistiques", label: "Statistiques" },
@@ -40,7 +40,7 @@ export default async function SuiviPage() {
       />
       <section className="mx-auto max-w-6xl px-6 py-8">
         {retention && <RetentionNotice info={retention} className="mb-6" />}
-        <SuiviClient canExport={!supervisor} services={services} customTypes={cleanCustomTypes(ctx.hotel.consigne_types)} />
+        <SuiviClient canExport={!supervisor} tags={meta.tags} services={services} customTypes={cleanCustomTypes(ctx.hotel.consigne_types)} />
       </section>
       <HotelFooter />
     </main>

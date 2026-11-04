@@ -1,4 +1,5 @@
 import { blogPosts } from "@/data/blogPosts";
+import { cityPages } from "@/data/cityPages";
 
 const BASE_URL = "https://tourist-book.com";
 
@@ -6,9 +7,6 @@ const routes = [
   { path: "/", priority: 1, changeFrequency: "weekly" },
   { path: "/hotel", priority: 0.8, changeFrequency: "monthly" },
   { path: "/blog", priority: 0.6, changeFrequency: "weekly" },
-  { path: "/livret-accueil-nice", priority: 0.7, changeFrequency: "monthly" },
-  { path: "/livret-accueil-cannes", priority: 0.7, changeFrequency: "monthly" },
-  { path: "/livret-accueil-antibes", priority: 0.7, changeFrequency: "monthly" },
   { path: "/terminos", priority: 0.3, changeFrequency: "yearly" },
   { path: "/privacidad", priority: 0.3, changeFrequency: "yearly" },
   { path: "/aviso-legal", priority: 0.3, changeFrequency: "yearly" },
@@ -23,11 +21,12 @@ export default function sitemap() {
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));
+  const cityEntries = cityPages.map((c) => ({ url: `${BASE_URL}/livret-accueil-${c.slug}`, lastModified, changeFrequency: "monthly", priority: 0.7 }));
   const blogEntries = blogPosts.map((post) => ({
     url: `${BASE_URL}/blog/${post.slug}`,
     lastModified: new Date(post.publishedAt),
     changeFrequency: "yearly",
     priority: 0.6,
   }));
-  return [...staticEntries, ...blogEntries];
+  return [...staticEntries, ...cityEntries, ...blogEntries];
 }

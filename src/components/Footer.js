@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cityPages } from "@/data/cityPages";
 import { getLocale } from "@/lib/i18n/locale";
 import dict from "@/lib/i18n/dictionaries/footer";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -32,9 +33,9 @@ export default async function Footer() {
           <div>
             <span className="text-xs font-bold uppercase tracking-widest text-ink/50">{t.localGuides}</span>
             <ul className="mt-3 grid gap-2 text-sm">
-              <li><Link href="/livret-accueil-nice" className="text-ink/70 hover:text-ink">Nice</Link></li>
-              <li><Link href="/livret-accueil-cannes" className="text-ink/70 hover:text-ink">Cannes</Link></li>
-              <li><Link href="/livret-accueil-antibes" className="text-ink/70 hover:text-ink">Antibes</Link></li>
+              {cityPages.map((c) => (
+                <li key={c.slug}><Link href={`/livret-accueil-${c.slug}`} className="text-ink/70 hover:text-ink">{c.city}</Link></li>
+              ))}
             </ul>
           </div>
 

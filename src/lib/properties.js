@@ -14,7 +14,10 @@ export async function getPropertyBySlug(slug) {
     .eq("property_id", data.id)
     .order("passengers", { ascending: true });
 
-  return { ...data, transfer_rates: rates ?? [] };
+  // Hôte bloqué par l'admin (colonne hosts.blocked_at) : lecture tolérante, absente avant la migration SQL.
+  const { data: owner } = await admin.from("hosts").select("blocked_at").eq("id", data.host_id).maybeSingle();
+
+  return { ...data, transfer_rates: rates ?? [], blocked: Boolean(owner?.blocked_at) };
 }
 
 // Un logement créé mais jamais souscrit (subscription_status: null) ou dont
@@ -22,5 +25,6 @@ export async function getPropertyBySlug(slug) {
 // sans ça, un hôte pourrait créer un logement, ne jamais payer, et partager
 // quand même le lien à ses voyageurs indéfiniment.
 export function hasActiveSubscription(property) {
+  if (property?.blocked) return false;
   return ["trialing", "active"].includes(property?.subscription_status);
 }

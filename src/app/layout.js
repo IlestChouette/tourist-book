@@ -39,6 +39,23 @@ export const metadata = {
   },
 };
 
+// Données d'organisation pour Google et les assistants IA : qui est Tourist Book, ce qu'il propose, où.
+const orgJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://tourist-book.com/#org",
+      name: "Tourist Book",
+      url: "https://tourist-book.com",
+      logo: "https://tourist-book.com/tourist%20book%20logo.png",
+      description: "Livret d'accueil numérique pour les hôtes et conciergeries de la Côte d'Azur, et cahier de consignes numérique pour les hôtels.",
+      areaServed: { "@type": "AdministrativeArea", name: "Côte d'Azur" },
+    },
+    { "@type": "WebSite", "@id": "https://tourist-book.com/#site", url: "https://tourist-book.com", name: "Tourist Book", inLanguage: "fr", publisher: { "@id": "https://tourist-book.com/#org" } },
+  ],
+};
+
 export default async function RootLayout({ children }) {
   const locale = await getLocale();
   return (
@@ -47,6 +64,7 @@ export default async function RootLayout({ children }) {
       className={`${bodoniModa.variable} ${archivo.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-sand text-ink font-body">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
         {children}
         <HideOnPaths prefixes={HOTEL_APP_PATHS}>
           <Footer />

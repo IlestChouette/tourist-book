@@ -26,8 +26,13 @@ export default function PinPad({ onComplete, busy = false, message = "", length 
     if (submitted.current || busy) return;
     submitted.current = true;
     complete.current(digits);
-    setTimeout(() => setDigits(""), 350);
   }, [digits, busy, length]);
+
+  // Les points restent pleins pendant la vérification (≈ 1 s) : les vider tout de
+  // suite donnait l'impression que le code était refusé. On efface à la réponse.
+  useEffect(() => {
+    if (!busy) setDigits("");
+  }, [busy]);
 
   useEffect(() => {
     function onKey(e) {
@@ -48,7 +53,7 @@ export default function PinPad({ onComplete, busy = false, message = "", length 
         ))}
       </div>
       <p className="mt-4 min-h-7 text-center text-lg font-bold text-terracotta-deep" role="alert">
-        {message}
+        {busy && !message ? <span className="text-ink/60">Vérification…</span> : message}
       </p>
       <div className="mt-2 grid grid-cols-3 gap-3">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (

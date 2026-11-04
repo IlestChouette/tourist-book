@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { clientIp, limited } from "@/lib/rateLimit";
 
 // Base des liens envoyés par email : jamais dérivée de la requête (l'en-tête
 // Host/Origin est contrôlable par un attaquant, qui pourrait faire envoyer à
@@ -13,6 +14,7 @@ const THROTTLE_MS = 60_000;
 // avec cet email, pour inviter à en créer un sinon (choix produit : cela révèle
 // quels emails sont inscrits ; l'envoi reste limité à un email par minute).
 export async function POST(request) {
+  if (limited(`forgot:${clientIp(request)}`, 10, 10 * 60_000)) return NextResponse.json({ error: "Trop de tentatives. Réessayez dans quelques minutes." }, { status: 429 });
   const body = await request.json().catch(() => ({}));
   const address = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   if (!address || address.length > 254 || !address.includes("@")) {
