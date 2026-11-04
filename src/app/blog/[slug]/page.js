@@ -53,6 +53,10 @@ export default async function BlogPostPage({ params }) {
     publisher: { "@type": "Organization", name: "Tourist Book", url: "https://tourist-book.com" },
     mainEntityOfPage: `https://tourist-book.com/blog/${post.slug}`,
   };
+  const faq = blogSeo[post.slug]?.faq ?? null;
+  const faqJsonLd = faq && { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
+  // Les articles sur les conciergeries visent des gens qui gèrent des logements pour d'autres : message adapté.
+  const conciergerie = ["trouver-conciergerie-airbnb-courte-duree", "comment-devenir-concierge-airbnb", "tarif-conciergerie-airbnb-commission-menage", "comment-marche-une-conciergerie-airbnb", "que-propose-airbnb-frais-alternatives-rentabilite", "location-linge-airbnb-alpes-maritimes-draps-serviettes", "gestion-tarifs-location-saisonniere-difficultes-experts"].includes(post.slug);
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -70,6 +74,7 @@ export default async function BlogPostPage({ params }) {
     <main className="flex-1">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      {faqJsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />}
       <Hero compact backHref="/blog" backLabel="Blog" eyebrow={dateFormatter.format(new Date(post.publishedAt))} title={post.title} />
       <article className="mx-auto max-w-3xl px-6 py-10 sm:py-14">
         <div className="grid gap-10">
@@ -78,8 +83,23 @@ export default async function BlogPostPage({ params }) {
           ))}
         </div>
 
+        {faq && (
+          <section className="mt-14" aria-labelledby="faq">
+            <h2 id="faq" className="font-display italic text-2xl text-ink">Questions fréquentes</h2>
+            <div className="mt-4 grid gap-3">
+              {faq.map((f) => (
+                <details key={f.q} className="rounded-lg border border-sand-dim bg-sand-card px-5 py-4">
+                  <summary className="cursor-pointer font-bold text-ink">{f.q}</summary>
+                  <p className="mt-2 text-sm text-ink/75">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
+
         <div className="mt-14 rounded-xl border border-sand-dim bg-sand-card p-7 text-center">
-          <p className="font-display italic text-xl text-ink">Envie d&apos;un livret comme celui-ci pour votre logement ?</p>
+          <p className="font-display italic text-xl text-ink">{conciergerie ? "Vous gérez des logements, pour vous ou pour vos propriétaires ?" : "Envie d'un livret comme celui-ci pour votre logement ?"}</p>
+          {conciergerie && <p className="mx-auto mt-3 max-w-xl text-sm text-ink/75">Un seul compte gère autant de logements que vous le voulez : chacun a son livret numérique à votre logo, en français, anglais et espagnol, que vous modifiez en ligne sans rien imprimer.</p>}
           <Link
             href="/panel/registro"
             className="mt-4 inline-block rounded bg-terracotta px-6 py-3.5 font-bold text-ink transition-colors hover:bg-terracotta-deep"
@@ -95,6 +115,9 @@ export default async function BlogPostPage({ params }) {
             ))}
           </ul>
           <p className="mt-6 text-sm text-ink/70">
+            Pour aller plus loin : <Link href="/livret-accueil-interactif-video" className="font-bold text-aqua-deep underline underline-offset-4">le livret d&apos;accueil interactif</Link> et <Link href="/check-in-electronique-airbnb" className="font-bold text-aqua-deep underline underline-offset-4">le check-in électronique</Link>.
+          </p>
+          <p className="mt-3 text-sm text-ink/70">
             Votre logement est sur la Côte d&apos;Azur ? Découvrez le livret d&apos;accueil numérique pour{" "}
             {cityPages.map((c, i) => (
               <span key={c.slug}>{i > 0 ? (i === cityPages.length - 1 ? " et " : ", ") : ""}<Link href={`/livret-accueil-${c.slug}`} className="font-bold text-aqua-deep underline underline-offset-4">{c.city}</Link></span>

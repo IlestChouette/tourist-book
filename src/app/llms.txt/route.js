@@ -1,5 +1,6 @@
 import { blogPosts } from "@/data/blogPosts";
 import { cityPages } from "@/data/cityPages";
+import { featurePages } from "@/data/featurePages";
 
 // llms.txt : résumé en langage clair, pour les assistants IA et les moteurs, de ce que fait Tourist Book.
 // Tout ce qui est écrit ici est repris de ce que le site affiche déjà (offres, prix, fonctions).
@@ -22,6 +23,9 @@ export function GET() {
 - Remplace le cahier papier de la réception : consignes écrites en quelques touches, validées avec un code personnel, visibles par tous les services.
 - Un cahier par service (réception, conciergerie, technique, etc.), récapitulatif par email à chaque relève, statistiques pour la direction.
 - Prix : 15 € par mois et par service. Interface en français.
+
+## Fonctions
+${featurePages.map((p) => `- [${p.h1}](${base}${p.path})`).join("\n")}
 
 ## Pages principales
 - [Accueil](${base}/)

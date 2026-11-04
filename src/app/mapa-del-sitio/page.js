@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cityPages } from "@/data/cityPages";
+import { featurePages } from "@/data/featurePages";
 import Hero from "@/components/Hero";
 import { getLocale } from "@/lib/i18n/locale";
 
@@ -18,6 +19,7 @@ const content = {
           { href: "/#como-funciona", label: "Comment ça marche" },
           { href: "/hotel", label: "Espace hôtels" },
           { href: "/blog", label: "Blog" },
+          ...featurePages.map((p) => ({ href: p.path, label: p.seoTitle })),
         ],
       },
       {
@@ -58,6 +60,7 @@ const content = {
           { href: "/#como-funciona", label: "How it works" },
           { href: "/hotel", label: "Hotel space" },
           { href: "/blog", label: "Blog" },
+          ...featurePages.map((p) => ({ href: p.path, label: p.seoTitle })),
         ],
       },
       {
@@ -98,6 +101,7 @@ const content = {
           { href: "/#como-funciona", label: "Cómo funciona" },
           { href: "/hotel", label: "Espacio hoteles" },
           { href: "/blog", label: "Blog" },
+          ...featurePages.map((p) => ({ href: p.path, label: p.seoTitle })),
         ],
       },
       {

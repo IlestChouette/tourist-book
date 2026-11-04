@@ -26,6 +26,8 @@ const READ_ALSO = [
   { href: "/blog/taxe-sejour-numero-enregistrement-mentions-obligatoires-2026", label: "Taxe de séjour et numéro d'enregistrement : les mentions obligatoires" },
   { href: "/blog/voyageurs-etrangers-cote-azur-traduction-livret-accueil", label: "Voyageurs étrangers sur la Côte d'Azur : pourquoi traduire son livret" },
   { href: "/blog/livret-accueil-numerique-avantages-hote", label: "Livret d'accueil numérique : à quoi ça sert ?" },
+  { href: "/check-in-electronique-airbnb", label: "Check-in électronique et auto-enregistrement des voyageurs" },
+  { href: "/livret-accueil-interactif-video", label: "Le livret d'accueil interactif, avec photos et vidéos" },
 ];
 
 export default function CityLandingPage({ slug }) {

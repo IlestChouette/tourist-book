@@ -4,6 +4,14 @@ export const blogSeo = {
   "airbnb-regles-de-la-maison-20-novembre-2026": {
     seoTitle: "Airbnb règles de la maison : 20 novembre 2026",
     description: "Airbnb change ses règles de la maison le 20 novembre 2026. Ce que les hôtes doivent modifier dans leur annonce et leur livret d'accueil.",
+    // Questions les plus posées, réponses tirées de l'article lui-même (rien d'ajouté).
+    faq: [
+      { q: "Qu'est-ce qui change le 20 novembre 2026 pour les règles de la maison Airbnb ?", a: "Airbnb distingue sept règles de la maison, que le voyageur doit respecter, de simples demandes. Les corvées de départ ne peuvent plus être imposées : laver la vaisselle, enlever les draps ou sortir les poubelles hors du logement ne sont plus des règles." },
+      { q: "Quelles sont les 7 règles de la maison ?", a: "Le nombre maximum de voyageurs, les heures de calme, les événements, les animaux, le tabac (vapotage compris), la photo et le tournage commercial, et la fermeture à clé au départ." },
+      { q: "Que peut-on encore demander au voyageur au départ ?", a: "Des demandes raisonnables, sans obligation : mettre la vaisselle utilisée dans l'évier, rassembler les serviettes, trier les déchets dans les bacs à l'intérieur ou éteindre la climatisation en partant." },
+      { q: "Que devient le livret d'accueil ?", a: "Il reste le bon endroit pour l'information utile : wifi, fonctionnement des appareils, accès, bonnes adresses. Gardez-y ce qui informe et conseille, et placez règles et demandes dans l'annonce." },
+      { q: "Que faire avant le 20 novembre ?", a: "Relire vos consignes de départ, réécrire en demandes simples celles qui sont des corvées imposées, et prévoir le travail correspondant dans votre organisation de ménage ou vos tarifs." },
+    ],
   },
   "livret-accueil-numerique-avantages-hote": {
     seoTitle: "Livret d'accueil numérique : à quoi ça sert ?",

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cityPages } from "@/data/cityPages";
+import { featurePages } from "@/data/featurePages";
 import { getLocale } from "@/lib/i18n/locale";
 import dict from "@/lib/i18n/dictionaries/footer";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -26,6 +27,9 @@ export default async function Footer() {
               <li><Link href="/#planes" className="text-ink/70 hover:text-ink">{t.plans}</Link></li>
               <li><Link href="/#como-funciona" className="text-ink/70 hover:text-ink">{t.howItWorks}</Link></li>
               <li><Link href="/hotel" className="text-ink/70 hover:text-ink">{t.hotels}</Link></li>
+              {featurePages.map((p) => (
+                <li key={p.slug}><Link href={p.path} className="text-ink/70 hover:text-ink">{p.slug.startsWith("check-in") ? "Check-in électronique" : "Livret interactif"}</Link></li>
+              ))}
               <li><Link href="/blog" className="text-ink/70 hover:text-ink">Blog</Link></li>
             </ul>
           </div>
