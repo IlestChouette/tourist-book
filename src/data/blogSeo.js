@@ -2,7 +2,7 @@
 // reste le H1 de l'article. Le titre de page est « seoTitle — Tourist Book ».
 export const blogSeo = {
   "airbnb-regles-de-la-maison-20-novembre-2026": {
-    seoTitle: "Airbnb : nouvelles règles de la maison 2026",
+    seoTitle: "Airbnb règles de la maison : 20 novembre 2026",
     description: "Airbnb change ses règles de la maison le 20 novembre 2026. Ce que les hôtes doivent modifier dans leur annonce et leur livret d'accueil.",
   },
   "livret-accueil-numerique-avantages-hote": {
