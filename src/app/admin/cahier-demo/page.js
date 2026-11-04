@@ -3,7 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import Flowchart from "./Flowchart";
+import FlowExplorer from "./FlowExplorer";
 import { Notes, PriceCalc } from "./Interactive";
 
 export const metadata = { title: "Présentation du cahier de consignes", robots: { index: false, follow: false } };
@@ -278,8 +278,8 @@ export default async function CahierDemoPage() {
       </section>
 
       {/* 8. Diagramme de flux */}
-      <Section id="parcours" eyebrow="Tout le parcours" title="Du moment où l'on écrit une consigne jusqu'à la décision de la direction" intro="À chaque question, une réponse claire : oui, on continue ; non, le cahier la garde visible jusqu'à ce qu'elle soit faite.">
-        <Flowchart />
+      <Section id="parcours" eyebrow="Tous les processus" title="Du premier jour jusqu'à la décision de la direction : tout le cahier, étape par étape" intro="Huit parcours : la mise en route, l'écriture, la validation, la relève, le pilotage, l'accès, l'abonnement et la conservation. Cliquez sur une étape, ou parcourez le cahier pas à pas en répondant Oui ou Non.">
+        <FlowExplorer />
       </Section>
 
       {/* 9. Appel final */}
