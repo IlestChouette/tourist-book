@@ -38,7 +38,7 @@ export default function LanguageSwitcher({ locale, className = "" }) {
             onClick={handleClick}
             data-locale={lang.code}
             disabled={locale === lang.code || isPending}
-            className={locale === lang.code ? "text-ink" : "text-ink/50 hover:text-ink"}
+            className={`relative after:absolute after:-inset-x-1.5 after:-inset-y-3 after:content-[''] ${locale === lang.code ? "text-ink" : "text-ink/70 hover:text-ink"}`}
           >
             {lang.label}
           </button>

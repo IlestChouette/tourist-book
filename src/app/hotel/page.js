@@ -121,9 +121,9 @@ export default function HotelLandingPage() {
           <Link href="/" className="inline-flex shrink-0">
             <Image src="/tourist book long.png" alt="Tourist Book" width={278} height={106} priority className="h-16 w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] sm:h-20" />
           </Link>
-          <nav className="flex items-center gap-5 text-sm font-bold text-[#f7f1e4]/85">
+          <nav className="flex items-center gap-5 text-sm font-bold text-[#f7f1e4]">
             <Link href="/hotel/connexion" className="hidden hover:text-[#f7f1e4] sm:inline">Connexion</Link>
-            <Link href="/hotel/inscription" className="whitespace-nowrap rounded-lg bg-terracotta px-4 py-2 text-ink transition-colors hover:bg-terracotta-deep">Créer mon espace</Link>
+            <Link href="/hotel/inscription" className="inline-flex min-h-11 items-center whitespace-nowrap rounded-lg bg-terracotta px-4 py-2 text-ink transition-colors hover:bg-terracotta-deep">Créer mon espace</Link>
           </nav>
         </div>
       </header>
@@ -135,7 +135,7 @@ export default function HotelLandingPage() {
             <h1 className="font-display italic text-4xl leading-[1.1] text-[#f7f1e4] sm:text-5xl lg:text-6xl">
               Plus aucune consigne oubliée entre deux équipes.
             </h1>
-            <p className="mt-5 max-w-xl text-lg text-[#f7f1e4]/90">
+            <p className="mt-5 max-w-xl text-lg text-[#f7f1e4]">
               Le cahier de consignes de votre réception, sur écran. Chacun écrit en quelques touches, tout le monde voit ce qu'il reste à faire, et rien ne disparaît tant que personne ne l'a validé.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -143,7 +143,7 @@ export default function HotelLandingPage() {
               <ContactButton locale="fr" variant="dark" intent="demo" />
               <a href="#comment" className="text-base font-bold text-[#f7f1e4] underline underline-offset-4 hover:text-white">Voir comment ça marche</a>
             </div>
-            <p className="mt-5 text-sm text-[#f7f1e4]/80">Prêt en 10 minutes · Aucune formation nécessaire · Pour les équipes de réception, conciergerie, technique…</p>
+            <p className="mt-5 text-sm text-[#f7f1e4]">Prêt en 10 minutes · Aucune formation nécessaire · Pour les équipes de réception, conciergerie, technique…</p>
           </div>
           <div className="mx-auto w-full max-w-md md:max-w-none">
             <TabletMockup className="md:-rotate-1" />
@@ -221,7 +221,7 @@ export default function HotelLandingPage() {
               ))}
             </ul>
           </div>
-          <StatsMockup className="mx-auto w-full max-w-sm" />
+          <div className="mx-auto w-full max-w-sm"><StatsMockup className="w-full" /><p className="mt-3 text-center text-xs text-[#f7f1e4]">Exemple avec des données fictives.</p></div>
         </div>
       </section>
 

@@ -94,7 +94,7 @@ export function StatRow({ items }) {
 
 export function Quote({ text }) {
   return (
-    <p className="border-l-4 border-terracotta pl-5 font-display italic text-2xl text-ink">
+    <p className="font-display italic text-2xl text-ink before:mb-1 before:block before:text-5xl before:leading-none before:text-terracotta-deep before:content-['“']">
       {text}
     </p>
   );

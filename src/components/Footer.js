@@ -15,55 +15,55 @@ export default async function Footer() {
         <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-5">
           <div className="col-span-2 sm:col-span-1">
             <span className="font-display italic text-lg text-ink">Tourist Book</span>
-            <p className="mt-2 text-sm text-ink/60">{t.tagline}</p>
+            <p className="mt-2 text-sm text-ink/75">{t.tagline}</p>
             <div className="mt-4">
               <LanguageSwitcher locale={locale} />
             </div>
           </div>
 
           <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-ink/50">{t.product}</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-ink/70">{t.product}</span>
             <ul className="mt-3 grid gap-2 text-sm">
-              <li><Link href="/#planes" className="text-ink/70 hover:text-ink">{t.plans}</Link></li>
-              <li><Link href="/#como-funciona" className="text-ink/70 hover:text-ink">{t.howItWorks}</Link></li>
-              <li><Link href="/hotel" className="text-ink/70 hover:text-ink">{t.hotels}</Link></li>
+              <li><Link href="/#planes" className="inline-block py-1 text-ink/80 hover:text-ink">{t.plans}</Link></li>
+              <li><Link href="/#como-funciona" className="inline-block py-1 text-ink/80 hover:text-ink">{t.howItWorks}</Link></li>
+              <li><Link href="/hotel" className="inline-block py-1 text-ink/80 hover:text-ink">{t.hotels}</Link></li>
               {featurePages.map((p) => (
-                <li key={p.slug}><Link href={p.path} className="text-ink/70 hover:text-ink">{p.slug.startsWith("check-in") ? "Check-in électronique" : "Livret interactif"}</Link></li>
+                <li key={p.slug}><Link href={p.path} className="inline-block py-1 text-ink/80 hover:text-ink">{p.slug.startsWith("check-in") ? "Check-in électronique" : "Livret interactif"}</Link></li>
               ))}
-              <li><Link href="/blog" className="text-ink/70 hover:text-ink">Blog</Link></li>
+              <li><Link href="/blog" className="inline-block py-1 text-ink/80 hover:text-ink">Blog</Link></li>
             </ul>
           </div>
 
           <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-ink/50">{t.localGuides}</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-ink/70">{t.localGuides}</span>
             <ul className="mt-3 grid gap-2 text-sm">
               {cityPages.map((c) => (
-                <li key={c.slug}><Link href={`/livret-accueil-${c.slug}`} className="text-ink/70 hover:text-ink">{c.city}</Link></li>
+                <li key={c.slug}><Link href={`/livret-accueil-${c.slug}`} className="inline-block py-1 text-ink/80 hover:text-ink">{c.city}</Link></li>
               ))}
             </ul>
           </div>
 
           <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-ink/50">{t.account}</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-ink/70">{t.account}</span>
             <ul className="mt-3 grid gap-2 text-sm">
-              <li><Link href="/panel/registro" className="text-ink/70 hover:text-ink">{t.createAccount}</Link></li>
-              <li><Link href="/panel/login" className="text-ink/70 hover:text-ink">{t.login}</Link></li>
+              <li><Link href="/panel/registro" className="inline-block py-1 text-ink/80 hover:text-ink">{t.createAccount}</Link></li>
+              <li><Link href="/panel/login" className="inline-block py-1 text-ink/80 hover:text-ink">{t.login}</Link></li>
             </ul>
           </div>
 
           <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-ink/50">{t.legal}</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-ink/70">{t.legal}</span>
             <ul className="mt-3 grid gap-2 text-sm">
-              <li><Link href="/terminos" className="text-ink/70 hover:text-ink">{t.terms}</Link></li>
-              <li><Link href="/privacidad" className="text-ink/70 hover:text-ink">{t.privacy}</Link></li>
-              <li><Link href="/privacidad#cookies" className="text-ink/70 hover:text-ink">{t.cookies}</Link></li>
-              <li><Link href="/aviso-legal" className="text-ink/70 hover:text-ink">{t.legalNotice}</Link></li>
-              <li><Link href="/mapa-del-sitio" className="text-ink/70 hover:text-ink">{t.sitemap}</Link></li>
+              <li><Link href="/terminos" className="inline-block py-1 text-ink/80 hover:text-ink">{t.terms}</Link></li>
+              <li><Link href="/privacidad" className="inline-block py-1 text-ink/80 hover:text-ink">{t.privacy}</Link></li>
+              <li><Link href="/privacidad#cookies" className="inline-block py-1 text-ink/80 hover:text-ink">{t.cookies}</Link></li>
+              <li><Link href="/aviso-legal" className="inline-block py-1 text-ink/80 hover:text-ink">{t.legalNotice}</Link></li>
+              <li><Link href="/mapa-del-sitio" className="inline-block py-1 text-ink/80 hover:text-ink">{t.sitemap}</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-2 border-t border-sand-dim pt-6 text-xs text-ink/50 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-12 flex flex-col gap-2 border-t border-sand-dim pt-6 text-xs text-ink/70 sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} Tourist Book</span>
           <span>
             {t.createdBy}{" "}

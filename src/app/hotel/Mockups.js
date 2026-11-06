@@ -11,7 +11,7 @@ export function TabletMockup({ className = "" }) {
       <div className="overflow-hidden rounded-[1.6rem] bg-sand-card">
         <div className="flex items-center justify-between bg-aqua px-5 py-3">
           <span className="whitespace-nowrap font-display italic text-xl text-ink">Hôtel Les Mimosas</span>
-          <span className="hidden gap-2 text-[10px] font-bold uppercase tracking-widest text-ink/60 sm:flex">
+          <span className="hidden gap-2 text-xs font-bold uppercase tracking-widest text-ink/75 sm:flex">
             <span className="rounded-full bg-sand-card/80 px-2.5 py-1">Statistiques</span>
             <span className="rounded-full bg-sand-card/80 px-2.5 py-1">Gestion</span>
           </span>
@@ -98,14 +98,14 @@ export function PhonePin() {
 export function EmailMockup() {
   return (
     <div aria-hidden="true" className="mx-auto w-full max-w-[19rem] rounded-2xl border border-sand-dim bg-white p-4 text-left shadow-[0_20px_40px_-24px_rgba(18,32,42,0.5)]">
-      <p className="text-[11px] font-bold uppercase tracking-wider text-ink/40">Reçu à 06:55</p>
+      <p className="text-xs font-bold uppercase tracking-wider text-ink/70">Reçu à 06:55</p>
       <p className="mt-1 text-sm font-bold text-ink">Cahier de consignes — relève de 6h55 : 3 en attente</p>
       <div className="mt-3 grid gap-2 text-xs text-ink/80">
         <p><strong className="text-terracotta-deep">PRIORITAIRE · 214 · Problème</strong><br />Fuite sous le lavabo. Prévenir le technicien dès 8 h.</p>
         <p><strong className="text-terracotta-deep">PRIORITAIRE · ouverte depuis 2 j · Lobby</strong><br />Changer l'ampoule du couloir du 2e étage.</p>
         <p><strong>Spa · Information</strong><br />Fermé lundi : prévenir les clients.</p>
       </div>
-      <p className="mt-3 text-[11px] text-ink/50">+ le PDF des consignes d'hier en pièce jointe</p>
+      <p className="mt-3 text-xs text-ink/70">+ le PDF des consignes d'hier en pièce jointe</p>
     </div>
   );
 }

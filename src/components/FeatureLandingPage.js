@@ -23,14 +23,14 @@ export default function FeatureLandingPage({ slug }) {
       <section className="mx-auto grid max-w-5xl items-center gap-10 px-6 py-14 md:grid-cols-[1fr_auto] md:gap-16 md:py-20">
         <div>
           <p className="max-w-md text-lg leading-relaxed text-ink/85 sm:text-xl">{page.lead}</p>
-          <ul className="mt-7 flex flex-wrap gap-2">
+          <Link href="/panel/registro" className={`${CTA} mt-6`}>Créer mon compte gratuit →</Link>
+          <ul className="mt-6 flex flex-wrap gap-2">
             {page.chips.map((c) => (
               <li key={c} className="inline-flex items-center gap-1.5 rounded-full bg-sand-card px-3.5 py-2 text-sm font-bold text-ink ring-1 ring-sand-dim">
                 <span className="text-aqua-deep"><Icon name="check" /></span>{c}
               </li>
             ))}
           </ul>
-          <Link href="/panel/registro" className={`${CTA} mt-8`}>Créer mon compte gratuit →</Link>
         </div>
         <div className="md:-rotate-2"><Phone /></div>
       </section>
@@ -38,13 +38,13 @@ export default function FeatureLandingPage({ slug }) {
       {/* Ce que ça contient : une tuile large, des tuiles courtes */}
       <section className="bg-sand-card py-14 md:py-20">
         <div className="mx-auto max-w-5xl px-6">
-          <h2 className="font-display text-2xl italic text-ink sm:text-3xl">{page.bentoTitle}</h2>
+          <h2 className="font-display text-2xl text-ink sm:text-3xl">{page.bentoTitle}</h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {page.bento.map((b) => (
               <div key={b.t} className={b.big ? "flex flex-col justify-between gap-8 rounded-2xl bg-aqua-deep p-7 text-[#f7f1e4] sm:col-span-2 lg:col-span-1 lg:row-span-2" : "rounded-2xl bg-sand p-6 ring-1 ring-sand-dim"}>
                 <span className={b.big ? "flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f7f1e4]/15 [&>svg]:h-8 [&>svg]:w-8" : "flex h-11 w-11 items-center justify-center rounded-xl bg-aqua/35 text-aqua-deep"}><Icon name={b.icon} /></span>
                 <div className={b.big ? "" : "mt-4"}>
-                  <h3 className={b.big ? "font-display text-xl italic leading-tight" : "text-base font-bold text-ink"}>{b.t}</h3>
+                  <h3 className={b.big ? "font-display text-xl leading-tight" : "text-base font-bold text-ink"}>{b.t}</h3>
                   <p className={`mt-1.5 text-sm ${b.big ? "text-[#f7f1e4]/90" : "text-ink/75"}`}>{b.d}</p>
                 </div>
               </div>
@@ -55,11 +55,11 @@ export default function FeatureLandingPage({ slug }) {
 
       {/* Étapes : une vraie séquence */}
       <section className="mx-auto max-w-5xl px-6 py-14 md:py-20">
-        <h2 className="font-display text-2xl italic text-ink sm:text-3xl">{page.stepsTitle}</h2>
+        <h2 className="font-display text-2xl text-ink sm:text-3xl">{page.stepsTitle}</h2>
         <ol className={`mt-10 grid gap-8 md:gap-6 ${stepCols}`}>
           {page.steps.map((s, i) => (
             <li key={s.t}>
-              <span className="font-display text-4xl italic leading-none text-terracotta" aria-hidden="true">{i + 1}</span>
+              <span className="font-display text-4xl leading-none text-terracotta-deep" aria-hidden="true">{i + 1}</span>
               <h3 className="mt-2 text-base font-bold text-ink">{s.t}</h3>
               <p className="mt-1 max-w-[16rem] text-sm text-ink/75">{s.d}</p>
             </li>
@@ -68,13 +68,13 @@ export default function FeatureLandingPage({ slug }) {
       </section>
 
       <section className="mx-auto max-w-3xl px-6 pb-14 md:pb-20">
-        <h2 className="font-display text-2xl italic text-ink sm:text-3xl">Questions fréquentes</h2>
+        <h2 className="font-display text-2xl text-ink sm:text-3xl">Questions fréquentes</h2>
         <div className="mt-6 divide-y divide-sand-dim border-y border-sand-dim">
           {page.faq.map((f) => (
             <details key={f.q} className="group py-4">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-ink [&::-webkit-details-marker]:hidden">
                 {f.q}
-                <span aria-hidden="true" className="text-2xl leading-none text-terracotta transition-transform duration-200 group-open:rotate-45">+</span>
+                <span aria-hidden="true" className="text-2xl leading-none text-terracotta-deep transition-transform duration-200 group-open:rotate-45">+</span>
               </summary>
               <p className="mt-2 max-w-xl text-sm text-ink/75">{f.a}</p>
             </details>
@@ -83,7 +83,7 @@ export default function FeatureLandingPage({ slug }) {
       </section>
 
       <section className="bg-aqua-deep px-6 py-14 text-center text-[#f7f1e4] md:py-20">
-        <p className="mx-auto max-w-xl font-display text-2xl italic leading-snug sm:text-3xl">Prêt en 5 minutes pour votre premier logement.</p>
+        <p className="mx-auto max-w-xl font-display text-2xl leading-snug sm:text-3xl">Prêt en 5 minutes pour votre premier logement.</p>
         <Link href="/panel/registro" className={`${CTA} mt-8`}>Créer mon compte gratuit →</Link>
         <ul className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
           {page.links.map((l) => <li key={l.href}><Link href={l.href} className="font-bold underline underline-offset-4 hover:text-aqua">{l.label}</Link></li>)}

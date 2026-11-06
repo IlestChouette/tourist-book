@@ -32,35 +32,35 @@ const content = {
     login: "Se connecter",
     createAccount: "Créer un compte →",
     eyebrow: "Pour les hôteliers et loueurs de la Côte d'Azur",
-    title: "Le livret d'accueil de vos hôtes, entièrement en ligne",
+    title: "Le livret d'accueil de vos voyageurs, dans un simple lien",
     subtitle:
       "Wifi, horaires, recommandations locales et check-in électronique — le tout dans un lien envoyé avant leur arrivée. De Beausoleil à Nice.",
     ctaPrimary: "Créer mon compte gratuit →",
     ctaSecondary: "Voir les offres",
     priceNote: "Dès 7 €/mois sans engagement · Ou annuel dès 39,99 €/an avec 1 mois offert",
-    legalBadge: "Conforme à l'article R.611-42 : vous êtes en règle avec la loi à chaque check-in, sans rien faire.",
+    legalBadge: "Un parcours d'enregistrement conforme à l'article R.611-42.",
     beforeLabel: "Avant",
     beforeText:
       "Un PDF perdu dans les emails, un groupe WhatsApp que personne ne relit, un formulaire compliqué, et la même question sur le wifi à 23h.",
     afterLabel: "Avec Tourist Book",
     afterText:
-      "Un seul lien, mis à jour à l'instant, en trois langues, à vos couleurs — et le check-in fait avant même l'arrivée de vos hôtes.",
-    featuresTitle: "Tout ce dont votre hôte a besoin",
+      "Un seul lien, mis à jour à l'instant, en trois langues, à vos couleurs — et le check-in fait avant même l'arrivée de vos voyageurs.",
+    featuresTitle: "Ce que vos voyageurs demandent le plus",
     phoneAlt: "Aperçu du livret d'accueil Tourist Book affiché sur un téléphone",
     demoLink: "Essayer le livret de démonstration →",
     features: [
-      { title: "Wifi et horaires en un instant", desc: "Mot de passe, arrivée, départ, itinéraire et stationnement — vos hôtes trouvent tout seuls, à toute heure." },
+      { title: "Wifi et horaires en un instant", desc: "Mot de passe, arrivée, départ, itinéraire et stationnement — vos voyageurs trouvent tout seuls, même à 23 h." },
       { title: "Guide local avec recherche", desc: "Vos recommandations de restaurants, plages et musées, classées par catégorie." },
-      { title: "Réservation de transfert", desc: "L'hôte réserve son transfert directement depuis le livret, avec le tarif affiché automatiquement." },
-      { title: "Livre d'or", desc: "Un livre de souvenirs numérique où vos hôtes laissent leur message." },
-      { title: "Assistant virtuel (Premium)", desc: "Répond aux questions fréquentes de l'hôte à toute heure." },
-      { title: "Avec votre propre logo", desc: "Votre marque sur chaque page vue par l'hôte, dès le premier clic." },
+      { title: "Réservation de transfert", desc: "Le voyageur réserve son transfert directement depuis le livret, avec le tarif affiché automatiquement." },
+      { title: "Livre d'or", desc: "Un livre de souvenirs numérique où vos voyageurs laissent leur message." },
+      { title: "Assistant virtuel (Premium)", desc: "Répond aux questions fréquentes des voyageurs, de jour comme de nuit." },
+      { title: "Avec votre propre logo", desc: "Votre marque sur chaque page vue par le voyageur, dès le premier clic." },
     ],
     howItWorksTitle: "Comment ça marche",
     steps: [
       { n: "1", t: "Créez votre compte et ajoutez votre logement", d: "Nom, photos, wifi, horaires — 5 minutes." },
       { n: "2", t: "Choisissez l'offre de ce logement", d: "Essentiel ou Premium, annuel ou saisonnier, selon chaque logement." },
-      { n: "3", t: "Partagez le lien avec vos hôtes", d: "Par WhatsApp, email ou Airbnb — comme vous préférez." },
+      { n: "3", t: "Partagez le lien avec vos voyageurs", d: "Par WhatsApp, email ou Airbnb — comme vous préférez." },
     ],
     pricingTitle: "Une offre par logement",
     pricingSubtitle:
@@ -80,7 +80,7 @@ const content = {
       { label: "Pièce d'identité, selfie et signature électronique", basico: false, premium: true },
       { label: "Règlement intérieur accepté et tracé au check-in", basico: false, premium: true },
       { label: "Vérification manuelle depuis votre panel", basico: false, premium: true },
-      { label: "Identifiants automatiques pour l'hôte", basico: false, premium: true },
+      { label: "Identifiants automatiques pour le voyageur", basico: false, premium: true },
     ],
     pricingNote:
       "Offre annuelle : 1 mois d'essai gratuit lors de votre première souscription (par compte, pas par logement) ; l'abonnement se renouvelle chaque année et ne peut être résilié qu'une fois l'année en cours terminée. Offre saisonnière : sans essai gratuit, facturation mensuelle, résiliable à tout moment.",
@@ -91,7 +91,7 @@ const content = {
     faq: [
       {
         q: "Mes voyageurs doivent envoyer une pièce d'identité — est-ce sécurisé ?",
-        a: "Oui. Les documents, selfies et signatures sont stockés dans un espace privé, jamais accessible publiquement, et ne sont visibles que par vous depuis votre panel, via un lien à durée limitée. Aucune donnée n'est partagée avec des tiers.",
+        a: "Oui. Les documents, selfies et signatures sont stockés dans un espace privé, jamais accessible publiquement, et ne sont visibles que par vous depuis votre panel, via un lien à durée limitée. Vos données ne sont ni vendues ni utilisées à d'autres fins.",
       },
       {
         q: "Je peux résilier quand je veux ?",
@@ -114,7 +114,7 @@ const content = {
     hotelBandBody: "Le cahier de consignes numérique de votre réception : plus aucune consigne oubliée entre deux équipes.",
     hotelBandCta: "Découvrir l'espace hôtels →",
     navHotels: "Hôtels",
-    finalCtaTitle: "Prêt à passer au livret 100 % numérique ?",
+    finalCtaTitle: "Votre premier livret en 5 minutes",
   },
   en: {
     metaTitle: "Tourist Book — Digital welcome book and check-in",
@@ -129,7 +129,7 @@ const content = {
     ctaPrimary: "Create my free account →",
     ctaSecondary: "See the plans",
     priceNote: "From €7/month, no commitment · Or annual from €39.99/year with 1 month free",
-    legalBadge: "Compliant with Article R.611-42: you're covered by the law on every check-in, without lifting a finger.",
+    legalBadge: "A check-in flow built around Article R.611-42.",
     beforeLabel: "Before",
     beforeText:
       "A PDF lost in email, a WhatsApp group nobody reads, an awkward form, and the same wifi question at 11pm.",
@@ -182,7 +182,7 @@ const content = {
     faq: [
       {
         q: "My guests have to send an ID document — is that secure?",
-        a: "Yes. Documents, selfies and signatures are stored in a private space, never publicly accessible, and only visible to you from your panel via a time-limited link. No data is shared with third parties.",
+        a: "Yes. Documents, selfies and signatures are stored in a private space, never publicly accessible, and only visible to you from your panel via a time-limited link. Your data is never sold or used for other purposes.",
       },
       {
         q: "Can I cancel whenever I want?",
@@ -220,7 +220,7 @@ const content = {
     ctaPrimary: "Crear mi cuenta gratis →",
     ctaSecondary: "Ver los planes",
     priceNote: "Desde 7 €/mes sin permanencia · O anual desde 39,99 €/año con 1 mes gratis",
-    legalBadge: "Cumpliendo el artículo R.611-42: estás en regla con la ley en cada check-in, sin hacer nada.",
+    legalBadge: "Un registro de viajeros diseñado según el artículo R.611-42.",
     beforeLabel: "Antes",
     beforeText:
       "Un PDF perdido en el email, un grupo de WhatsApp que nadie relee, un formulario difícil de utilizar, y la misma pregunta del wifi a las 23h.",
@@ -273,7 +273,7 @@ const content = {
     faq: [
       {
         q: "Mis huéspedes tienen que enviar un documento de identidad — ¿es seguro?",
-        a: "Sí. Los documentos, selfies y firmas se guardan en un espacio privado, nunca accesible públicamente, y solo tú puedes verlos desde tu panel, mediante un enlace de duración limitada. Ningún dato se comparte con terceros.",
+        a: "Sí. Los documentos, selfies y firmas se guardan en un espacio privado, nunca accesible públicamente, y solo tú puedes verlos desde tu panel, mediante un enlace de duración limitada. Tus datos no se venden ni se usan para otros fines.",
       },
       {
         q: "¿Puedo cancelar cuando quiera?",
@@ -366,17 +366,17 @@ export default async function Home() {
           <nav className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start sm:gap-5">
             <LanguageSwitcher
               locale={locale}
-              className="[&_button]:text-[#f7f1e4]/60 [&_button:disabled]:text-[#f7f1e4] [&_button:hover]:text-[#f7f1e4] [&_span]:text-[#f7f1e4]/40"
+              className="[&_button]:text-[#f7f1e4]/85 [&_button:disabled]:text-[#f7f1e4] [&_button:hover]:text-[#f7f1e4] [&_span]:text-[#f7f1e4]/60"
             />
-            <Link href="/hotel" className="hidden text-sm font-bold text-[#f7f1e4]/80 hover:text-[#f7f1e4] sm:inline">
+            <Link href="/hotel" className="hidden text-sm font-bold text-[#f7f1e4] hover:underline sm:inline">
               {t.navHotels}
             </Link>
-            <Link href="/panel/login" className="text-sm font-bold text-[#f7f1e4]/80 hover:text-[#f7f1e4]">
+            <Link href="/panel/login" className="text-sm font-bold text-[#f7f1e4] hover:underline">
               {t.login}
             </Link>
             <Link
               href="/panel/registro"
-              className="whitespace-nowrap rounded bg-terracotta px-3 py-2 text-sm font-bold text-ink transition-colors hover:bg-terracotta-deep sm:px-4"
+              className="inline-flex min-h-11 items-center whitespace-nowrap rounded bg-terracotta px-3 py-2 text-sm font-bold text-ink transition-colors hover:bg-terracotta-deep sm:px-4"
             >
               {t.createAccount}
             </Link>
@@ -387,7 +387,7 @@ export default async function Home() {
       <section className="relative overflow-hidden bg-aqua-deep">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 pb-16 pt-6 sm:pt-8 lg:grid-cols-2 lg:gap-10 lg:pb-20">
           <div className="text-center lg:text-left">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#f7f1e4]/80">{t.eyebrow}</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-[#f7f1e4]">{t.eyebrow}</span>
             <h1 className="mt-5 font-display italic text-4xl leading-tight text-[#f7f1e4] sm:text-5xl">{t.title}</h1>
             <p className="mx-auto mt-5 max-w-xl text-lg text-[#f7f1e4]/90 lg:mx-0">{t.subtitle}</p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
@@ -399,8 +399,8 @@ export default async function Home() {
               </Link>
               <ContactButton locale={locale} variant="dark" intent="demo" />
             </div>
-            <p className="mx-auto mt-5 max-w-sm text-xs font-bold tracking-wide text-[#f7f1e4]/70 lg:mx-0">{t.priceNote} · <a href="#planes" className="underline underline-offset-2">{t.ctaSecondary}</a></p>
-            <p className="mx-auto mt-3 max-w-md text-sm text-[#f7f1e4]/80 lg:mx-0">✓ {t.legalBadge}</p>
+            <p className="mx-auto mt-5 max-w-sm text-xs font-bold tracking-wide text-[#f7f1e4] lg:mx-0">{t.priceNote} · <a href="#planes" className="underline underline-offset-2">{t.ctaSecondary}</a></p>
+            <p className="mx-auto mt-3 max-w-md text-sm text-[#f7f1e4]/95 lg:mx-0">✓ {t.legalBadge}</p>
           </div>
 
           <div className="text-center">
@@ -472,7 +472,7 @@ export default async function Home() {
                 </span>
                 <div>
                   <h3 className="font-bold text-ink">{f.title}</h3>
-                  <p className="mt-1 text-sm text-ink/70">{f.desc}</p>
+                  <p className="mt-1 text-sm text-ink/80">{f.desc}</p>
                 </div>
               </div>
             ))}
@@ -487,7 +487,7 @@ export default async function Home() {
             <div key={s.n}>
               <span className="font-display italic text-3xl text-terracotta-deep">{s.n}</span>
               <h3 className="mt-2 font-bold text-ink">{s.t}</h3>
-              <p className="mt-1 text-sm text-ink/70">{s.d}</p>
+              <p className="mt-1 text-sm text-ink/80">{s.d}</p>
             </div>
           ))}
         </div>
@@ -497,7 +497,7 @@ export default async function Home() {
         <div className="mx-auto max-w-4xl px-6">
           <div className="text-center">
             <h2 className="font-display italic text-3xl text-ink">{t.pricingTitle}</h2>
-            <p className="mx-auto mt-3 max-w-xl text-ink/70">{t.pricingSubtitle}</p>
+            <p className="mx-auto mt-3 max-w-xl text-ink/80">{t.pricingSubtitle}</p>
             <div className="mt-5 flex flex-wrap justify-center gap-3">
               <a
                 href="/logement/exemple/entrer?code=0000"
@@ -526,7 +526,7 @@ export default async function Home() {
             <table className="w-full min-w-[480px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-sand-dim bg-sand">
-                  <th className="px-5 py-3 text-left font-bold text-ink/70">{t.comparisonHeader.includes}</th>
+                  <th className="px-5 py-3 text-left font-bold text-ink/80">{t.comparisonHeader.includes}</th>
                   <th className="px-5 py-3 text-center font-bold text-aqua-deep">{t.comparisonHeader.basic}</th>
                   <th className="px-5 py-3 text-center font-bold text-terracotta-deep">{t.comparisonHeader.premium}</th>
                 </tr>
@@ -548,7 +548,7 @@ export default async function Home() {
               </tbody>
             </table>
           </div>
-          <p className="mx-auto mt-5 max-w-md text-center text-xs text-ink/50">{t.pricingNote}</p>
+          <p className="mx-auto mt-5 max-w-md text-center text-xs text-ink/70">{t.pricingNote}</p>
         </div>
       </section>
 
@@ -556,7 +556,7 @@ export default async function Home() {
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 px-6 text-center md:flex-row md:justify-between md:text-left">
           <div className="max-w-xl">
             <h2 className="font-display italic text-3xl text-ink">{t.hotelBandTitle}</h2>
-            <p className="mt-2 text-ink/70">{t.hotelBandBody}</p>
+            <p className="mt-2 text-ink/80">{t.hotelBandBody}</p>
           </div>
           <Link
             href="/hotel"
@@ -572,7 +572,7 @@ export default async function Home() {
           <ShieldIcon />
         </span>
         <h2 className="mt-5 font-display italic text-2xl text-ink">{t.positioningTitle}</h2>
-        <p className="mx-auto mt-3 max-w-lg text-ink/70">{t.positioningBody}</p>
+        <p className="mx-auto mt-3 max-w-lg text-ink/80">{t.positioningBody}</p>
       </section>
 
       <section className="mx-auto max-w-2xl px-6 py-16">
@@ -587,7 +587,7 @@ export default async function Home() {
                 {item.q}
                 <span className="shrink-0 text-xl text-ink/40 transition-transform group-open:rotate-45">+</span>
               </summary>
-              <p className="mt-3 max-w-prose text-ink/70">{item.a}</p>
+              <p className="mt-3 max-w-prose text-ink/80">{item.a}</p>
             </details>
           ))}
         </div>
