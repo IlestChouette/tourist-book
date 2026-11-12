@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { authErrorMessage } from "@/lib/authErrors";
 import Hero from "@/components/Hero";
+import ContactButton from "@/components/ContactButton";
 
 export default function HotelConnexionPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -80,9 +81,7 @@ export default function HotelConnexionPage() {
           </button>
           {error && <p className="text-sm text-terracotta-deep">{error}</p>}
           {notFound && (
-            <Link href="/hotel/inscription" className="justify-self-start rounded border border-aqua-deep px-4 py-2 text-sm font-bold text-aqua-deep transition-colors hover:bg-aqua-deep hover:text-sand-card">
-              Créer l'espace de mon hôtel →
-            </Link>
+            <div className="justify-self-start"><ContactButton locale="fr" variant="outline" intent="demo" /></div>
           )}
         </form>
         <p className="mt-4 text-sm text-ink/70">
@@ -91,10 +90,10 @@ export default function HotelConnexionPage() {
           </Link>
         </p>
         <p className="mt-2 text-sm text-ink/70">
-          Pas encore d'espace ?{" "}
-          <Link href="/hotel/inscription" className="font-bold text-aqua-deep">
-            Créer l'espace de mon hôtel
-          </Link>
+          Pas encore d'espace ?
+        </p>
+        <p className="mt-2">
+          <ContactButton locale="fr" variant="outline" intent="demo" />
         </p>
       </section>
     </main>

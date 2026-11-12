@@ -25,6 +25,10 @@ const faq = [
     a: "Non. Le cahier s'ouvre dans le navigateur du poste de réception, d'une tablette ou d'un téléphone. Le manager active le poste une seule fois ; ensuite chacun s'identifie avec son code.",
   },
   {
+    q: "Puis-je essayer avant de payer ?",
+    a: "Oui. Après la démo, vous testez le cahier 14 jours gratuitement, avec jusqu'à 3 services et sans carte bancaire. Au 15e jour, sans abonnement, le cahier se met en pause : vos consignes sont conservées. Si vous ne payez que certains services, les autres restent en pause.",
+  },
+  {
     q: "Mes équipes devront-elles apprendre à s'en servir ?",
     a: "Très peu. Un gros bouton « Écrire une consigne », une question par écran, un clavier à chiffres : la personne la moins à l'aise avec un ordinateur s'en sort sans explication.",
   },
@@ -80,17 +84,6 @@ const steps = [
   },
 ];
 
-function Cta({ children = "Créer l'espace de mon hôtel", className = "" }) {
-  return (
-    <Link
-      href="/hotel/inscription"
-      className={`inline-flex items-center justify-center rounded-xl bg-terracotta px-7 py-4 text-lg font-bold text-ink transition-colors hover:bg-terracotta-deep focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-sand-card ${className}`}
-    >
-      {children}
-    </Link>
-  );
-}
-
 export default function HotelLandingPage() {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -123,7 +116,6 @@ export default function HotelLandingPage() {
           </Link>
           <nav className="flex items-center gap-5 text-sm font-bold text-[#f7f1e4]">
             <Link href="/hotel/connexion" className="hidden hover:text-[#f7f1e4] sm:inline">Connexion</Link>
-            <Link href="/hotel/inscription" className="inline-flex min-h-11 items-center whitespace-nowrap rounded-lg bg-terracotta px-4 py-2 text-ink transition-colors hover:bg-terracotta-deep">Créer mon espace</Link>
           </nav>
         </div>
       </header>
@@ -139,8 +131,7 @@ export default function HotelLandingPage() {
               Le cahier de consignes de votre réception, sur écran. Chacun écrit en quelques touches, tout le monde voit ce qu'il reste à faire, et rien ne disparaît tant que personne ne l'a validé.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Cta />
-              <ContactButton locale="fr" variant="dark" intent="demo" />
+              <ContactButton locale="fr" variant="solid" intent="demo" />
               <a href="#comment" className="text-base font-bold text-[#f7f1e4] underline underline-offset-4 hover:text-white">Voir comment ça marche</a>
             </div>
             <p className="mt-5 text-sm text-[#f7f1e4]">Prêt en 10 minutes · Aucune formation nécessaire · Pour les équipes de réception, conciergerie, technique…</p>
@@ -257,8 +248,9 @@ export default function HotelLandingPage() {
             <p className="font-display italic text-6xl text-ink">15 €</p>
             <p className="mt-1 text-lg font-bold text-ink">par mois et par service</p>
             <p className="mt-4 text-ink/70">Statistiques, exports Excel et PDF, récap par email : tout est inclus.</p>
+            <p className="mt-3 text-sm font-bold text-aqua-deep">14 jours d'essai gratuit, jusqu'à 3 services, sans carte.</p>
           </div>
-          <div className="mt-8"><Cta className="bg-terracotta" /></div>
+          <div className="mt-8 flex justify-center"><ContactButton locale="fr" variant="solid" intent="demo" /></div>
         </div>
       </section>
 
@@ -282,7 +274,7 @@ export default function HotelLandingPage() {
       <section className="bg-aqua-deep py-16 text-center">
         <h2 className="mx-auto max-w-2xl px-6 font-display italic text-3xl text-[#f7f1e4] sm:text-4xl">Votre prochaine relève, sans rien oublier.</h2>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4 px-6">
-          <Cta />
+          <ContactButton locale="fr" variant="solid" intent="demo" />
           <Link href="/hotel/connexion" className="text-base font-bold text-[#f7f1e4] underline underline-offset-4">J'ai déjà un espace</Link>
         </div>
         <p className="mt-5 px-6 text-sm text-[#f7f1e4]/80">Une question ? Écrivez-nous : <a href="mailto:allo@ilestchouette.fr" className="font-bold underline underline-offset-2">allo@ilestchouette.fr</a></p>

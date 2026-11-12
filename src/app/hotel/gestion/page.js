@@ -8,6 +8,7 @@ import { cleanCustomTypes } from "@/lib/hotelTheme";
 import { retentionInfo } from "@/lib/hotelData";
 import { cleanServices, servicesFromTags, isCustomServiceId } from "@/lib/hotelServices";
 import { createClient } from "@/lib/supabase/server";
+import { pilotOf } from "@/lib/hotelBilling";
 import CreateHotel from "./CreateHotel";
 import GestionClient from "./GestionClient";
 import AddHotel from "./AddHotel";
@@ -90,6 +91,7 @@ const keepsFallback = hotel.billing_exempt === true || ["active", "past_due"].in
                   periodEnd: hotel.current_period_end ?? null,
                   pastDueSince: hotel.past_due_since ?? null,
                   hasCustomer: Boolean(hotel.stripe_customer_id),
+                  pilot: pilotOf(hotel),
                 }
           }
           // null tant que la migration SQL n'est pas passée : la section reste cachée.

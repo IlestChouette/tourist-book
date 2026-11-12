@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { getHotelContext } from "@/lib/hotelAuth";
-import { hotelServicePriceId } from "@/lib/hotelBilling";
+import { hotelServicePriceId, pilotOf } from "@/lib/hotelBilling";
 import { cleanServices } from "@/lib/hotelServices";
 
 const SITE_URL = process.env.SITE_URL || "https://tourist-book.com";
 const fail = (error, status) => NextResponse.json({ error }, { status });
 
 // Ouvre le paiement Stripe de l'abonnement du cahier : 15 €/mois par service,
-// sans essai gratuit. Réservé au manager (propriétaire de l'hôtel).
+// l'essai gratuit de 14 jours éventuel est repris (premier paiement à son terme). Réservé au manager (propriétaire de l'hôtel).
 export async function POST(request) {
   const ctx = await getHotelContext();
   if (!ctx || ctx.mode !== "manager") return fail("Connectez-vous en tant que manager.", 401);
@@ -27,6 +27,7 @@ export async function POST(request) {
     quantity = ids.length;
   }
 
+  const pilot = pilotOf(hotel);
   try {
     let customerId = hotel.stripe_customer_id;
     if (!customerId) {
@@ -55,7 +56,12 @@ export async function POST(request) {
           ...(managed ? {} : { adjustable_quantity: { enabled: true, minimum: 1, maximum: 20 } }),
         },
       ],
-      subscription_data: { metadata: { hotel_id: hotel.id, kind: "hotel_cahier" } },
+      // Essai gratuit en cours : l'abonnement démarre tout de suite mais le premier paiement
+      // n'a lieu qu'à la fin de l'essai (Stripe exige au moins 48 h devant soi).
+      subscription_data: {
+        metadata: { hotel_id: hotel.id, kind: "hotel_cahier" },
+        ...(pilot?.active && Date.parse(pilot.endsAt) - Date.now() > 49 * 3600000 ? { trial_end: Math.floor(Date.parse(pilot.endsAt) / 1000) } : {}),
+      },
       metadata: { hotel_id: hotel.id, kind: "hotel_cahier" },
       success_url: `${SITE_URL}/hotel/gestion?abonnement=ok`,
       cancel_url: `${SITE_URL}/hotel/gestion?abonnement=annule`,

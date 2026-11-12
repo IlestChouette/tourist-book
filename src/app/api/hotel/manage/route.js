@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { cleanCustomTypes, MAX_CUSTOM_TYPES, THEMES } from "@/lib/hotelTheme";
 import { SERVICES, cleanServices, cleanCustomServices, isCustomServiceId } from "@/lib/hotelServices";
 import { stripe } from "@/lib/stripe";
+import { pilotOf, PILOT_MAX_SERVICES } from "@/lib/hotelBilling";
 import { slugForHotel } from "@/lib/hotelSlug";
 import { isGeneralPlace } from "@/lib/hotelPlaces";
 import { sendHotelActivationLink } from "@/lib/email";
@@ -87,6 +88,10 @@ export async function POST(request) {
       // Un service propre n'est retenu que s'il arrive avec son nom.
       const ids = cleanServices(Array.isArray(b.services) ? b.services.filter((id) => !isCustomServiceId(id) || customIds.has(id)) : []);
       if (ids.length === 0) return fail("Gardez au moins un service.");
+      // Pendant l'essai gratuit (avant tout abonnement), 3 services au plus.
+      if (pilotOf(hotel)?.active && !hotel.billing_exempt && !["active", "past_due"].includes(hotel.billing_status) && ids.length > PILOT_MAX_SERVICES) {
+        return fail(`Pendant l'essai gratuit, ${PILOT_MAX_SERVICES} services au plus.`);
+      }
       const { error } = await admin.from("hotels").update({ services: ids }).eq("id", hotel.id);
       if (error) return fail("Impossible d'enregistrer.", 500);
       // Les étiquettes de poste correspondantes existent (pour adresser une consigne).

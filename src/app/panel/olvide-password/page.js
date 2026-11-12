@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Hero from "@/components/Hero";
+import ContactButton from "@/components/ContactButton";
 import { MailIcon } from "@/components/icons";
 import { useClientLocale } from "@/lib/i18n/clientLocale";
 
@@ -114,7 +115,7 @@ export default function OlvidePasswordPage() {
               <div className="grid gap-2">
                 <p className="text-sm text-terracotta-deep">{t.notFound}</p>
                 <Link href="/panel/registro" className="justify-self-start text-sm font-bold text-aqua-deep">{t.createAccount} →</Link>
-                <Link href="/hotel/inscription" className="justify-self-start text-sm font-bold text-aqua-deep">{t.createHotel} →</Link>
+                <div className="justify-self-start"><ContactButton locale={locale} variant="outline" intent="demo" /></div>
               </div>
             )}
             <Link href="/panel/login" className="text-sm font-bold text-aqua-deep">

@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendHotelSignupNotification } from "@/lib/email";
 import { GENERAL_PLACE } from "@/lib/hotelPlaces";
+import { PILOT_DAYS } from "@/lib/hotelBilling";
 
 const SHIFT_TAGS = ["matin", "soir", "nuit"];
 const ROLE_TAGS = [
@@ -26,15 +27,15 @@ export async function ensureHotel(user, nameOverride) {
   const { data: existing } = await admin.from("hotels").select("id").eq("owner_id", user.id).limit(1);
   if (existing?.length) return;
   const meta = user.user_metadata ?? {};
-  await createHotel(user, nameOverride || meta.hotel_name || "Mon hôtel");
+  await createHotel(user, nameOverride || meta.hotel_name || "Mon hôtel", { pilot: true });
   // Inscription d'un groupe : les autres hôtels saisis à l'inscription.
   const extras = Array.isArray(meta.extra_hotels) ? meta.extra_hotels : [];
-  for (const n of extras.slice(0, 19)) if (typeof n === "string" && n.trim().length >= 2) await createHotel(user, n, { notify: false });
+  for (const n of extras.slice(0, 19)) if (typeof n === "string" && n.trim().length >= 2) await createHotel(user, n, { notify: false, pilot: true });
 }
 
 // Crée un hôtel pour ce compte (un compte peut en gérer plusieurs), avec ses équipes
 // et postes de départ. Renvoie l'id, ou null en cas d'échec.
-export async function createHotel(user, name, { notify = true } = {}) {
+export async function createHotel(user, name, { notify = true, pilot = false } = {}) {
   const admin = createAdminClient();
   const meta = user.user_metadata ?? {};
   const hotelName = String(name || "Mon hôtel").trim().slice(0, 120);
@@ -46,6 +47,12 @@ export async function createHotel(user, name, { notify = true } = {}) {
   if (error) {
     console.error("createHotel failed:", error);
     return null;
+  }
+
+  // Essai gratuit à l'inscription (pas pour un hôtel ajouté plus tard). Colonne absente avant le SQL : on ignore l'erreur.
+  if (pilot) {
+    const { error: pilotError } = await admin.from("hotels").update({ pilot_ends_at: new Date(Date.now() + PILOT_DAYS * 86400000).toISOString() }).eq("id", hotel.id);
+    if (pilotError) console.error("pilot start skipped:", pilotError.message);
   }
 
   await admin.from("hotel_staff").insert({ hotel_id: hotel.id, name: meta.name || "Manager", is_manager: true });

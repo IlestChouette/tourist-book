@@ -2,7 +2,7 @@ import { HotelFooter, HotelHeader } from "@/components/HotelShell";
 import { listServices, loadDay, loadMeta, loadSent } from "@/lib/hotelData";
 import { parisDate } from "@/lib/hotelTime";
 import Link from "next/link";
-import { hotelHasAccess } from "@/lib/hotelBilling";
+import { hotelHasAccess, pilotOf } from "@/lib/hotelBilling";
 import { cleanCustomTypes, selectableTypes, serviceThemeId, themeById, themeStyle } from "@/lib/hotelTheme";
 import CahierClient from "./cahier/CahierClient";
 import SupervisorBar from "./SupervisorBar";
@@ -20,10 +20,10 @@ export default async function CahierView({ ctx }) {
       <main className="flex-1 bg-sand-card/50">
         <HotelHeader hotel={ctx.hotel} logout={isManager} links={isManager ? [{ href: "/hotel/gestion", label: "Gestion" }] : []} />
         <section className="mx-auto max-w-xl px-6 py-14 text-center">
-          <h1 className="text-3xl font-bold text-ink">Le cahier est en pause</h1>
+          <h1 className="text-3xl font-bold text-ink">{pilotOf(ctx.hotel) && !pilotOf(ctx.hotel).active ? "L'essai gratuit est terminé" : "Le cahier est en pause"}</h1>
           {isManager ? (
             <>
-              <p className="mt-4 text-xl text-ink/75">L'abonnement n'est pas actif. Vos consignes sont conservées : elles réapparaissent dès que l'abonnement est réglé.</p>
+              <p className="mt-4 text-xl text-ink/75">{pilotOf(ctx.hotel) && !pilotOf(ctx.hotel).active ? "Les 14 jours d'essai sont passés. Vos consignes sont conservées. Choisissez les services à garder et abonnez-vous : seuls les services payés rouvrent." : "L'abonnement n'est pas actif. Vos consignes sont conservées : elles réapparaissent dès que l'abonnement est réglé."}</p>
               <p className="mt-3 text-base text-ink/70">Après la fin d'un abonnement, les données du cahier sont supprimées au bout de 3 mois (avec un email un mois avant). Pour en garder une copie : <Link href="/hotel/suivi" className="font-bold text-aqua-deep underline">Suivi, Télécharger pour Excel</Link>.</p>
               <Link href="/hotel/gestion" className="mt-8 inline-flex h-14 items-center rounded-2xl bg-terracotta px-8 text-xl font-bold text-ink hover:bg-terracotta-deep">Régler l'abonnement</Link>
             </>

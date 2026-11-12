@@ -175,13 +175,20 @@ function BillingCard({ billing, servicesDirty = false }) {
     );
   }
   const pastDue = billing.status === "past_due";
+  const pilot = billing.pilot;
+  const pilotOn = !pastDue && pilot?.active;
+  const pilotOver = !pastDue && pilot && !pilot.active;
   return (
     <div className="mt-6 rounded border-2 border-terracotta-deep bg-sand-card p-5">
-      <h2 className="font-display italic text-2xl text-ink">{pastDue ? "Paiement à régulariser" : "Activez votre abonnement"}</h2>
+      <h2 className="font-display italic text-2xl text-ink">{pastDue ? "Paiement à régulariser" : pilotOn ? `Essai gratuit : ${pilot.daysLeft} jour${pilot.daysLeft > 1 ? "s" : ""} restant${pilot.daysLeft > 1 ? "s" : ""}` : pilotOver ? "Votre essai gratuit est terminé" : "Activez votre abonnement"}</h2>
       <p className="mt-1 text-sm text-ink/70">
         {pastDue
           ? "Le dernier paiement a échoué. Mettez à jour votre carte pour que le cahier reste accessible à vos équipes."
-          : "Le cahier s'ouvre à vos équipes dès le paiement. 15 € par mois et par service (réception, conciergerie, technique…), sans mois d'essai. Résiliable à tout moment : le cahier reste actif jusqu'à la fin du mois payé."}
+          : pilotOn
+            ? "Vous testez le cahier gratuitement, avec 3 services au plus. Aucune carte n'est demandée. Pour continuer après l'essai, choisissez vos services et abonnez-vous : le premier paiement n'a lieu qu'à la fin de l'essai (15 € par mois et par service). Les services que vous ne payez pas passent en pause, sans rien perdre."
+            : pilotOver
+              ? "Le cahier est bloqué. Vos consignes sont conservées. Choisissez les services à garder (carte « Services » plus haut) et abonnez-vous : seuls les services payés rouvrent, les autres restent en pause. 15 € par mois et par service."
+              : "Le cahier s'ouvre à vos équipes dès le paiement. 15 € par mois et par service (réception, conciergerie, technique…), sans mois d'essai. Résiliable à tout moment : le cahier reste actif jusqu'à la fin du mois payé."}
       </p>
       {pastDue ? (
         <button type="button" disabled={busy} onClick={() => go("/api/hotel/billing/portal")} className={`${btn} mt-4`}>Mettre à jour le paiement</button>
