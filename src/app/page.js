@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import ContactButton from "@/components/ContactButton";
+import { TabletMockup } from "@/app/hotel/Mockups";
 import PricingCards from "@/components/PricingCards";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { getLocale } from "@/lib/i18n/locale";
@@ -113,7 +114,7 @@ const content = {
     hotelBandTitle: "Vous gérez un hôtel ?",
     hotelBandBody: "Le cahier de consignes numérique de votre réception : plus aucune consigne oubliée entre deux équipes.",
     hotelBandCta: "Découvrir l'espace hôtels →",
-    navHotels: "Hôtels",
+    navHotels: "Découvrir l'espace hôtels",
     finalCtaTitle: "Votre premier livret en 5 minutes",
   },
   en: {
@@ -204,7 +205,7 @@ const content = {
     hotelBandTitle: "Do you run a hotel?",
     hotelBandBody: "A digital handover logbook for your front desk, so no instruction gets lost between shifts. (Available in French.)",
     hotelBandCta: "Discover the hotel space →",
-    navHotels: "Hotels",
+    navHotels: "Discover the hotel space",
     finalCtaTitle: "Ready to go fully digital?",
   },
   es: {
@@ -295,7 +296,7 @@ const content = {
     hotelBandTitle: "¿Gestionas un hotel?",
     hotelBandBody: "El cuaderno de consignas digital de tu recepción: ninguna consigna se pierde entre turnos. (Disponible en francés.)",
     hotelBandCta: "Descubrir el espacio hoteles →",
-    navHotels: "Hoteles",
+    navHotels: "Descubre el espacio hoteles",
     finalCtaTitle: "¿Listo para pasar al libro 100 % digital?",
   },
 };
@@ -368,7 +369,7 @@ export default async function Home() {
               locale={locale}
               className="[&_button]:text-[#f7f1e4]/85 [&_button:disabled]:text-[#f7f1e4] [&_button:hover]:text-[#f7f1e4] [&_span]:text-[#f7f1e4]/60"
             />
-            <Link href="/hotel" className="hidden text-sm font-bold text-[#f7f1e4] hover:underline sm:inline">
+            <Link href="/hotel" className="hidden min-h-11 items-center whitespace-nowrap rounded border border-[#f7f1e4]/70 px-4 py-2 text-sm font-bold text-[#f7f1e4] transition-colors hover:bg-[#f7f1e4]/10 md:inline-flex">
               {t.navHotels}
             </Link>
             <Link href="/panel/login" className="text-sm font-bold text-[#f7f1e4] hover:underline">
@@ -552,17 +553,20 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="bg-aqua-deep/[0.08] py-14">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 px-6 text-center md:flex-row md:justify-between md:text-left">
-          <div className="max-w-xl">
+      <section className="bg-aqua-deep/[0.08] py-14 md:py-20">
+        <div className="mx-auto grid max-w-5xl items-center gap-10 px-6 text-center md:grid-cols-[1fr_1.1fr] md:gap-14 md:text-left">
+          <div>
             <h2 className="font-display italic text-3xl text-ink">{t.hotelBandTitle}</h2>
-            <p className="mt-2 text-ink/80">{t.hotelBandBody}</p>
+            <p className="mt-3 max-w-md text-ink/80 max-md:mx-auto">{t.hotelBandBody}</p>
+            <Link
+              href="/hotel"
+              className="mt-7 inline-flex min-h-11 items-center rounded bg-aqua-deep px-6 py-3.5 font-bold text-[#f7f1e4] transition-colors hover:bg-aqua-deep/90"
+            >
+              {t.hotelBandCta}
+            </Link>
           </div>
-          <Link
-            href="/hotel"
-            className="inline-block shrink-0 rounded bg-aqua-deep px-6 py-3.5 font-bold text-[#f7f1e4] transition-colors hover:bg-aqua-deep/90"
-          >
-            {t.hotelBandCta}
+          <Link href="/hotel" tabIndex={-1} aria-hidden="true" className="mx-auto block w-full max-w-md md:max-w-none">
+            <TabletMockup className="md:rotate-1" />
           </Link>
         </div>
       </section>
